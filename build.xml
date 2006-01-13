@@ -1,0 +1,268 @@
+<?xml version="1.0"?>
+
+<project name="wsf" default="generate.stub" basedir=".">
+
+    <!-- user need to modify the following two properties -->
+    <property name="webservice.home" location="C:\Apache\Tomcat\webapps\axis" />
+    <property name="webservice.url" value="http://localhost:8080/axis/services" />
+    <property name="plugin.name" value="EchoPlugin" />
+    <property name="plugin.params" value="timezone=GMT-5" />
+    <property name="plugin.columns" value="Month,day,Year,Hour, Minute,Second" />
+
+    <!-- property definitions -->
+    <property name="src" location="src/java" />
+    <property name="build" location="classes" />
+    <property name="lib" location="lib/java" />
+    <property name="deploy" location="deploy" />
+    <property name="config" location="config" />
+    <property name="wsftoy.base" location="../WSFToy" />
+
+    <path id="classpath">
+        <pathelement path="${classpath}" />
+        <fileset dir="${lib}">
+            <include name="**/*.jar"/>
+        </fileset>
+        <pathelement location="${build}"/>
+    </path>
+    
+    <target name="check"
+            description="Check the existance of certain files">
+    
+        <available file="${deploy}/undeploy.wsdd" property="undeploy.exist" />
+        <available file="${config}/WEB-INF/wsfService-config.xml" property="config.exist" />
+    
+    </target>
+
+    <target name="clean">
+        
+        <delete dir="${build}" quiet="true" />
+        <delete dir="${deploy}" quiet="true" />
+        <delete dir="${client}" quiet="true" />
+        <delete file="${lib}/wsf-toy.jar" quiet="true" />
+        <delete file="${lib}/wsf-client.jar" quiet="true" />
+        
+    </target>
+    
+    <target name="build.interface"
+            description="build the plugin interface">
+        
+        <delete dir="${build}" />   
+        <mkdir dir="${build}" />
+        <mkdir dir="${deploy}" />
+		
+        <javac srcdir="${src}" 
+               destdir="${build}"
+               includes="org/gusdb/wsf/IWsfPlugin.java" />
+               
+        <jar destfile="${deploy}/wsf-interface.jar"
+             basedir="${build}"
+             includes="org/**" />
+        
+    </target>
+    
+    <target name="build.service"
+            description="build the service code">
+    
+        <delete dir="${build}" quiet="true"/>   
+        <delete file="${lib}/wsf-client.jar" quiet="true"/>   
+        <mkdir dir="${build}" />
+        <mkdir dir="${deploy}" />
+		
+	<echo>Compiling the WSF service code</echo>
+	
+        <javac srcdir="${src}" 
+               destdir="${build}"
+               includes="org/gusdb/wsf/WsfPortalService.java">
+            <classpath refid="classpath" />
+        </javac>
+               
+        <jar destfile="${deploy}/wsf-service.jar"
+             basedir="${build}"
+             includes="org/**"
+             excludes="org/gusdb/wsf/test/*.java" />
+        
+    </target>
+
+    <target name="undeploy.service"
+            depends="check"
+            if="undeploy.exist"
+            description="undeploy a web servie, if a undeploy.wsdd file exists">
+
+        <echo>Unregistering web service from Axis. Tomcat/Axis must be up and running.</echo>
+            
+        <java classname="org.apache.axis.client.AdminClient" 
+              fork="true">
+            <classpath refid="classpath" />
+            <arg value="${deploy}/undeploy.wsdd" />
+        </java>
+
+    </target>
+    
+    <target name="instantialize.config"
+            unless="config.exist"
+            description="Create a new configuration file from the template">
+    
+        <echo>Creating a service configuration file from the template.</echo>
+            
+        <copy file="${config}/WEB-INF/wsfService-config.xml.sample" 
+              tofile="${config}/WEB-INF/wsfService-config.xml" />
+        
+    </target>
+
+    
+    <target name="deploy.service"
+            depends="undeploy.service, prepare.wsftoy"
+            description="copy necessary service files into axis directory">
+        
+        <!-- undeploy.service must be executed before generate.stub to avoid the interface incompatible problem -->  
+        <antcall target="generate.stub" />
+        
+        <copy file="${config}/WEB-INF/wsfService-config.xml" todir="${webservice.home}/WEB-INF" />
+        <copy file="${deploy}/wsf-service.jar" todir="${webservice.home}/WEB-INF/lib" />
+        <copy file="${lib}/wsf-toy.jar" todir="${webservice.home}/WEB-INF/lib" />
+        
+        <!-- register web service -->
+        <echo>Registering web service into Axis. Tomcat/Axis must be up and running.</echo>
+        
+        <java classname="org.apache.axis.client.AdminClient" 
+              fork="true">
+            <classpath refid="classpath" />
+            <arg value="${deploy}/deploy.wsdd" />
+        </java>
+
+    </target>
+
+    <target name="generate.stub"
+            depends="build.service, instantialize.config"
+            description="generate the client stub and create deployment script" >
+
+	<delete dir="${deploy}/org" quiet="true" />
+	<delete dir="${deploy}/classes" quiet="true" />
+	<delete file="${deploy}/deploy.wsdd" quiet="true" />
+	<delete file="${deploy}/undeploy.wsdd" quiet="true" />
+	
+        <echo>Creating WSDL file.</echo>
+        
+        <java classname="org.apache.axis.wsdl.Java2WSDL" 
+              fork="true">
+            <classpath refid="classpath" />
+            <arg line='-o ${deploy}/WsfPortalService.wsdl -l"${webservice.url}/WsfPortalService" -n "wsf.gusdb.org" -p"org.gusdb.wsf" "urn:wsf.gusdb.org" org.gusdb.wsf.WsfPortalService' />
+            <jvmarg line='-Dwebservice.home=${config}' />
+        </java>
+          
+        <echo>Generating client stub and deployment files from WSDL.</echo>
+        
+        <java classname="org.apache.axis.wsdl.WSDL2Java" fork="true">
+            <classpath refid="classpath" />
+            <arg line='-o ${deploy} -d Session -c org.gusdb.wsf.WsfPortalServiceImp -s ${deploy}/WsfPortalService.wsdl' />
+        </java>
+        
+        <delete file="${deploy}/org/gusdb/wsf/WsfPortalServiceImp.java" />
+        <move file="${deploy}/org/gusdb/wsf/deploy.wsdd" todir="${deploy}" />
+        <move file="${deploy}/org/gusdb/wsf/undeploy.wsdd" todir="${deploy}" />
+        
+        <!-- compile the deployment helper -->
+        <echo>Compiling the helper class for deployment.</echo>
+        
+        <javac srcdir="${src}"
+               destdir="${build}"
+               includes="org/gusdb/wsf/WsfDeployHelper.java">
+            <classpath refid="classpath" /> 
+        </javac>
+              
+        <echo>Modifying the className definition in deploy.wsdd with WsfDeployHelper</echo>
+
+        <java classname="org.gusdb.wsf.WsfDeployHelper" fork="true">
+            <classpath refid="classpath" />
+            <arg line="changeClass ${deploy}/deploy.wsdd org.gusdb.wsf.WsfPortalService" />
+        </java>
+        
+        <!-- build and package client -->
+        <mkdir dir="${deploy}/classes" />
+        
+        <echo>Compiling WSF client stub.</echo>
+        
+        <javac srcdir="${deploy}"
+               destdir="${deploy}/classes"
+               includes="org/**">
+            <classpath refid="classpath" /> 
+        </javac>
+
+	<echo>Packaging WSF client stub. The jar file will be placed at ${deploy}/wsf-client.jar </echo>
+	
+        <jar destfile="${lib}/wsf-client.jar"
+             basedir="${deploy}/classes"
+             includes="org/**" />
+        
+    </target>
+    
+    <target name="build.service.test"
+            depends="build.service"
+            description="build the JUnit test code for the service">
+            
+        <echo>Compling the JUnit test code for the service.</echo>
+        
+        <javac srcdir="${src}"
+               destdir="${build}"
+               includes="org/gusdb/wsf/test/WsfPortalServiceTest.java">
+            <classpath refid="classpath" /> 
+        </javac>
+        
+    </target>
+    
+    <target name="prepare.wsftoy"
+            description="Build the WSF Toy and copy wsf-toy.jar into lib">
+            
+        <ant dir="${wsftoy.base}" target="build.toy" inheritAll="false" />
+        
+        <copy file="${wsftoy.base}/deploy/wsf-toy.jar" todir="${lib}" />
+            
+    </target>
+    
+    <target name="run.service.test"
+            depends="prepare.wsftoy, instantialize.config"
+            description="run the JUnit test for service code">
+        
+        <antcall target="build.service.test" />    
+    
+        <echo>Running the JUnit test for the Service, using WSF Toy as test case</echo>
+        <java classname="junit.textui.TestRunner" fork="true">
+            <classpath refid="classpath" /> 
+            <arg value="org.gusdb.wsf.test.WsfPortalServiceTest" />
+            <jvmarg line='-Dwebservice.home="${config}" -Dplugin.name=${plugin.name} -Dparameters="${plugin.params}" -Dcolumns="${plugin.columns}"' />
+        </java>
+            
+    </target>
+  
+    <target name="build.client.test"
+            depends="generate.stub"
+            description="build the client code">
+
+        <delete dir="${build}" quiet="true" />
+        <mkdir dir="${build}" />
+    
+        <echo>Compling the client code.</echo>
+        
+        <javac srcdir="${src}"
+               destdir="${build}"
+               includes="org/gusdb/wsf/test/WsfPortalClientTest.java">
+            <classpath refid="classpath" /> 
+        </javac>
+        
+    </target>
+  
+    <target name="run.client.test"
+            depends="build.client.test"
+            description="run the JUnit test for client code">
+    
+        <echo>Running the JUnit test for the Client, using WSF Toy as test case. Web service must be deployed already.</echo>
+        
+        <java classname="junit.textui.TestRunner" fork="true">
+            <classpath refid="classpath" /> 
+            <arg value="org.gusdb.wsf.test.WsfPortalClientTest" />
+            <jvmarg line='-Dwebservice.url="${webservice.url}/WsfPortalService" -Dplugin.name=${plugin.name} -Dparameters="${plugin.params}" -Dcolumns="${plugin.columns}"' />
+        </java>
+            
+    </target>
+                 
+</project>
