@@ -1,15 +1,23 @@
 package org.gusdb.wsf;
 
+import java.util.Map;
+
 /**
  * 
  */
 
 /**
  * @author Jerric
- * @created Nov 2, 2005
+ * @created Feb 10, 2006
  */
 public interface IWsfPlugin {
 
-    public String[][] invoke(String[] params, String[] values, String[] cols)
+    /**
+     * @param params
+     * @param cols specify the columns of the result, and the order of them
+     * @return
+     * @throws WsfServiceException
+     */
+    public String[][] invoke(Map<String, String> params, String[] cols)
             throws WsfServiceException;
 }

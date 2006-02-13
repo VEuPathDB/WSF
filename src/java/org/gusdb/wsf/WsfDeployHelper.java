@@ -16,6 +16,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -27,6 +28,8 @@ import org.xml.sax.SAXException;
  * @created Jan 10, 2006
  */
 public class WsfDeployHelper {
+
+    private static Logger logger = Logger.getLogger(WsfDeployHelper.class);
 
     /**
      * @param args
@@ -48,10 +51,7 @@ public class WsfDeployHelper {
             try {
                 changeClass(args[1], args[2]);
             } catch (Exception ex) {
-                // TODO Auto-generated catch block
-                ex.printStackTrace();
-                // System.err.println(ex);
-                System.exit(-1);
+                logger.error(ex);
             }
         }
     }
@@ -63,6 +63,7 @@ public class WsfDeployHelper {
         // read the wsdd file into a document
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setValidating(false);
+        logger.info("Parsing configuration file: " + file.getAbsolutePath());
         Document document = factory.newDocumentBuilder().parse(file);
 
         // get parameters and replace to a new value

@@ -251,9 +251,9 @@
         
     </target>
   
-    <target name="run.client.test"
+    <target name="run.wsftoy.test"
             depends="build.client.test"
-            description="run the JUnit test for client code">
+            description="run the JUnit test of WSF Toy through Web service">
     
         <echo>Running the JUnit test for the Client, using WSF Toy as test case. Web service must be deployed already.</echo>
         
@@ -261,6 +261,28 @@
             <classpath refid="classpath" /> 
             <arg value="org.gusdb.wsf.test.WsfPortalClientTest" />
             <jvmarg line='-Dwebservice.url="${webservice.url}/WsfPortalService" -Dplugin.name=${plugin.name} -Dparameters="${plugin.params}" -Dcolumns="${plugin.columns}"' />
+        </java>
+            
+    </target>
+
+    <target name="run.plasmoap.test"
+            depends="build.client.test"
+            description="run the JUnit test of PlasmoAP through Web service">
+    
+        <echo>Running the JUnit test for the Client, using PlasmoAP plugin as test case. Web service must be deployed already.</echo>
+        
+        <java classname="junit.textui.TestRunner" fork="true">
+            <classpath refid="classpath" /> 
+            <arg value="org.gusdb.wsf.test.WsfPortalClientTest" />
+            <jvmarg line='-Dwebservice.url="${webservice.url}/WsfPortalService" -Dplugin.name="PlasmoAPPlugin" -Dparameters="sequence=MRKLYCVLLLSAFEFTYMINFGRGQNYWEHPYQNSDVYRPINEHREHPKEYEYPLHQEHTYQQEDSGEDE
+        NTLQHAYPIDHEGAEPAPQEQNLFSSIEIVERSNYMGNPWTEYMAKYDIEEVHGSGIRVDLGEDAEVAGT
+        QYRLPSGKCPVFGKGIIIENSNTTFLTPVATGNQYLKDGGFAFPPTEPLMSPMTLDEMRHFYKDNKYVKN
+        LDELTLCSRHAGNMIPDNDKNSNYKYPAVYDDKDKKCHILYIAAQENNGPRYCNKDESKRNSMFCFRPAK
+        DISFQNYTYLSKNVVDNWEKVCPRKNLQNAKFGLWVDGNCEDIPHVNEFPAIDLFECNKLVFELSASDQP
+        KQYEQHLTDYEKIKEGFKNKNASMIKSAFLPTGAFKADRYKSHGKGYNWGNYNTETQKCEIFNVKPTCLI
+        NNSSYIATTALSHPIEVENNFPCSLYKDEIMKEIERESKRIKLNDNDDEGNKKIIAPRIFISDDKDSLKC
+        PCDPEMVSNSTCRFFVCKCVERRAEVTSNNEVVVKEEYKDEYADIPEHKPTYDKMKIIIASSAAVAVLAT
+        ILMVYLYKRKGNAEKYDKMDEPQDYGKSNSRNDEMLDPEASFWGEEKRASHTTPVLMEKPYY" -Dcolumns="Report, Signal"' />
         </java>
             
     </target>
