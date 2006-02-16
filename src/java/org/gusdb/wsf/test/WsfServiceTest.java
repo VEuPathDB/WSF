@@ -8,14 +8,14 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.gusdb.wsf.WsfPortalService;
+import org.gusdb.wsf.WsfService;
 import org.gusdb.wsf.WsfServiceException;
 
 /**
  * @author Jerric
  * @created Nov 2, 2005
  */
-public class WsfPortalServiceTest extends TestCase {
+public class WsfServiceTest extends TestCase {
 
     /*
      * @see TestCase#setUp()
@@ -30,8 +30,8 @@ public class WsfPortalServiceTest extends TestCase {
      */
     public void testInvoke() {
         // get plugin name; required
-        String pluginName = System.getProperty("plugin.name");
-        assertNotNull(pluginName);
+        String pluginClassName = System.getProperty("plugin.class");
+        assertNotNull(pluginClassName);
 
         // get columns for the result; required
         String columnTemp = System.getProperty("columns");
@@ -43,38 +43,31 @@ public class WsfPortalServiceTest extends TestCase {
 
         // get parameters for the plugin; optional
         String paramTemp = System.getProperty("parameters");
-        String[] params, values;
+        Map<String, String> params = new HashMap<String, String>();
         if (paramTemp != null) {
             String[] parts = paramTemp.split(",");
-            Map<String, String> paramMap = new HashMap<String, String>();
             for (String part : parts) {
                 String[] subpart = part.trim().split("=");
                 String param = subpart[0].trim();
                 if (param.length() > 0) {
                     String value = "";
                     if (subpart.length > 1) value = subpart[1].trim();
-                    paramMap.put(param, value);
+                    params.put(param, value);
                 }
             }
-            params = new String[paramMap.size()];
-            values = new String[paramMap.size()];
-            paramMap.keySet().toArray(params);
-            paramMap.values().toArray(values);
-        } else {
-            params = new String[0];
-            values = new String[0];
         }
 
-        // create column map for printing purpose
-        Map<String, Integer> map = new HashMap<String, Integer>();
-        for (int i = 0; i < columns.length; i++) {
-            map.put(columns[i], i);
-        }
-
-        WsfPortalService service = new WsfPortalService();
+        WsfService service = new WsfService();
         try {
-            String[][] result = service.invoke(pluginName, params, values,
+            String[][] result = service.invoke(pluginClassName, params, 
                     columns);
+
+
+            // create column map for printing purpose
+            Map<String, Integer> map = new HashMap<String, Integer>();
+            for (int i = 0; i < columns.length; i++) {
+                map.put(columns[i], i);
+            }
 
             // print out the result
             System.out.println("");
