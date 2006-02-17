@@ -18,67 +18,144 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 /**
+ * The WsfPlugin provides the common routines a plugin needs to simplify the
+ * development of new WSF plugins.
+ * 
  * @author Jerric
  * @created Feb 9, 2006
  */
 public abstract class WsfPlugin implements IWsfPlugin {
 
-    private Logger logger;
-    private Properties properties;
-
-    protected int exitValue;
-
-    protected abstract String[] getRequiredParameters();
-
-    protected abstract String[] getColumns();
-
-    protected abstract String[][] execute(Map<String, String> params,
-            String[] cols);
+    /**
+     * The logger for this plugin. It is a recommended way to record standard
+     * output and error messages.
+     */
+    protected Logger logger;
 
     /**
-     * With-property-file case
+     * It stores the properties defined in the configuration file. If the plugin
+     * doesn't use a configuration file, this map is empty.
+     */
+    private Properties properties;
+
+    /**
+     * it contains the exit value of the invoked appliaction. If the last
+     * invocation is successfully finished, this value is 0; if the plugin
+     * hasn't invoked any application, this value is -1; if the last invocation
+     * is failed, this value can be any number other than 0. However, this is
+     * not the recommended way to check if an invocation is succeeded or not
+     * since it relies on the behavior of the external application.
+     */
+    protected int exitValue;
+
+    /**
+     * The Plugin needs to provide a list of required parameter names; the base
+     * class will use this template method in the input validation process.
      * 
-     * @param logger
-     * @param propertyFile
+     * @return returns an array the names of the required parameters
+     */
+    protected abstract String[] getRequiredParameterNames();
+
+    /**
+     * The Plugin needs to provides a list of the columns expected in the
+     * result; the base class will use this template method in the input
+     * validation process.
+     * 
+     * @return returns an array the columns expected in the result
+     */
+    protected abstract String[] getColumns();
+
+    /**
+     * This is an optional method for the plugin to validate its parameter by
+     * itself. The plugin can validate the conceptual type of certain parameter
+     * values, as well as their value ranges. <br>
+     * Plugin can ignore this by leave an empty implementation of this method.
+     * <br>
+     * If the validation fails, Plugin is expected to throw out a
+     * WsfServiceException, describing the reson.
+     * 
+     * @param params
+     * @throws WsfServiceException
+     */
+    protected abstract void validateParameters(Map<String, String> params)
+            throws WsfServiceException;
+
+    /**
+     * The plugin should implement this method to do the real job, for example,
+     * to invoke an application, and prepare the results into tabular format,
+     * and then return the results.
+     * 
+     * @param params The <name, value> Map of parameters given by the client
+     * @param orderedColumns The ordered columns assigned by the client. each of
+     *        the columns must match with one column sepecified in getColumns()
+     *        by the plugin. The The plugin is responsible to re-format the
+     *        result following the order of the columns defined here.
+     * @return returns the result in 2-dimensional array of strings format.
+     * @throws WsfServiceException
+     */
+    protected abstract String[][] execute(Map<String, String> params,
+            String[] orderedColumns) throws WsfServiceException;
+
+    /**
+     * Initialize a plugin with empty properties
+     */
+    public WsfPlugin() {
+        this.logger = Logger.getLogger(WsfPlugin.class); // use default
+        exitValue = -1;
+        // logger
+        properties = new Properties();
+    }
+
+    /**
+     * Initialize a plugin and assign a property file to it
+     * 
+     * @param propertyFile the name of the property file. The base class will
+     *        resolve the path to this file, which should be under the WEB-INF
+     *        of axis' webapps.
      * @throws InvalidPropertiesFormatException
      * @throws IOException
      */
-    public WsfPlugin(Logger logger, String propertyFile)
+    public WsfPlugin(String propertyFile)
             throws InvalidPropertiesFormatException, IOException {
-        this(logger);
-        exitValue = 0;
+        this();
         // load the properties
         loadPropertyFile(propertyFile);
     }
 
     /**
-     * Initialize an empty property file
-     * 
-     * @param logger
+     * @param logger set a different logger to the plugin. The WsfService will
+     *        assign a specific logger to each plugin.
      */
-    public WsfPlugin(Logger logger) {
+    public void setLogger(Logger logger) {
         this.logger = logger;
-        properties = new Properties();
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * The service will call the plugin through this interface. Plugin cannot
+     * override this method from the base class, instead it should implement
+     * execute() method.
      * 
      * @see org.gusdb.wsf.IWsfPlugin#invoke(java.util.Map, java.lang.String[])
      */
-    public final String[][] invoke(Map<String, String> params, String[] cols)
-            throws WsfServiceException {
+    public final String[][] invoke(Map<String, String> params,
+            String[] orderedColumns) throws WsfServiceException {
         // validate the input
-        if (!validateInput(params, cols))
+        logger.info("WsfPlugin.validateInput()");
+        if (!validateInput(params, orderedColumns))
             throw new WsfServiceException("Input validation failed.");
 
+        // validate the type and content of parameters
+        logger.info("WsfPlugin.validateParameters()");
+        validateParameters(params);
+
         // execute the main function, and obtain result
-        return execute(params, cols);
+        logger.info("WsfPlugin.execute()");
+        return execute(params, orderedColumns);
     }
 
-    protected boolean validateInput(Map<String, String> params, String[] cols) {
-        logger.info("WsfPlugin.validateInput()");
-        String[] reqParams = getRequiredParameters();
+    private boolean validateInput(Map<String, String> params,
+            String[] orderedColumns) {
+        String[] reqParams = getRequiredParameterNames();
         String[] reqColumns = getColumns();
 
         // validate parameters
@@ -90,8 +167,8 @@ public abstract class WsfPlugin implements IWsfPlugin {
         }
 
         // validate columns
-        Set<String> colSet = new HashSet<String>(cols.length);
-        for (String col : cols) {
+        Set<String> colSet = new HashSet<String>(orderedColumns.length);
+        for (String col : orderedColumns) {
             colSet.add(col);
         }
         for (String col : reqColumns) {
@@ -106,7 +183,7 @@ public abstract class WsfPlugin implements IWsfPlugin {
         for (String col : reqColumns) {
             colSet.add(col);
         }
-        for (String col : cols) {
+        for (String col : orderedColumns) {
             if (!colSet.contains(col)) {
                 logger.error("Unknown column: " + col);
                 return false;
@@ -125,7 +202,7 @@ public abstract class WsfPlugin implements IWsfPlugin {
             root = System.getProperty("catalina.home");
             rootDir = new File(root, "webapps/axis");
         } else rootDir = new File(root);
-        File configFile = new File(rootDir, "WEB-INF/" + propertyFile);
+        File configFile = new File(rootDir, "WEB-INF/wsf-config/" + propertyFile);
         InputStream in = new FileInputStream(configFile);
         properties.loadFromXML(in);
     }
@@ -136,6 +213,7 @@ public abstract class WsfPlugin implements IWsfPlugin {
 
     protected String invokeCommand(String command, long timeout)
             throws IOException {
+        logger.info("WsfPlugin.invokeCommand()");
         // invoke the command
         Process process = Runtime.getRuntime().exec(command);
         BufferedReader in = new BufferedReader(new InputStreamReader(
@@ -182,8 +260,8 @@ public abstract class WsfPlugin implements IWsfPlugin {
             }
         }
     }
-    
-    protected String printArray(String[] array) {
+
+    public static String printArray(String[] array) {
         StringBuffer sb = new StringBuffer();
         sb.append("{'");
         for (String s : array) {
@@ -195,4 +273,13 @@ public abstract class WsfPlugin implements IWsfPlugin {
         return sb.toString();
     }
 
+    public static String printArray(String[][] array) {
+        StringBuffer sb = new StringBuffer();
+        String newline = System.getProperty("line.separator");
+        for (String[] parts : array) {
+            sb.append(printArray(parts));
+            sb.append(newline);
+        }
+        return sb.toString();
+    }
 }

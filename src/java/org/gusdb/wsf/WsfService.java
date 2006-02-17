@@ -38,6 +38,7 @@ public class WsfService {
             logger.info("Loading object " + pluginClassName);
             Class pluginClass = Class.forName(pluginClassName);
             IWsfPlugin plugin = (IWsfPlugin) pluginClass.newInstance();
+            plugin.setLogger(Logger.getLogger(pluginClass));
 
             // invoke the plugin
             logger.info("Invoking Plugin " + pluginClassName);

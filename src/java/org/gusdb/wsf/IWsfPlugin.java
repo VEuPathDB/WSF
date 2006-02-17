@@ -2,6 +2,8 @@ package org.gusdb.wsf;
 
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 /**
  * 
  */
@@ -18,6 +20,8 @@ public interface IWsfPlugin {
      * @return
      * @throws WsfServiceException
      */
-    public String[][] invoke(Map<String, String> params, String[] cols)
+    public String[][] invoke(Map<String, String> params, String[] orderedColumns)
             throws WsfServiceException;
+    
+    void setLogger(Logger logger);
 }
