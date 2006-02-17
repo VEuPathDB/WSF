@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.gusdb.wsf;
+package org.gusdb.wsf.plugin;
 
 import java.io.BufferedReader;
 import java.io.File;

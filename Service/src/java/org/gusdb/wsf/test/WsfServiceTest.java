@@ -8,8 +8,8 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.gusdb.wsf.WsfService;
-import org.gusdb.wsf.WsfServiceException;
+import org.gusdb.wsf.plugin.WsfServiceException;
+import org.gusdb.wsf.service.WsfService;
 
 /**
  * @author Jerric

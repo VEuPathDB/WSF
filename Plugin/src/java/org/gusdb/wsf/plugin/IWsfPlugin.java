@@ -1,4 +1,4 @@
-package org.gusdb.wsf;
+package org.gusdb.wsf.plugin;
 
 import java.util.Map;
 
@@ -22,6 +22,6 @@ public interface IWsfPlugin {
      */
     public String[][] invoke(Map<String, String> params, String[] orderedColumns)
             throws WsfServiceException;
-    
+
     void setLogger(Logger logger);
 }

@@ -1,4 +1,4 @@
-package org.gusdb.wsf;
+package org.gusdb.wsf.plugin;
 
 /**
  * 
