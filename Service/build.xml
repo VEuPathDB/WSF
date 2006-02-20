@@ -19,17 +19,11 @@
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
 
   <target name="WSF-Installation" depends="WSF/Service-Installation,
-                                           WSF/Client-Installation">
+                                           WSF/Plugin-Installation">
 
     <ant target="defaultProjectInstall"/>
 
-    <copy file="${projectsDir}/config/WEB-INF/plasmoResources.xml" 
-          tofile="${targetDir}/lib/xml/plasmoResources.xml"/>
-
-    <mkdir dir="${targetDir}/config"/>
-    <copy todir="${targetDir}/config">
-      <fileset dir="${projectsDir}/PlasmoDBData/Model/config"/>
-    </copy>
+    <mkdir dir="${targetDir}/wsf-config"/>
 
   </target>
 
@@ -43,10 +37,10 @@
     </ant>
   </target>
 
-  <target name="WSF/Client-Installation">
+  <target name="WSF/Plugin-Installation">
     <ant target="defaultComponentInstall">
       <property name="project" value="WSF"/>
-      <property name="component" value="Client"/>
+      <property name="component" value="Plugin"/>
     </ant>
   </target>
 
@@ -54,15 +48,21 @@
   <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
 
-  <target name="PlasmoDBWebsite-WebInstallation" depends="PlasmoDBWebsite-Installation,
-                                                          ApiCommonWebsite-WebInstallation,
-                                                          PlasmoDBWebsite/Site-WebInstallation">
+  <target name="WSF-WebInstallation" depends="WSF/Service-WebInstallation,
+                                              WSF/Plugin-WebInstallation">
  </target>
 
-  <target name="PlasmoDBWebsite/Site-WebInstallation">
+  <target name="WSF/Service-WebInstallation">
     <ant target="defaultWebComponentInstall">
-      <property name="project" value="PlasmoDBWebsite"/>
-      <property name="component" value="Site"/>
+      <property name="project" value="WSF"/>
+      <property name="component" value="Service"/>
+    </ant>
+  </target>
+
+  <target name="WSF/Plugin-WebInstallation">
+    <ant target="defaultWebComponentInstall">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Plugin"/>
     </ant>
   </target>
 
@@ -70,24 +70,20 @@
   <!-- oooooooooooooooooooooooooooo  Release  ooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
 
-  <target name="PlasmoDBWebsite-Release">
+  <target name="WSF-Release">
     
-    <ant target="defaultProjectRelease">
-      <property name="cvsroot" value=":ext:cvs.sanger.ac.uk:/cvsroot/GUS"/>
-    </ant>
+    <echo>"WSF-Release" is not supported at this moment.</echo>
+
   </target>  
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooo  Distributable  ooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
 
-  <target name="PlasmoDBWebsite-Distributable">
+  <target name="WSF-Distributable">
 
-    <copy todir="${targetDir}">
-      <fileset dir="${projectsDir}" >
-        <exclude name="**/CVS/*" />
-      </fileset>
-    </copy>  
+    <echo>"WSF-Distributable" is not supported at this moment.</echo>
+
   </target>  
 
 </project>
