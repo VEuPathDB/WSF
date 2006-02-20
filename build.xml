@@ -1,6 +1,11 @@
 <project name="WSF" default="Installation" basedir=".">
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooo   Properties   oooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+
+
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooo  Dependencies  oooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
 
@@ -19,22 +24,27 @@
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
 
   <target name="WSF-Installation" depends="WSF/Service-Installation,
-                                           WSF/Plugin-Installation">
+                                           WSF/Plugin-Installation,
+                                           WSF/Client-Installation">
 
     <ant target="defaultProjectInstall"/>
 
-    <mkdir dir="${targetDir}/wsf-config"/>
+    <mkdir dir="${targetDir}/wsf-lib/java"/>
+    <move file="${targetDir}/lib/java/WSF-Service.jar" todir="${targetDir}/wsf-lib/java" />
+    <move file="${targetDir}/lib/java/WSF-Plugin.jar" todir="${targetDir}/wsf-lib/java" />
 
   </target>
 
 
  <!-- ooooooooooooooooooooooo  Install Components  ooooooooooooooooooooooo -->
 
-  <target name="WSF/Service-Installation">
+  <target name="WSF/Service-Installation" depends="WSF/Plugin-Installation">
+
     <ant target="defaultComponentInstall">
       <property name="project" value="WSF"/>
       <property name="component" value="Service"/>
     </ant>
+
   </target>
 
   <target name="WSF/Plugin-Installation">
@@ -42,6 +52,56 @@
       <property name="project" value="WSF"/>
       <property name="component" value="Plugin"/>
     </ant>
+  </target>
+
+  <target name="WSF/Client-Installation" depends="WSF/Service-Installation">
+    <delete dir="../WSF/Client" quiet="true" />
+    <mkdir dir="../WSF/Client/src/java"/>
+    <mkdir dir="../WSF/Client/lib/java"/>
+    <mkdir dir="../WSF/Client/config"/>
+    <copy todir="../WSF/Client/lib/java">
+      <fileset dir="../WSF/Service/lib/java"/>
+    </copy>
+    <copy file="${targetDir}/lib/java/WSF-Service.jar" todir="../WSF/Client/lib/java" />
+    <copy file="${targetDir}/lib/java/WSF-Plugin.jar" todir="../WSF/Client/lib/java" />
+
+    <path id="classpath">
+      <pathelement path="${classpath}" />
+      <fileset dir="../WSF/Client/lib/java">
+        <include name="**/*.jar"/>
+      </fileset>
+    </path>
+	
+    <echo>Creating WSDL file.</echo>
+        
+    <java classname="org.apache.axis.wsdl.Java2WSDL" fork="true">
+      <classpath refid="classpath" />
+      <arg line='-o ../WSF/Client/config/WsfService.wsdl -l"http://localhost:8080/WsfService" -n ".service.wsf.gusdb.org" -p"org.gusdb.wsf.service" "urn:service.wsf.gusdb.org" org.gusdb.wsf.service.WsfService' />
+    </java>
+          
+    <echo>Generating client stub and deployment files from WSDL.</echo>
+        
+    <java classname="org.apache.axis.wsdl.WSDL2Java" fork="true">
+      <classpath refid="classpath" />
+      <arg line='-o ../WSF/Client/src/java -d Session -c org.gusdb.wsf.service.WsfServiceImp -s ../WSF/Client/config/WsfService.wsdl' />
+    </java>
+        
+    <delete file="../WSF/Client/src/java/org/gusdb/wsf/service/WsfServiceImp.java" />
+    <move file="../WSF/Client/src/java/org/gusdb/wsf/service/deploy.wsdd" tofile="../WSF/Client/config/wsfService-deploy.wsdd" />
+    <move file="../WSF/Client/src/java/org/gusdb/wsf/service/undeploy.wsdd" tofile="../WSF/Client/config/wsfService-undeploy.wsdd" />
+              
+    <echo>Modifying the className definition in deploy.wsdd with WsfDeployHelper</echo>
+
+    <java classname="org.gusdb.wsf.util.WsfDeployHelper" fork="true">
+      <classpath refid="classpath" />
+      <arg line="changeClass ../WSF/Client/config/deploy.wsdd org.gusdb.wsf.service.WsfService" />
+    </java>
+
+    <ant target="defaultComponentInstall">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Client"/>
+    </ant>
+
   </target>
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
@@ -52,7 +112,7 @@
                                               WSF/Plugin-WebInstallation">
  </target>
 
-  <target name="WSF/Service-WebInstallation">
+  <target name="WSF/Service-WebInstallation" depends="WSF/Plugin-WebInstallation">
     <ant target="defaultWebComponentInstall">
       <property name="project" value="WSF"/>
       <property name="component" value="Service"/>
