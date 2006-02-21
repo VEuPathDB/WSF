@@ -29,7 +29,7 @@
 
     <ant target="defaultProjectInstall"/>
 
-    <mkdir dir="${targetDir}/wsf-lib/java"/>
+    <mkdir dir="${targetDir}/wsf/"/>
     <move file="${targetDir}/lib/java/WSF-Service.jar" todir="${targetDir}/wsf-lib/java" />
     <move file="${targetDir}/lib/java/WSF-Plugin.jar" todir="${targetDir}/wsf-lib/java" />
 
@@ -108,23 +108,45 @@
   <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
 
-  <target name="WSF-WebInstallation" depends="WSF/Service-WebInstallation,
-                                              WSF/Plugin-WebInstallation">
- </target>
+  <target name="WSF-WebInstallation" depends="WSF-Installation">
 
-  <target name="WSF/Service-WebInstallation" depends="WSF/Plugin-WebInstallation">
-    <ant target="defaultWebComponentInstall">
-      <property name="project" value="WSF"/>
-      <property name="component" value="Service"/>
-    </ant>
+    <available file="${webAppTargetDir}/WEB-INF/wsf-config" type="dir" property="wsf-config.exist" />
+    <available file="${webAppTargetDir}/WEB-INF/lib/wsf-lib" type="dir" property="wsf-lib.exist" />
+    <available file="${targetDir}/config/wsfService-undeploy.wsdd" property="undeploy.exist" />
+        
+    <antcall target="WSF-WebUninstallation" />
+    <antcall target="createConfigLink" />
+    <antcall target="createLibLink" />
+
+    <java classname="org.apache.axis.client.AdminClient" 
+          fork="true">
+      <classpath refid="classpath" />
+      <arg value="${targetDir}/config/deploy.wsdd" />
+    </java>
+
   </target>
 
-  <target name="WSF/Plugin-WebInstallation">
-    <ant target="defaultWebComponentInstall">
-      <property name="project" value="WSF"/>
-      <property name="component" value="Plugin"/>
-    </ant>
+  <target name="createLibLink" unless="wsf-lib.exist">
+    <symlink link="${webappTargetDir}/WEB-INF/lib/wsf-lib" resource="${targetDir}/wsf-lib/java"/>
   </target>
+
+  <target name="createConfigLink" unless="wsf-config.exist">
+    <symlink link="${webappTargetDir}/WEB-INF/wsf-config" resource="${targetDir}/config"/>
+  </target>
+  
+  <!-- ooooooooooooooooooooo  Install web components  ooooooooooooooooooooo -->
+  
+  <target name="WSF-WebUninstallation" if="undeploy.exist">
+  
+    <echo>Unregistering web service from Axis. Tomcat/Axis must be up and running.</echo>
+            
+    <java classname="org.apache.axis.client.AdminClient" fork="true">
+      <classpath refid="classpath" />
+      <arg value="${targetDir}/config/wsfService-undeploy.wsdd" />
+    </java>
+  
+  </target>
+  
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooo  Release  ooooooooooooooooooooooooooooo -->
