@@ -27,9 +27,10 @@
                                            WSF/Plugin-Installation,
                                            WSF/Client-Installation">
 
+    <mkdir dir="${targetDir}/wsf-lib/java"/>
+
     <ant target="defaultProjectInstall"/>
 
-    <mkdir dir="${targetDir}/wsf/"/>
     <move file="${targetDir}/lib/java/WSF-Service.jar" todir="${targetDir}/wsf-lib/java" />
     <move file="${targetDir}/lib/java/WSF-Plugin.jar" todir="${targetDir}/wsf-lib/java" />
 
