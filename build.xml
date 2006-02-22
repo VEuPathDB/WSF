@@ -136,7 +136,7 @@
     <java classname="org.apache.axis.client.AdminClient" 
           fork="true">
       <classpath refid="classpath" />
-      <arg line="-l${webappBaseUrl}/servlet/AxisServlet" />
+      <arg line="-l${webserviceBaseUrl}/servlet/AxisServlet" />
       <arg line="${targetDir}/config/deploy.wsdd" />
     </java>
 
@@ -158,7 +158,7 @@
             
     <java classname="org.apache.axis.client.AdminClient" fork="true">
       <classpath refid="classpath" />
-      <arg line="-l${webappBaseUrl}/servlet/AxisServlet" />
+      <arg line="-l${webserviceBaseUrl}/servlet/AxisServlet" />
       <arg line="${targetDir}/config/wsfService-undeploy.wsdd" />
     </java>
   
