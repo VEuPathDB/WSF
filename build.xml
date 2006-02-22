@@ -56,6 +56,12 @@
   </target>
 
   <target name="WSF/Client-Installation" depends="WSF/Service-Installation">
+    <condition property="webserviceBaseUrl" value="http://localhost:8080/axis">
+      <not>
+        <isset property="webserviceBaseUrl" />
+      </not>
+    </condition>
+    
     <delete dir="../WSF/Client" quiet="true" />
     <mkdir dir="../WSF/Client/src/java"/>
     <mkdir dir="../WSF/Client/lib/java"/>
@@ -77,14 +83,22 @@
         
     <java classname="org.apache.axis.wsdl.Java2WSDL" fork="true">
       <classpath refid="classpath" />
-      <arg line='-o ../WSF/Client/config/WsfService.wsdl -l"http://localhost:8080/WsfService" -n ".service.wsf.gusdb.org" -p"org.gusdb.wsf.service" "urn:service.wsf.gusdb.org" org.gusdb.wsf.service.WsfService' />
+      <arg line="-o ../WSF/Client/config/WsfService.wsdl" />
+      <arg line="-l${webserviceBaseUrl}/services/WsfService" />
+      <arg line="-n .service.wsf.gusdb.org" />
+      <arg line="-porg.gusdb.wsf.service urn:service.wsf.gusdb.org" />
+      <arg line="org.gusdb.wsf.service.WsfService" />
     </java>
           
     <echo>Generating client stub and deployment files from WSDL.</echo>
         
     <java classname="org.apache.axis.wsdl.WSDL2Java" fork="true">
       <classpath refid="classpath" />
-      <arg line='-o ../WSF/Client/src/java -d Session -c org.gusdb.wsf.service.WsfServiceImp -s ../WSF/Client/config/WsfService.wsdl' />
+      <arg line="-o ../WSF/Client/src/java" />
+      <arg line="-d Session" />
+      <arg line="-c org.gusdb.wsf.service.WsfServiceImp" />
+      <arg line="-s" />
+      <arg line="../WSF/Client/config/WsfService.wsdl" />
     </java>
         
     <delete file="../WSF/Client/src/java/org/gusdb/wsf/service/WsfServiceImp.java" />
@@ -122,7 +136,8 @@
     <java classname="org.apache.axis.client.AdminClient" 
           fork="true">
       <classpath refid="classpath" />
-      <arg value="${targetDir}/config/deploy.wsdd" />
+      <arg line="-l${webappBaseUrl}/servlet/AxisServlet" />
+      <arg line="${targetDir}/config/deploy.wsdd" />
     </java>
 
   </target>
@@ -143,7 +158,8 @@
             
     <java classname="org.apache.axis.client.AdminClient" fork="true">
       <classpath refid="classpath" />
-      <arg value="${targetDir}/config/wsfService-undeploy.wsdd" />
+      <arg line="-l${webappBaseUrl}/servlet/AxisServlet" />
+      <arg line="${targetDir}/config/wsfService-undeploy.wsdd" />
     </java>
   
   </target>
