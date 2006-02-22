@@ -9,11 +9,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.InvalidPropertiesFormatException;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -25,6 +29,9 @@ import org.apache.log4j.Logger;
  * @created Feb 9, 2006
  */
 public abstract class WsfPlugin implements IWsfPlugin {
+
+    
+    protected static final String newline = System.getProperty("line.separator");
 
     /**
      * The logger for this plugin. It is a recommended way to record standard
@@ -112,14 +119,17 @@ public abstract class WsfPlugin implements IWsfPlugin {
      * @param propertyFile the name of the property file. The base class will
      *        resolve the path to this file, which should be under the WEB-INF
      *        of axis' webapps.
-     * @throws InvalidPropertiesFormatException
-     * @throws IOException
+     * @throws WsfServiceException 
      */
-    public WsfPlugin(String propertyFile)
-            throws InvalidPropertiesFormatException, IOException {
+    public WsfPlugin(String propertyFile) throws WsfServiceException {
         this();
         // load the properties
-        loadPropertyFile(propertyFile);
+        try {
+            loadPropertyFile(propertyFile);
+        } catch (IOException ex) {
+            logger.error(ex);
+            throw new WsfServiceException(ex);
+        }
     }
 
     /**
@@ -140,16 +150,16 @@ public abstract class WsfPlugin implements IWsfPlugin {
     public final String[][] invoke(Map<String, String> params,
             String[] orderedColumns) throws WsfServiceException {
         // validate the input
-        logger.info("WsfPlugin.validateInput()");
+        logger.debug("WsfPlugin.validateInput()");
         if (!validateInput(params, orderedColumns))
             throw new WsfServiceException("Input validation failed.");
 
         // validate the type and content of parameters
-        logger.info("WsfPlugin.validateParameters()");
+        logger.debug("WsfPlugin.validateParameters()");
         validateParameters(params);
 
         // execute the main function, and obtain result
-        logger.info("WsfPlugin.execute()");
+        logger.debug("WsfPlugin.execute()");
         return execute(params, orderedColumns);
     }
 
@@ -213,13 +223,16 @@ public abstract class WsfPlugin implements IWsfPlugin {
 
     protected String invokeCommand(String command, long timeout)
             throws IOException {
-        logger.info("WsfPlugin.invokeCommand()");
+        logger.debug("WsfPlugin.invokeCommand()");
         // invoke the command
         Process process = Runtime.getRuntime().exec(command);
         BufferedReader in = new BufferedReader(new InputStreamReader(
                 process.getInputStream()));
+        BufferedReader err = new BufferedReader(
+                new InputStreamReader(process.getErrorStream()));
 
         long start = System.currentTimeMillis();
+        long limit = timeout * 1000;
         // check the exit value of the process; if the process is not
         // finished yet, an IllegalThreadStateException is thrown out
         while (true) {
@@ -233,13 +246,19 @@ public abstract class WsfPlugin implements IWsfPlugin {
 
                 // obtain the standard output
                 StringBuffer sb = new StringBuffer();
-                String newline = System.getProperty("line.separator");
                 String line;
                 while ((line = in.readLine()) != null) {
                     sb.append(line);
                     sb.append(newline);
                 }
-                return sb.toString();
+                
+                // obtain the error output, if have
+                StringBuffer sberr = new StringBuffer();
+                while ((line = err.readLine()) != null) {
+                    sberr.append(line);
+                    sberr.append(newline);
+                }
+                return (exitValue == 0)?sb.toString(): sberr.toString();
             } catch (IllegalThreadStateException ex) {
                 // if the timeout is set to <= 0, keep waiting till the process
                 // is finished
@@ -247,12 +266,12 @@ public abstract class WsfPlugin implements IWsfPlugin {
 
                 // otherwise, check if time's up
                 long time = System.currentTimeMillis() - start;
-                if (time > timeout) {
+                if (time > limit) {
                     logger.warn("Time out, the command is cancelled: "
                             + command);
                     process.destroy();
                     exitValue = -1;
-                    return "";
+                    return "Time out, the command is cancelled.";
                 }
             } catch (InterruptedException ex) {
                 // do nothing, keep looping
@@ -275,11 +294,25 @@ public abstract class WsfPlugin implements IWsfPlugin {
 
     public static String printArray(String[][] array) {
         StringBuffer sb = new StringBuffer();
-        String newline = System.getProperty("line.separator");
         for (String[] parts : array) {
             sb.append(printArray(parts));
             sb.append(newline);
         }
         return sb.toString();
     }
+    
+
+    public static String[] tokenize(String line) {
+        Pattern pattern = Pattern.compile("\\b[\\w\\.]+\\b");
+        Matcher match = pattern.matcher(line);
+        List<String> tokens = new ArrayList<String>();
+        while (match.find()) {
+            String token = line.substring(match.start(), match.end());
+            tokens.add(token);
+        }
+        String[] sArray = new String[tokens.size()];
+        tokens.toArray(sArray);
+        return sArray;
+    }
+
 }
