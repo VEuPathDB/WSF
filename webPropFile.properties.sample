@@ -1,2 +1,2 @@
-webAppTargetDir=<your_axis_webapp_dir>
+webappTargetDir=<your_axis_webapp_dir>
 confTargetDir="wsf-config"
