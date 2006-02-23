@@ -132,7 +132,7 @@
     <antcall target="createConfigLink" />
     
     <copy todir="${webappTargetDir}/WEB-INF/lib">
-      <fileset dir="${targetDir}/wsf-lib/java"/>
+      <fileset dir="${targetDir}/wsf-lib/java" />
     </copy>
 
     <java classname="org.apache.axis.client.AdminClient" 
@@ -145,7 +145,7 @@
   </target>
 
   <target name="createConfigLink" unless="wsf-config.exist">
-    <symlink link="${webappTargetDir}/WEB-INF/wsf-config/" resource="${targetDir}/config/"/>
+    <symlink link="${webappTargetDir}/WEB-INF/wsf-config" resource="${targetDir}/config"/>
   </target>
   
   <!-- ooooooooooooooooooooo  Install web components  ooooooooooooooooooooo -->
