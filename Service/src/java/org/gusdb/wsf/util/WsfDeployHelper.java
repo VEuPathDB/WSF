@@ -34,7 +34,7 @@ public class WsfDeployHelper {
     /**
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         // check arguments
         if (args.length == 0) {
             System.err.println("Usage: java WSFDeployHelper command [options...]");
@@ -53,6 +53,7 @@ public class WsfDeployHelper {
                 changeClass(args[1], args[2]);
             } catch (Exception ex) {
                 logger.error(ex);
+                throw ex;
             }
         }
     }
