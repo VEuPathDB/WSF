@@ -3,6 +3,7 @@
  */
 package org.gusdb.wsf.service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -25,16 +26,17 @@ public class WsfService {
      * to the client in tabular format.
      * 
      * @param pluginClassName
-     * @param params
+     * @param paramValues an array of "param=value" pairs. The param and value
+     *        and separated by the first "="
      * @param cols
      * @return
      * @throws WsfServiceException
      */
-    public String[][] invoke(String pluginClassName,
-            Map<String, String> params, String[] cols)
-            throws WsfServiceException {
+    public String[][] invoke(String pluginClassName, String[] paramValues,
+            String[] cols) throws WsfServiceException {
         logger.debug(pluginClassName);
 
+        Map<String, String> params = convertParams(paramValues);
         try {
             // use reflection to load the plugin object
             logger.info("Loading object " + pluginClassName);
@@ -52,5 +54,20 @@ public class WsfService {
             logger.error(ex);
             throw new WsfServiceException(ex);
         }
+    }
+
+    private Map<String, String> convertParams(String[] paramValues) {
+        Map<String, String> params = new HashMap<String, String>(
+                paramValues.length);
+        for (String paramValue : paramValues) {
+            int pos = paramValue.indexOf('=');
+            if (pos < 0) params.put(paramValue.trim(), "");
+            else {
+                String param = paramValue.substring(0, pos).trim();
+                String value = paramValue.substring(pos + 1).trim();
+                params.put(param, value);
+            }
+        }
+        return params;
     }
 }

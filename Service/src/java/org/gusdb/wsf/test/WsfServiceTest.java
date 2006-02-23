@@ -43,25 +43,12 @@ public class WsfServiceTest extends TestCase {
 
         // get parameters for the plugin; optional
         String paramTemp = System.getProperty("parameters");
-        Map<String, String> params = new HashMap<String, String>();
-        if (paramTemp != null) {
-            String[] parts = paramTemp.split(",");
-            for (String part : parts) {
-                String[] subpart = part.trim().split("=");
-                String param = subpart[0].trim();
-                if (param.length() > 0) {
-                    String value = "";
-                    if (subpart.length > 1) value = subpart[1].trim();
-                    params.put(param, value);
-                }
-            }
-        }
+        String[] params = (paramTemp != null) ? paramTemp.split(",")
+                : new String[0];
 
         WsfService service = new WsfService();
         try {
-            String[][] result = service.invoke(pluginClassName, params, 
-                    columns);
-
+            String[][] result = service.invoke(pluginClassName, params, columns);
 
             // create column map for printing purpose
             Map<String, Integer> map = new HashMap<String, Integer>();
