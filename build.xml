@@ -109,7 +109,7 @@
 
     <java classname="org.gusdb.wsf.util.WsfDeployHelper" fork="true">
       <classpath refid="classpath" />
-      <arg line="changeClass ../WSF/Client/config/deploy.wsdd org.gusdb.wsf.service.WsfService" />
+      <arg line="changeClass ../WSF/Client/config/wsfService-deploy.wsdd org.gusdb.wsf.service.WsfService" />
     </java>
 
     <ant target="defaultComponentInstall">
