@@ -126,12 +126,14 @@
   <target name="WSF-WebInstallation" depends="WSF-Installation">
 
     <available file="${webappTargetDir}/WEB-INF/wsf-config" type="dir" property="wsf-config.exist" />
-    <available file="${webappTargetDir}/WEB-INF/lib/wsf-lib" type="dir" property="wsf-lib.exist" />
     <available file="${targetDir}/config/wsfService-undeploy.wsdd" property="undeploy.exist" />
         
     <antcall target="WSF-WebUninstallation" />
     <antcall target="createConfigLink" />
-    <antcall target="createLibLink" />
+    
+    <copy todir="${webappTargetDir}/WEB-INF/lib">
+      <fileset dir="${targetDir}/wsf-lib/java"/>
+    </copy>
 
     <java classname="org.apache.axis.client.AdminClient" 
           fork="true">
@@ -140,10 +142,6 @@
       <arg line="${targetDir}/config/wsfService-deploy.wsdd" />
     </java>
 
-  </target>
-
-  <target name="createLibLink" unless="wsf-lib.exist">
-    <symlink link="${webappTargetDir}/WEB-INF/lib/wsf-lib/" resource="${targetDir}/wsf-lib/java/"/>
   </target>
 
   <target name="createConfigLink" unless="wsf-config.exist">
