@@ -282,13 +282,13 @@ public abstract class WsfPlugin implements IWsfPlugin {
 
     public static String printArray(String[] array) {
         StringBuffer sb = new StringBuffer();
-        sb.append("{'");
+        sb.append("{\"");
         for (String s : array) {
             sb.append(s);
-            sb.append("', '");
+            sb.append("\", \"");
         }
-        sb.delete(sb.length() - 2, sb.length());
-        sb.append("'}");
+        sb.delete(sb.length() - 3, sb.length());
+        sb.append("}");
         return sb.toString();
     }
 
