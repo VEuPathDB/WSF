@@ -226,10 +226,19 @@ public abstract class WsfPlugin implements IWsfPlugin {
         logger.debug("WsfPlugin.invokeCommand()");
         // invoke the command
         Process process = Runtime.getRuntime().exec(command);
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-                process.getInputStream()));
-        BufferedReader err = new BufferedReader(
-                new InputStreamReader(process.getErrorStream()));
+
+	StringBuffer sbErr = new StringBuffer();
+	StringBuffer sbOut = new StringBuffer();
+
+	// any error message?
+	StreamGobbler errorGobbler = new
+	    StreamGobbler(process.getErrorStream(), "ERROR", sbErr);            
+	// any output?
+	StreamGobbler outputGobbler = new
+	    StreamGobbler(process.getInputStream(), "OUTPUT", sbOut);
+	logger.info("kicking off the stderr and stdout stream gobbling threads...");
+	errorGobbler.start();
+	outputGobbler.start();
 
         long start = System.currentTimeMillis();
         long limit = timeout * 1000;
@@ -237,28 +246,11 @@ public abstract class WsfPlugin implements IWsfPlugin {
         // finished yet, an IllegalThreadStateException is thrown out
         while (true) {
             try {
+		logger.debug("waiting for 1 second ...");
                 Thread.sleep(1000);
 
                 exitValue = process.exitValue();
-
-                // an exception will be thrown before reaching here if the
-                // process is still running
-
-                // obtain the standard output
-                StringBuffer sb = new StringBuffer();
-                String line;
-                while ((line = in.readLine()) != null) {
-                    sb.append(line);
-                    sb.append(newline);
-                }
-                
-                // obtain the error output, if have
-                StringBuffer sberr = new StringBuffer();
-                while ((line = err.readLine()) != null) {
-                    sberr.append(line);
-                    sberr.append(newline);
-                }
-                return (exitValue == 0)?sb.toString(): sberr.toString();
+                return (exitValue == 0)?sbOut.toString() : sbErr.toString();
             } catch (IllegalThreadStateException ex) {
                 // if the timeout is set to <= 0, keep waiting till the process
                 // is finished
@@ -315,4 +307,32 @@ public abstract class WsfPlugin implements IWsfPlugin {
         return sArray;
     }
 
+    class StreamGobbler extends Thread
+    {
+	InputStream is;
+	String type;
+	StringBuffer sb;
+    
+	StreamGobbler(InputStream is, String type, StringBuffer sb)
+	{
+	    this.is = is;
+	    this.type = type;
+	    this.sb = sb;
+	}
+    
+	public void run()
+	{
+	    try
+		{
+		    InputStreamReader isr = new InputStreamReader(is);
+		    BufferedReader br = new BufferedReader(isr);
+		    String line=null;
+		    while ( (line = br.readLine()) != null)
+			sb.append(type + ">" + line);    
+		} catch (IOException ioe)
+		    {
+			ioe.printStackTrace();  
+		    }
+	}
+    }
 }
