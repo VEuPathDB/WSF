@@ -49,6 +49,7 @@
   </target>
 
   <target name="WSF/Plugin-Installation">
+    <delete file="${targetDir}/lib/java/WSF-Client.jar" quiet="true" />
     <ant target="defaultComponentInstall">
       <property name="project" value="WSF"/>
       <property name="component" value="Plugin"/>
@@ -146,6 +147,7 @@
       <arg line="${targetDir}/config/wsfService-deploy.wsdd" />
     </java>
 
+    <echo>WARNING: Please restart Web Service server, and run WSF web installation again, if you have not done so. </echo>
   </target>
 
   <target name="createConfigLink" unless="wsf-config.exist">
