@@ -221,7 +221,7 @@ public abstract class WsfPlugin implements IWsfPlugin {
         return properties.getProperty(propertyName);
     }
 
-    protected String invokeCommand(String command, long timeout)
+    protected String invokeCommand(String[] command, long timeout)
             throws IOException {
         logger.debug("WsfPlugin.invokeCommand()");
         // invoke the command
