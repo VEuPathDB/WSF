@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------------
+ooooooooooooooooooooooooooo  WSF Version 1.12  ooooooooooooooooooooooooooooooo
+------------------------------------------------------------------------------
+
+Summary: bug fixes.
+
+
+------------------------------------------------------------------------------
 ooooooooooooooooooooooooooo  WSF Version 1.11  ooooooooooooooooooooooooooooooo
 ------------------------------------------------------------------------------
 
