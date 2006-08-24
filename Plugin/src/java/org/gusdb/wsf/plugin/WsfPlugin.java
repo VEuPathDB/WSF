@@ -327,8 +327,10 @@ public abstract class WsfPlugin implements IWsfPlugin {
 		    InputStreamReader isr = new InputStreamReader(is);
 		    BufferedReader br = new BufferedReader(isr);
 		    String line=null;
-		    while ( (line = br.readLine()) != null)
-			sb.append(type + ">" + line);    
+		    while ( (line = br.readLine()) != null) {
+                //sb.append(type + ">" + line);    
+                sb.append(line + newline);    
+            }
 		} catch (IOException ioe)
 		    {
 			ioe.printStackTrace();  
