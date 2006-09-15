@@ -54,6 +54,11 @@ public abstract class WsfPlugin implements IWsfPlugin {
      * since it relies on the behavior of the external application.
      */
     protected int exitValue;
+    
+    /**
+     * The message which the plugin wants to return to the invoking client
+     */
+    protected String message;
 
     /**
      * The Plugin needs to provide a list of required parameter names; the base
@@ -160,7 +165,12 @@ public abstract class WsfPlugin implements IWsfPlugin {
 
         // execute the main function, and obtain result
         logger.debug("WsfPlugin.execute()");
-        return execute(params, orderedColumns);
+        String[][] result = execute(params, orderedColumns);
+        
+        // TEST
+        logger.info("Result Message: '" + message + "'");
+
+        return result;
     }
 
     private boolean validateInput(Map<String, String> params,
@@ -270,6 +280,13 @@ public abstract class WsfPlugin implements IWsfPlugin {
                 continue;
             }
         }
+    }
+    
+    /* (non-Javadoc)
+     * @see org.gusdb.wsf.plugin.IWsfPlugin#getMessage()
+     */
+    public String getMessage() {
+        return message;
     }
 
     public static String printArray(String[] array) {

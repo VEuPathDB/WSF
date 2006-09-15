@@ -26,14 +26,15 @@ public class WsfService {
      * to the client in tabular format.
      * 
      * @param pluginClassName
-     * @param paramValues an array of "param=value" pairs. The param and value
-     *        and separated by the first "="
+     * @param paramValues
+     *            an array of "param=value" pairs. The param and value and
+     *            separated by the first "="
      * @param cols
      * @return
      * @throws WsfServiceException
      */
-    public String[][] invoke(String pluginClassName, String[] paramValues,
-            String[] cols) throws WsfServiceException {
+    public WsfResponse invoke(String pluginClassName,
+            String[] paramValues, String[] cols) throws WsfServiceException {
         logger.debug(pluginClassName);
 
         Map<String, String> params = convertParams(paramValues);
@@ -46,7 +47,15 @@ public class WsfService {
 
             // invoke the plugin
             logger.info("Invoking Plugin " + pluginClassName);
-            return plugin.invoke(params, cols);
+            String[][] result = plugin.invoke(params, cols);
+            String message = plugin.getMessage();
+
+            // prepare the response message
+            WsfResponse response = new WsfResponse();
+            response.setMessage(message);
+            response.setResults(result);
+            
+            return response;
         } catch (WsfServiceException ex) {
             logger.error(ex);
             throw ex;

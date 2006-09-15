@@ -9,6 +9,7 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.gusdb.wsf.plugin.WsfServiceException;
+import org.gusdb.wsf.service.WsfResponse;
 import org.gusdb.wsf.service.WsfService;
 
 /**
@@ -48,7 +49,13 @@ public class WsfServiceTest extends TestCase {
 
         WsfService service = new WsfService();
         try {
-            String[][] result = service.invoke(pluginClassName, params, columns);
+            WsfResponse response = service.invoke(pluginClassName, params,
+                    columns);
+            String[][] result = response.getResults();
+            String message = response.getMessage();
+
+            // print out the message returned by the plugin
+            System.out.println("Plugin returns: " + message);
 
             // create column map for printing purpose
             Map<String, Integer> map = new HashMap<String, Integer>();

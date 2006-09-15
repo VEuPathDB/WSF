@@ -23,5 +23,7 @@ public interface IWsfPlugin {
     public String[][] invoke(Map<String, String> params, String[] orderedColumns)
             throws WsfServiceException;
 
+    public String getMessage();
+    
     void setLogger(Logger logger);
 }
