@@ -60,6 +60,7 @@ public class WsfService {
             logger.error(ex);
             throw ex;
         } catch (Exception ex) {
+            ex.printStackTrace();
             logger.error(ex);
             throw new WsfServiceException(ex);
         }
