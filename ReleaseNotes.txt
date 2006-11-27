@@ -2,7 +2,8 @@
 ooooooooooooooooooooooooooo  WSF Version 1.12  ooooooooooooooooooooooooooooooo
 ------------------------------------------------------------------------------
 
-Summary: bug fixes.
+Summary: Add support to optional extra messages returned from WSF compatible
+         plugins. Some minor bug fixes
 
 
 ------------------------------------------------------------------------------
