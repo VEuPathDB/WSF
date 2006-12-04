@@ -86,8 +86,8 @@
       <classpath refid="classpath" />
       <arg line="-o ../WSF/Client/config/WsfService.wsdl" />
       <arg line="-l${webserviceBaseUrl}/services/WsfService" />
-      <arg line="-n .service.wsf.gusdb.org" />
-      <arg line="-porg.gusdb.wsf.service urn:service.wsf.gusdb.org" />
+      <arg line="-n .client.wsf.gusdb.org" />
+      <arg line="-porg.gusdb.wsf.service=urn:wsf_classes" />
       <arg line="org.gusdb.wsf.service.WsfService" />
     </java>
           
@@ -97,27 +97,26 @@
       <classpath refid="classpath" />
       <arg line="-o ../WSF/Client/src/java" />
       <arg line="-d Session" />
-      <arg line="-c org.gusdb.wsf.service.WsfServiceImp" />
+      <arg line="-c org.gusdb.wsf.service.WsfService" />
+      <arg line="-Nurn:wsf_classes=org.gusdb.wsf.service" />
       <arg line="-s" />
       <arg line="../WSF/Client/config/WsfService.wsdl" />
     </java>
         
-    <delete file="../WSF/Client/src/java/org/gusdb/wsf/service/WsfServiceImp.java" />
-    <move file="../WSF/Client/src/java/org/gusdb/wsf/service/deploy.wsdd" tofile="../WSF/Client/config/wsfService-deploy.wsdd" />
-    <move file="../WSF/Client/src/java/org/gusdb/wsf/service/undeploy.wsdd" tofile="../WSF/Client/config/wsfService-undeploy.wsdd" />
-              
-    <echo>Modifying the className definition in deploy.wsdd with WsfDeployHelper</echo>
+    <delete file="../WSF/Client/src/java/org/gusdb/wsf/service/WsfService.java" />
+    <move file="../WSF/Client/src/java/org/gusdb/wsf/client/deploy.wsdd" 
+          tofile="../WSF/Client/config/wsfService-deploy.wsdd" />
+    <move file="../WSF/Client/src/java/org/gusdb/wsf/client/undeploy.wsdd" 
+          tofile="../WSF/Client/config/wsfService-undeploy.wsdd" />
 
-    <java classname="org.gusdb.wsf.util.WsfDeployHelper" fork="true">
-      <classpath refid="classpath" />
-      <arg line="changeClass ../WSF/Client/config/wsfService-deploy.wsdd org.gusdb.wsf.service.WsfService" />
-    </java>
+    <replace file="../WSF/Client/config/wsfService-deploy.wsdd" 
+             token="org.gusdb.wsf.client." value="org.gusdb.wsf.service."/>
 
     <ant target="defaultComponentInstall">
       <property name="project" value="WSF"/>
       <property name="component" value="Client"/>
     </ant>
-
+    
   </target>
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
