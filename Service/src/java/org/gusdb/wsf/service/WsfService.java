@@ -33,9 +33,11 @@ public class WsfService {
      * @return
      * @throws WsfServiceException
      */
-    public WsfResponse invoke(String pluginClassName,
-            String[] paramValues, String[] cols) throws WsfServiceException {
-        logger.debug(pluginClassName);
+    public WsfResponse invoke(String pluginClassName, String[] paramValues,
+            String[] cols) throws WsfServiceException {
+        int resultSize = 0;
+        long start = System.currentTimeMillis();
+        logger.info("Invoking: " + pluginClassName);
 
         Map<String, String> params = convertParams(paramValues);
         try {
@@ -48,13 +50,14 @@ public class WsfService {
             // invoke the plugin
             logger.info("Invoking Plugin " + pluginClassName);
             String[][] result = plugin.invoke(params, cols);
+            resultSize = result.length;
             String message = plugin.getMessage();
 
             // prepare the response message
             WsfResponse response = new WsfResponse();
             response.setMessage(message);
             response.setResults(result);
-            
+
             return response;
         } catch (WsfServiceException ex) {
             logger.error(ex);
@@ -63,6 +66,10 @@ public class WsfService {
             ex.printStackTrace();
             logger.error(ex);
             throw new WsfServiceException(ex);
+        } finally {
+            long end = System.currentTimeMillis();
+            logger.info("WSF finshed in: " + ((end - start) / 1000.0)
+                    + " seconds with " + resultSize + " results.");
         }
     }
 
