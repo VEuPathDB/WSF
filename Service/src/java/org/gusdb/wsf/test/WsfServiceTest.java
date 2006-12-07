@@ -34,6 +34,10 @@ public class WsfServiceTest extends TestCase {
         String pluginClassName = System.getProperty("plugin.class");
         assertNotNull(pluginClassName);
 
+        // get plugin name; optional
+        String invokeKey = System.getProperty("invoke.key");
+        if (invokeKey == null) invokeKey = "";
+
         // get columns for the result; required
         String columnTemp = System.getProperty("columns");
         assertNotNull(columnTemp);
@@ -49,8 +53,8 @@ public class WsfServiceTest extends TestCase {
 
         WsfService service = new WsfService();
         try {
-            WsfResponse response = service.invoke(pluginClassName, params,
-                    columns);
+            WsfResponse response = service.invoke(pluginClassName, invokeKey,
+                    params, columns);
             String[][] result = response.getResults();
             String message = response.getMessage();
 

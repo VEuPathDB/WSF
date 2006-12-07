@@ -30,7 +30,6 @@ import org.apache.log4j.Logger;
  */
 public abstract class WsfPlugin implements IWsfPlugin {
 
-    
     protected static final String newline = System.getProperty("line.separator");
 
     /**
@@ -54,7 +53,7 @@ public abstract class WsfPlugin implements IWsfPlugin {
      * since it relies on the behavior of the external application.
      */
     protected int exitValue;
-    
+
     /**
      * The message which the plugin wants to return to the invoking client
      */
@@ -78,35 +77,23 @@ public abstract class WsfPlugin implements IWsfPlugin {
     protected abstract String[] getColumns();
 
     /**
-     * This is an optional method for the plugin to validate its parameter by
-     * itself. The plugin can validate the conceptual type of certain parameter
-     * values, as well as their value ranges. <br>
-     * Plugin can ignore this by leave an empty implementation of this method.
-     * <br>
-     * If the validation fails, Plugin is expected to throw out a
-     * WsfServiceException, describing the reson.
-     * 
-     * @param params
-     * @throws WsfServiceException
-     */
-    protected abstract void validateParameters(Map<String, String> params)
-            throws WsfServiceException;
-
-    /**
      * The plugin should implement this method to do the real job, for example,
      * to invoke an application, and prepare the results into tabular format,
      * and then return the results.
      * 
-     * @param params The <name, value> Map of parameters given by the client
-     * @param orderedColumns The ordered columns assigned by the client. each of
-     *        the columns must match with one column sepecified in getColumns()
-     *        by the plugin. The The plugin is responsible to re-format the
-     *        result following the order of the columns defined here.
+     * @param params
+     *            The <name, value> Map of parameters given by the client
+     * @param orderedColumns
+     *            The ordered columns assigned by the client. each of the
+     *            columns must match with one column sepecified in getColumns()
+     *            by the plugin. The The plugin is responsible to re-format the
+     *            result following the order of the columns defined here.
      * @return returns the result in 2-dimensional array of strings format.
      * @throws WsfServiceException
      */
-    protected abstract String[][] execute(Map<String, String> params,
-            String[] orderedColumns) throws WsfServiceException;
+    protected abstract String[][] execute(String invokeKey,
+            Map<String, String> params, String[] orderedColumns)
+            throws WsfServiceException;
 
     /**
      * Initialize a plugin with empty properties
@@ -121,10 +108,11 @@ public abstract class WsfPlugin implements IWsfPlugin {
     /**
      * Initialize a plugin and assign a property file to it
      * 
-     * @param propertyFile the name of the property file. The base class will
-     *        resolve the path to this file, which should be under the WEB-INF
-     *        of axis' webapps.
-     * @throws WsfServiceException 
+     * @param propertyFile
+     *            the name of the property file. The base class will resolve the
+     *            path to this file, which should be under the WEB-INF of axis'
+     *            webapps.
+     * @throws WsfServiceException
      */
     public WsfPlugin(String propertyFile) throws WsfServiceException {
         this();
@@ -138,8 +126,9 @@ public abstract class WsfPlugin implements IWsfPlugin {
     }
 
     /**
-     * @param logger set a different logger to the plugin. The WsfService will
-     *        assign a specific logger to each plugin.
+     * @param logger
+     *            set a different logger to the plugin. The WsfService will
+     *            assign a specific logger to each plugin.
      */
     public void setLogger(Logger logger) {
         this.logger = logger;
@@ -152,49 +141,63 @@ public abstract class WsfPlugin implements IWsfPlugin {
      * 
      * @see org.gusdb.wsf.IWsfPlugin#invoke(java.util.Map, java.lang.String[])
      */
-    public final String[][] invoke(Map<String, String> params,
-            String[] orderedColumns) throws WsfServiceException {
+    public final String[][] invoke(String invokeKey,
+            Map<String, String> params, String[] orderedColumns)
+            throws WsfServiceException {
         // validate the input
         logger.debug("WsfPlugin.validateInput()");
-        if (!validateInput(params, orderedColumns))
-            throw new WsfServiceException("Input validation failed.");
-
-        // validate the type and content of parameters
-        logger.debug("WsfPlugin.validateParameters()");
-        validateParameters(params);
+        validateInput(params, orderedColumns);
 
         // execute the main function, and obtain result
         logger.debug("WsfPlugin.execute()");
-        String[][] result = execute(params, orderedColumns);
-        
+        String[][] result = execute(invokeKey, params, orderedColumns);
+
         // TEST
         logger.info("Result Message: '" + message + "'");
 
         return result;
     }
 
-    private boolean validateInput(Map<String, String> params,
-            String[] orderedColumns) {
+    private void validateInput(Map<String, String> params,
+            String[] orderedColumns) throws WsfServiceException {
+        // validate required parameters
+        validateRequiredParameters(params);
+
+        // validate parameters
+        validateParameters(params);
+
+        // validate columns
+        validateColumns(orderedColumns);
+    }
+
+    protected abstract void validateParameters(Map<String, String> params)
+            throws WsfServiceException;
+
+    private void validateRequiredParameters(Map<String, String> params)
+            throws WsfServiceException {
         String[] reqParams = getRequiredParameterNames();
-        String[] reqColumns = getColumns();
 
         // validate parameters
         for (String param : reqParams) {
             if (!params.containsKey(param)) {
-                logger.error("The required parameter is missing: " + param);
-                return false;
+                throw new WsfServiceException(
+                        "The required parameter is missing: " + param);
             }
         }
+    }
 
-        // validate columns
+    protected void validateColumns(String[] orderedColumns)
+            throws WsfServiceException {
+        String[] reqColumns = getColumns();
+
         Set<String> colSet = new HashSet<String>(orderedColumns.length);
         for (String col : orderedColumns) {
             colSet.add(col);
         }
         for (String col : reqColumns) {
             if (!colSet.contains(col)) {
-                logger.error("The expected column is missing: " + col);
-                return false;
+                throw new WsfServiceException(
+                        "The required column is missing: " + col);
             }
         }
         // cross check
@@ -205,11 +208,9 @@ public abstract class WsfPlugin implements IWsfPlugin {
         }
         for (String col : orderedColumns) {
             if (!colSet.contains(col)) {
-                logger.error("Unknown column: " + col);
-                return false;
+                throw new WsfServiceException("Unknown column: " + col);
             }
         }
-        return true;
     }
 
     private void loadPropertyFile(String propertyFile)
@@ -222,7 +223,8 @@ public abstract class WsfPlugin implements IWsfPlugin {
             root = System.getProperty("catalina.home");
             rootDir = new File(root, "webapps/axis");
         } else rootDir = new File(root);
-        File configFile = new File(rootDir, "WEB-INF/wsf-config/" + propertyFile);
+        File configFile = new File(rootDir, "WEB-INF/wsf-config/"
+                + propertyFile);
         InputStream in = new FileInputStream(configFile);
         properties.loadFromXML(in);
     }
@@ -237,18 +239,18 @@ public abstract class WsfPlugin implements IWsfPlugin {
         // invoke the command
         Process process = Runtime.getRuntime().exec(command);
 
-	StringBuffer sbErr = new StringBuffer();
-	StringBuffer sbOut = new StringBuffer();
+        StringBuffer sbErr = new StringBuffer();
+        StringBuffer sbOut = new StringBuffer();
 
-	// any error message?
-	StreamGobbler errorGobbler = new
-	    StreamGobbler(process.getErrorStream(), "ERROR", sbErr);            
-	// any output?
-	StreamGobbler outputGobbler = new
-	    StreamGobbler(process.getInputStream(), "OUTPUT", sbOut);
-	logger.info("kicking off the stderr and stdout stream gobbling threads...");
-	errorGobbler.start();
-	outputGobbler.start();
+        // any error message?
+        StreamGobbler errorGobbler = new StreamGobbler(
+                process.getErrorStream(), "ERROR", sbErr);
+        // any output?
+        StreamGobbler outputGobbler = new StreamGobbler(
+                process.getInputStream(), "OUTPUT", sbOut);
+        logger.info("kicking off the stderr and stdout stream gobbling threads...");
+        errorGobbler.start();
+        outputGobbler.start();
 
         long start = System.currentTimeMillis();
         long limit = timeout * 1000;
@@ -256,11 +258,11 @@ public abstract class WsfPlugin implements IWsfPlugin {
         // finished yet, an IllegalThreadStateException is thrown out
         while (true) {
             try {
-		logger.debug("waiting for 1 second ...");
+                logger.debug("waiting for 1 second ...");
                 Thread.sleep(1000);
 
                 exitValue = process.exitValue();
-                return (exitValue == 0)?sbOut.toString() : sbErr.toString();
+                return (exitValue == 0) ? sbOut.toString() : sbErr.toString();
             } catch (IllegalThreadStateException ex) {
                 // if the timeout is set to <= 0, keep waiting till the process
                 // is finished
@@ -281,8 +283,10 @@ public abstract class WsfPlugin implements IWsfPlugin {
             }
         }
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.gusdb.wsf.plugin.IWsfPlugin#getMessage()
      */
     public String getMessage() {
@@ -309,7 +313,6 @@ public abstract class WsfPlugin implements IWsfPlugin {
         }
         return sb.toString();
     }
-    
 
     public static String[] tokenize(String line) {
         Pattern pattern = Pattern.compile("\\b[\\w\\.]+\\b");
@@ -324,34 +327,30 @@ public abstract class WsfPlugin implements IWsfPlugin {
         return sArray;
     }
 
-    class StreamGobbler extends Thread
-    {
-	InputStream is;
-	String type;
-	StringBuffer sb;
-    
-	StreamGobbler(InputStream is, String type, StringBuffer sb)
-	{
-	    this.is = is;
-	    this.type = type;
-	    this.sb = sb;
-	}
-    
-	public void run()
-	{
-	    try
-		{
-		    InputStreamReader isr = new InputStreamReader(is);
-		    BufferedReader br = new BufferedReader(isr);
-		    String line=null;
-		    while ( (line = br.readLine()) != null) {
-                //sb.append(type + ">" + line);    
-                sb.append(line + newline);    
+    class StreamGobbler extends Thread {
+
+        InputStream is;
+        String type;
+        StringBuffer sb;
+
+        StreamGobbler(InputStream is, String type, StringBuffer sb) {
+            this.is = is;
+            this.type = type;
+            this.sb = sb;
+        }
+
+        public void run() {
+            try {
+                InputStreamReader isr = new InputStreamReader(is);
+                BufferedReader br = new BufferedReader(isr);
+                String line = null;
+                while ((line = br.readLine()) != null) {
+                    // sb.append(type + ">" + line);
+                    sb.append(line + newline);
+                }
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
             }
-		} catch (IOException ioe)
-		    {
-			ioe.printStackTrace();  
-		    }
-	}
+        }
     }
 }

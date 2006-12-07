@@ -87,8 +87,8 @@
       <arg line="-o ../WSF/Client/config/WsfService.wsdl" />
       <arg line="-l${webserviceBaseUrl}/services/WsfService" />
       <arg line="-n .client.wsf.gusdb.org" />
-      <arg line="-y WRAPPED" />
-      <arg line="-u LITERAL" />
+      <!--arg line="-y WRAPPED" /-->
+      <!--arg line="-u LITERAL" /-->
       <arg line="-porg.gusdb.wsf.service=urn:wsf_classes" />
       <arg line="org.gusdb.wsf.service.WsfService" />
     </java>
@@ -106,9 +106,9 @@
     </java>
         
     <delete file="../WSF/Client/src/java/org/gusdb/wsf/service/WsfService.java" />
-    <copy file="../WSF/Plugin/src/java/org/gusdb/wsf/plugin/WsfServiceException.java" 
+    <!--copy file="../WSF/Plugin/src/java/org/gusdb/wsf/plugin/WsfServiceException.java" 
           todir="../WSF/Client/src/java/org/gusdb/wsf/plugin"
-          overwrite="true" />
+          overwrite="true" /-->
           
     <move file="../WSF/Client/src/java/org/gusdb/wsf/client/deploy.wsdd" 
           tofile="../WSF/Client/config/wsfService-deploy.wsdd" />

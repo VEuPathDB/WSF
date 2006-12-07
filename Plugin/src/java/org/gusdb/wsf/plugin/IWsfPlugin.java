@@ -16,14 +16,18 @@ public interface IWsfPlugin {
 
     /**
      * @param params
-     * @param cols specify the columns of the result, and the order of them
+     * @param cols
+     *            specify the columns of the result, and the order of them
      * @return
      * @throws WsfServiceException
      */
-    public String[][] invoke(Map<String, String> params, String[] orderedColumns)
-            throws WsfServiceException;
+    public String[][] invoke(String invokeKey, Map<String, String> params,
+            String[] orderedColumns) throws WsfServiceException;
 
+    /**
+     * @return get the result message
+     */
     public String getMessage();
-    
+
     void setLogger(Logger logger);
 }
