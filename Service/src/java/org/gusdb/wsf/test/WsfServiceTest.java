@@ -6,9 +6,10 @@ package org.gusdb.wsf.test;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.rpc.ServiceException;
+
 import junit.framework.TestCase;
 
-import org.gusdb.wsf.plugin.WsfServiceException;
 import org.gusdb.wsf.service.WsfResponse;
 import org.gusdb.wsf.service.WsfService;
 
@@ -78,7 +79,7 @@ public class WsfServiceTest extends TestCase {
                 }
                 System.out.println();
             }
-        } catch (WsfServiceException ex) {
+        } catch (ServiceException ex) {
             // TODO Auto-generated catch block
             ex.printStackTrace();
             // System.err.println(ex);

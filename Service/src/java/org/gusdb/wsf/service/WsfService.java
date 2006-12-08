@@ -6,6 +6,8 @@ package org.gusdb.wsf.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.rpc.ServiceException;
+
 import org.apache.log4j.Logger;
 import org.gusdb.wsf.plugin.IWsfPlugin;
 import org.gusdb.wsf.plugin.WsfServiceException;
@@ -34,7 +36,7 @@ public class WsfService {
      * @throws WsfServiceException
      */
     public WsfResponse invoke(String pluginClassName, String invokeKey, String[] paramValues,
-            String[] columns) throws WsfServiceException {
+            String[] columns) throws ServiceException {
         int resultSize = 0;
         long start = System.currentTimeMillis();
         logger.info("Invoking: " + pluginClassName + ", invokeKey: " + invokeKey);
@@ -59,13 +61,10 @@ public class WsfService {
             response.setResults(result);
 
             return response;
-        } catch (WsfServiceException ex) {
-            logger.error(ex);
-            throw ex;
         } catch (Exception ex) {
             ex.printStackTrace();
             logger.error(ex);
-            throw new WsfServiceException(ex);
+            throw new ServiceException(ex);
         } finally {
             long end = System.currentTimeMillis();
             logger.info("WSF finshed in: " + ((end - start) / 1000.0)
