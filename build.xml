@@ -34,6 +34,9 @@
     <move file="${targetDir}/lib/java/WSF-Service.jar" todir="${targetDir}/wsf-lib/java" />
     <move file="${targetDir}/lib/java/WSF-Plugin.jar" todir="${targetDir}/wsf-lib/java" />
 
+    <!-- Following line added for the ApiFedPlugin and WdkQueryPlugin -->
+    <move file="${targetDir}/lib/java/WSF-Client.jar" todir="${targetDir}/wsf-lib/java" />
+
   </target>
 
 
