@@ -220,8 +220,9 @@ public abstract class WsfPlugin implements IWsfPlugin {
         if (root == null) {
             // if the webservice.home is not specified, by default, we assume
             // the Axis is installed under ${tomcat_home}/webapps
-            root = System.getProperty("catalina.home");
-            rootDir = new File(root, "webapps/axis");
+            //root = System.getProperty("catalina.home");
+           root = System.getProperty("catalina.base");
+	   rootDir = new File(root, "webapps/axis");
         } else rootDir = new File(root);
         File configFile = new File(rootDir, "WEB-INF/wsf-config/"
                 + propertyFile);
