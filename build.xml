@@ -35,7 +35,7 @@
     <move file="${targetDir}/lib/java/WSF-Plugin.jar" todir="${targetDir}/wsf-lib/java" />
 
     <!-- Following line added for the ApiFedPlugin and WdkQueryPlugin -->
-    <move file="${targetDir}/lib/java/WSF-Client.jar" todir="${targetDir}/wsf-lib/java" />
+    <copy file="${targetDir}/lib/java/WSF-Client.jar" todir="${targetDir}/wsf-lib/java" />
 
   </target>
 
@@ -101,7 +101,7 @@
     <java classname="org.apache.axis.wsdl.WSDL2Java" fork="true">
       <classpath refid="classpath" />
       <arg line="-o ../WSF/Client/src/java" />
-      <arg line="-d Session" />
+      <arg line="-d Application" />
       <arg line="-c org.gusdb.wsf.service.WsfService" />
       <arg line="-Nurn:wsf_classes=org.gusdb.wsf.service" />
       <arg line="-s" />

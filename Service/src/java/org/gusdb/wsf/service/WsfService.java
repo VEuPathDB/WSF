@@ -4,6 +4,7 @@
 package org.gusdb.wsf.service;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.xml.rpc.ServiceException;
@@ -22,6 +23,8 @@ public class WsfService {
 
     private static Logger logger = Logger.getLogger(WsfService.class);
 
+    private static Map<String, IWsfPlugin> plugins = new LinkedHashMap<String, IWsfPlugin>();
+
     /**
      * Client requests to run a plugin by providing the complete class name of
      * the plugin, and the service will invoke the plugin and return the result
@@ -35,19 +38,29 @@ public class WsfService {
      * @return
      * @throws WsfServiceException
      */
-    public WsfResponse invoke(String pluginClassName, String invokeKey, String[] paramValues,
-            String[] columns) throws ServiceException {
+    public WsfResponse invoke(String pluginClassName, String invokeKey,
+            String[] paramValues, String[] columns) throws ServiceException {
         int resultSize = 0;
         long start = System.currentTimeMillis();
-        logger.info("Invoking: " + pluginClassName + ", invokeKey: " + invokeKey);
+        logger.info("Invoking: " + pluginClassName + ", invokeKey: "
+                + invokeKey);
 
         Map<String, String> params = convertParams(paramValues);
         try {
             // use reflection to load the plugin object
             logger.debug("Loading object " + pluginClassName);
-            Class pluginClass = Class.forName(pluginClassName);
-            IWsfPlugin plugin = (IWsfPlugin) pluginClass.newInstance();
-            plugin.setLogger(Logger.getLogger(pluginClass));
+
+            // check if the plugin has been cached
+            IWsfPlugin plugin;
+            if (plugins.containsKey(pluginClassName)) {
+                plugin = plugins.get(pluginClassName);
+            } else {
+                logger.info("Creating plugin " + pluginClassName);
+                Class pluginClass = Class.forName(pluginClassName);
+                plugin = (IWsfPlugin) pluginClass.newInstance();
+                plugin.setLogger(Logger.getLogger(pluginClass));
+                plugins.put(pluginClassName, plugin);
+            }
 
             // invoke the plugin
             logger.debug("Invoking Plugin " + pluginClassName);
