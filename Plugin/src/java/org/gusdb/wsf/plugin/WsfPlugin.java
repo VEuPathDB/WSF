@@ -21,6 +21,11 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import org.apache.axis.MessageContext;
+
+import javax.servlet.ServletContext;
+import javax.servlet.Servlet;
+
 /**
  * The WsfPlugin provides the common routines a plugin needs to simplify the
  * development of new WSF plugins.
@@ -215,15 +220,23 @@ public abstract class WsfPlugin implements IWsfPlugin {
 
     private void loadPropertyFile(String propertyFile)
             throws InvalidPropertiesFormatException, IOException {
-        String root = System.getProperty("webservice.home");
+
+	MessageContext msgContext = MessageContext.getCurrentContext();
+	ServletContext servletContext = ((Servlet) msgContext.getProperty(org.apache.axis.transport.http.HTTPConstants.MC_HTTP_SERVLET)).getServletConfig().getServletContext();
+	
+	String root = servletContext.getRealPath("/");
+	logger.info(root);
+
+	//       String root = System.getProperty("webservice.home");
         File rootDir;
-        if (root == null) {
+	//        if (root == null) {
             // if the webservice.home is not specified, by default, we assume
             // the Axis is installed under ${tomcat_home}/webapps
             //root = System.getProperty("catalina.home");
-           root = System.getProperty("catalina.base");
-	   rootDir = new File(root, "webapps/axis");
-        } else rootDir = new File(root);
+	//root = System.getProperty("catalina.base");
+	//rootDir = new File(root, "webapps/axis");
+        //} else 
+        rootDir = new File(root);
         File configFile = new File(rootDir, "WEB-INF/wsf-config/"
                 + propertyFile);
         InputStream in = new FileInputStream(configFile);
