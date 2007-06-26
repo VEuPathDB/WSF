@@ -274,6 +274,8 @@ public abstract class WsfPlugin implements IWsfPlugin {
                 if (time > limit) {
                     logger.warn("Time out, the command is cancelled: "
                             + command);
+                    outputGobbler.close();
+                    errorGobbler.close();
                     process.destroy();
                     exitValue = -1;
                     return "Time out, the command is cancelled.";
@@ -342,15 +344,28 @@ public abstract class WsfPlugin implements IWsfPlugin {
 
         public void run() {
             try {
-                InputStreamReader isr = new InputStreamReader(is);
-                BufferedReader br = new BufferedReader(isr);
+                BufferedReader br = new BufferedReader(new InputStreamReader(is));
                 String line = null;
                 while ((line = br.readLine()) != null) {
                     // sb.append(type + ">" + line);
                     sb.append(line + newline);
                 }
-            } catch (IOException ioe) {
-                ioe.printStackTrace();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+        
+        public void close() {
+            try {
+                is.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
         }
     }
