@@ -148,6 +148,17 @@
       <fileset dir="${targetDir}/wsf-lib/java" />
     </copy>
 
+    <!-- workaround requirement to build/reload/build due to issue in which 
+         AdminClient won't find typeMapping classes in jar files when deploying
+         the wsdd. Note we remove these class files after AdminClient. -->
+    <unzip src="${webappTargetDir}/WEB-INF/lib/WSF-Service.jar"
+           dest="${webappTargetDir}/WEB-INF/classes">
+      <patternset>
+        <include name="org/gusdb/wsf/service/WsfResponse.class"/>
+        <include name="org/gusdb/wsf/service/WsfService.class"/>
+      </patternset>
+    </unzip>
+
     <java classname="org.apache.axis.client.AdminClient" 
           fork="true">
       <classpath refid="classpath" />
@@ -155,7 +166,18 @@
       <arg line="${targetDir}/config/wsfService-deploy.wsdd" />
     </java>
 
-    <echo>WARNING: Please restart Web Service server, and run WSF web installation again, if you have not done so. </echo>
+    <!-- must either reload axis or GET the AxisServlet page before deleting
+         the extracted temp Wsf*.class files. -->
+    <get src="${webserviceBaseUrl}/servlet/AxisServlet" dest="/dev/null"/>
+
+    <!-- don't need WSF*.class files once the wsfService-deploy.wsdd is made -->
+    <delete includeEmptyDirs="true" quiet="true">
+      <fileset dir="${webappTargetDir}/WEB-INF/classes/org/gusdb/wsf/service/">
+        <include name="WsfResponse.class"/>
+        <include name="WsfService.class"/>
+      </fileset>
+    </delete>
+
   </target>
 
   <target name="createConfigLink" unless="wsf-config.exist">
