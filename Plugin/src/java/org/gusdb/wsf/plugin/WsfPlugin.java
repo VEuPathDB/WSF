@@ -223,7 +223,10 @@ public abstract class WsfPlugin implements IWsfPlugin {
 
 	MessageContext msgContext = MessageContext.getCurrentContext();
 	ServletContext servletContext = ((Servlet) msgContext.getProperty(org.apache.axis.transport.http.HTTPConstants.MC_HTTP_SERVLET)).getServletConfig().getServletContext();
-	
+
+    String wsfConfigDir = servletContext.getInitParameter("wsfConfigDir_param");
+    if (wsfConfigDir == null) { wsfConfigDir = "WEB-INF/wsf-config/"; }
+    
 	String root = servletContext.getRealPath("/");
 	logger.info(root);
 
@@ -237,7 +240,7 @@ public abstract class WsfPlugin implements IWsfPlugin {
 	//rootDir = new File(root, "webapps/axis");
         //} else 
         rootDir = new File(root);
-        File configFile = new File(rootDir, "WEB-INF/wsf-config/"
+        File configFile = new File(rootDir, wsfConfigDir
                 + propertyFile);
         InputStream in = new FileInputStream(configFile);
         properties.loadFromXML(in);

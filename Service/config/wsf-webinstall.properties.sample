@@ -1,3 +1,3 @@
 webappTargetDir=<your_axis_webapp_dir>
 webserviceBaseUrl=<your_web_service_base_url>
-confTargetDir="wsf-config"
+confTargetDir="/WEB-INF/wsf-config or value of wsfConfigDir_param in web.xml"
