@@ -42,7 +42,8 @@
 
  <!-- ooooooooooooooooooooooo  Install Components  ooooooooooooooooooooooo -->
 
-  <target name="WSF/Service-Installation">
+  <target name="WSF/Service-Installation" depends="WSF/Plugin-Installation">
+
     <ant target="defaultComponentInstall">
       <property name="project" value="WSF"/>
       <property name="component" value="Service"/>
