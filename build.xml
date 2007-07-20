@@ -42,8 +42,7 @@
 
  <!-- ooooooooooooooooooooooo  Install Components  ooooooooooooooooooooooo -->
 
-  <target name="WSF/Service-Installation" depends="WSF/Plugin-Installation">
-
+  <target name="WSF/Service-Installation">
     <ant target="defaultComponentInstall">
       <property name="project" value="WSF"/>
       <property name="component" value="Service"/>
@@ -59,7 +58,7 @@
     </ant>
   </target>
 
-  <target name="WSF/Client-Installation" depends="WSF/Service-Installation">
+  <target name="WSF/Client-Installation">
     <condition property="webserviceBaseUrl" value="http://localhost:8080/axis">
       <not>
         <isset property="webserviceBaseUrl" />
@@ -134,23 +133,30 @@
 
   <target name="WSF-WebInstallation" depends="WSF-Installation">
 
-    <available file="${webappTargetDir}/WEB-INF/wsf-config" type="dir" property="wsf-config.exist" />
+    <available file="${webappTargetDir}/${confTargetDir}" type="dir" property="wsf-config.exist" />
     <available file="${targetDir}/config/wsfService-undeploy.wsdd" property="undeploy.exist" />
         
     <antcall target="WSF-WebUninstallation" />
     <antcall target="createConfigLink" />
     
-    <copy todir="${webappTargetDir}/WEB-INF/wsf-config">
+    <copy todir="${webappTargetDir}/${confTargetDir}">
       <fileset dir="${targetDir}/config" />
     </copy>
-    
+
     <copy todir="${webappTargetDir}/WEB-INF/lib">
       <fileset dir="${targetDir}/wsf-lib/java" />
     </copy>
 
-    <!-- workaround requirement to build/reload/build due to issue in which 
-         AdminClient won't find typeMapping classes in jar files when deploying
-         the wsdd. Note we remove these class files after AdminClient. -->
+    <antcall target="deployService" />
+
+  </target>
+
+
+  <target name="deployService">
+  
+    <!-- Extract class files to workaround requirement to build/reload/build  
+         because AdminClient won't find classes in jar files until the jars
+         are loaded. We remove these extracted class files after deploymnet. -->
     <unzip src="${webappTargetDir}/WEB-INF/lib/WSF-Service.jar"
            dest="${webappTargetDir}/WEB-INF/classes">
       <patternset>
@@ -158,6 +164,9 @@
         <include name="org/gusdb/wsf/service/WsfService.class"/>
       </patternset>
     </unzip>
+    
+    <!-- temporary write permissions for server-config.wsdd -->
+    <chmod dir="${webappTargetDir}/WEB-INF" perm="777"/>
 
     <java classname="org.apache.axis.client.AdminClient" 
           fork="true">
@@ -170,18 +179,19 @@
          the extracted temp Wsf*.class files. -->
     <get src="${webserviceBaseUrl}/servlet/AxisServlet" dest="/dev/null"/>
 
-    <!-- don't need WSF*.class files once the wsfService-deploy.wsdd is made -->
+    <chmod dir="${webappTargetDir}/WEB-INF" perm="755"/>
+
     <delete includeEmptyDirs="true" quiet="true">
       <fileset dir="${webappTargetDir}/WEB-INF/classes/org/gusdb/wsf/service/">
         <include name="WsfResponse.class"/>
         <include name="WsfService.class"/>
       </fileset>
     </delete>
-
+  
   </target>
-
+  
   <target name="createConfigLink" unless="wsf-config.exist">
-    <mkdir dir="${webappTargetDir}/WEB-INF/wsf-config"/>
+    <mkdir dir="${webappTargetDir}/${confTargetDir}"/>
   </target>
   
   <!-- ooooooooooooooooooooo  Install web components  ooooooooooooooooooooo -->
@@ -189,12 +199,17 @@
   <target name="WSF-WebUninstallation" if="undeploy.exist">
   
     <echo>Unregistering web service from Axis. Tomcat/Axis must be up and running.</echo>
-            
+
+    <!-- temporary write permissions for server-config.wsdd -->
+    <chmod dir="${webappTargetDir}/WEB-INF" perm="777"/>
+           
     <java classname="org.apache.axis.client.AdminClient" fork="true">
       <classpath refid="classpath" />
       <arg line="-l${webserviceBaseUrl}/servlet/AxisServlet" />
       <arg line="${targetDir}/config/wsfService-undeploy.wsdd" />
     </java>
+
+    <chmod dir="${webappTargetDir}/WEB-INF" perm="755"/>
   
   </target>
   
