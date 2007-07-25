@@ -31,6 +31,8 @@ public class WsfService {
      * to the client in tabular format.
      * 
      * @param pluginClassName
+     * @param queryName
+     *          the name of the query that invokes the plugin
      * @param paramValues
      *            an array of "param=value" pairs. The param and value and
      *            separated by the first "="
@@ -38,12 +40,12 @@ public class WsfService {
      * @return
      * @throws WsfServiceException
      */
-    public WsfResponse invoke(String pluginClassName, String invokeKey,
+    public WsfResponse invoke(String pluginClassName, String queryName,
             String[] paramValues, String[] columns) throws ServiceException {
         int resultSize = 0;
         long start = System.currentTimeMillis();
-        logger.info("Invoking: " + pluginClassName + ", invokeKey: "
-                + invokeKey);
+        logger.info("Invoking: " + pluginClassName + ", queryName: "
+                + queryName);
 
         Map<String, String> params = convertParams(paramValues);
         try {
@@ -64,7 +66,7 @@ public class WsfService {
 
             // invoke the plugin
             logger.debug("Invoking Plugin " + pluginClassName);
-            String[][] result = plugin.invoke(invokeKey, params, columns);
+            String[][] result = plugin.invoke(queryName, params, columns);
             resultSize = result.length;
             String message = plugin.getMessage();
 

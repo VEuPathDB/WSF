@@ -27,20 +27,21 @@
                                            WSF/Plugin-Installation,
                                            WSF/Client-Installation">
 
-    <mkdir dir="${targetDir}/wsf-lib/java"/>
-
     <ant target="defaultProjectInstall"/>
 
-    <move file="${targetDir}/lib/java/WSF-Service.jar" todir="${targetDir}/wsf-lib/java" />
-    <move file="${targetDir}/lib/java/WSF-Plugin.jar" todir="${targetDir}/wsf-lib/java" />
-
-    <!-- Following line added for the ApiFedPlugin and WdkQueryPlugin -->
-    <copy file="${targetDir}/lib/java/WSF-Client.jar" todir="${targetDir}/wsf-lib/java" />
-
   </target>
-
+  
 
  <!-- ooooooooooooooooooooooo  Install Components  ooooooooooooooooooooooo -->
+
+  <target name="WSF/Plugin-Installation">
+
+    <ant target="defaultComponentInstall">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Plugin"/>
+    </ant>
+
+  </target>
 
   <target name="WSF/Service-Installation" depends="WSF/Plugin-Installation">
 
@@ -51,18 +52,13 @@
 
   </target>
 
-  <target name="WSF/Plugin-Installation">
-    <delete file="${targetDir}/lib/java/WSF-Client.jar" quiet="true" />
-    <ant target="defaultComponentInstall">
-      <property name="project" value="WSF"/>
-      <property name="component" value="Plugin"/>
-    </ant>
-  </target>
+  <target name="WSF/Client-Installation" depends="WSF/Plugin-Installation,
+                                                  WSF/Service-Installation">
 
-  <target name="WSF/Client-Installation">
-    <condition property="webserviceBaseUrl" value="http://localhost:8080/axis">
+    <!-- use a default webServiceBaseUrl, if not specified -->
+    <condition property="webServiceBaseUrl" value="http://localhost:8080/axis">
       <not>
-        <isset property="webserviceBaseUrl" />
+        <isset property="webServiceBaseUrl" />
       </not>
     </condition>
     
@@ -88,7 +84,7 @@
     <java classname="org.apache.axis.wsdl.Java2WSDL" fork="true">
       <classpath refid="classpath" />
       <arg line="-o ../WSF/Client/config/WsfService.wsdl" />
-      <arg line="-l${webserviceBaseUrl}/services/WsfService" />
+      <arg line="-l${webServiceBaseUrl}/services/WsfService" />
       <arg line="-n .client.wsf.gusdb.org" />
       <!--arg line="-y WRAPPED" /-->
       <!--arg line="-u LITERAL" /-->
@@ -109,9 +105,6 @@
     </java>
         
     <delete file="../WSF/Client/src/java/org/gusdb/wsf/service/WsfService.java" />
-    <!--copy file="../WSF/Plugin/src/java/org/gusdb/wsf/plugin/WsfServiceException.java" 
-          todir="../WSF/Client/src/java/org/gusdb/wsf/plugin"
-          overwrite="true" /-->
           
     <move file="../WSF/Client/src/java/org/gusdb/wsf/client/deploy.wsdd" 
           tofile="../WSF/Client/config/wsfService-deploy.wsdd" />
@@ -121,6 +114,7 @@
     <replace file="../WSF/Client/config/wsfService-deploy.wsdd" 
              token="org.gusdb.wsf.client." value="org.gusdb.wsf.service."/>
 
+    <!-- install WSF-Client.jar -->
     <ant target="defaultComponentInstall">
       <property name="project" value="WSF"/>
       <property name="component" value="Client"/>
@@ -132,25 +126,41 @@
   <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
 
-  <target name="WSF-WebInstallation" depends="WSF-Installation">
 
-    <available file="${webappTargetDir}/${confTargetDir}" type="dir" property="wsf-config.exist" />
+  <target name="WSF-WebInstallation" depends="verifyWebPropFile,
+                                              WSF-Installation,
+                                              WSF/Service-WebInstallation">
+
     <available file="${targetDir}/config/wsfService-undeploy.wsdd" property="undeploy.exist" />
+    <available file="${webappTargetDir}/WEB-INF/wsf-config" type="dir" property="wsf-config.exist" />
+    <available file="${webappTargetDir}/WEB-INF/lib" type="dir" property="lib.exist" />
         
     <antcall target="WSF-WebUninstallation" />
-    <antcall target="createConfigLink" />
-    
-    <copy todir="${webappTargetDir}/${confTargetDir}">
-      <fileset dir="${targetDir}/config" />
-    </copy>
 
-    <copy todir="${webappTargetDir}/WEB-INF/lib">
-      <fileset dir="${targetDir}/wsf-lib/java" />
-    </copy>
+    <antcall target="createLibLink" />
+    <antcall target="createConfigLink" />
 
     <antcall target="deployService" />
 
+
   </target>
+
+
+  <target name="WSF/Service-WebInstallation" depends="WSF/Service-Installation">
+    <ant target="defaultWebComponentInstall">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Service"/>
+    </ant>
+  </target>
+
+
+    <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
+    <target name="verifyWebPropFile">
+    
+        <fail unless="webServiceBaseUrl">The 'webServiceBaseUrl' is missing from the web property file. Example: http://localhost:8080/axis</fail>
+        <fail unless="webappTargetDir">The 'webappTargetDir' is missing from the web property file. Example: /usr/local/tomcat/webapps/axis</fail>
+    
+    </target>
 
 
   <target name="deployService">
@@ -172,13 +182,13 @@
     <java classname="org.apache.axis.client.AdminClient" 
           fork="true">
       <classpath refid="classpath" />
-      <arg line="-l${webserviceBaseUrl}/servlet/AxisServlet" />
+      <arg line="-l${webServiceBaseUrl}/servlet/AxisServlet" />
       <arg line="${targetDir}/config/wsfService-deploy.wsdd" />
     </java>
 
     <!-- must either reload axis or GET the AxisServlet page before deleting
          the extracted temp Wsf*.class files. -->
-    <get src="${webserviceBaseUrl}/servlet/AxisServlet" dest="/dev/null"/>
+    <get src="${webServiceBaseUrl}/servlet/AxisServlet" dest="/dev/null"/>
 
     <chmod dir="${webappTargetDir}/WEB-INF" perm="755"/>
 
@@ -190,9 +200,13 @@
     </delete>
   
   </target>
-  
+   
+  <target name="createLibLink" unless="lib.exist">
+    <symlink link="${webappTargetDir}/WEB-INF/lib" resource="${targetDir}/lib/java"/>
+  </target>
+ 
   <target name="createConfigLink" unless="wsf-config.exist">
-    <mkdir dir="${webappTargetDir}/${confTargetDir}"/>
+    <symlink link="${webappTargetDir}/WEB-INF/wsf-config" resource="${targetDir}/config"/>
   </target>
   
   <!-- ooooooooooooooooooooo  Install web components  ooooooooooooooooooooo -->
@@ -206,7 +220,7 @@
            
     <java classname="org.apache.axis.client.AdminClient" fork="true">
       <classpath refid="classpath" />
-      <arg line="-l${webserviceBaseUrl}/servlet/AxisServlet" />
+      <arg line="-l${webServiceBaseUrl}/servlet/AxisServlet" />
       <arg line="${targetDir}/config/wsfService-undeploy.wsdd" />
     </java>
 
