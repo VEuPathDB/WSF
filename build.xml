@@ -134,11 +134,13 @@
     <available file="${targetDir}/config/wsfService-undeploy.wsdd" property="undeploy.exist" />
     <available file="${webappTargetDir}/WEB-INF/wsf-config" type="dir" property="wsf-config.exist" />
     <available file="${webappTargetDir}/WEB-INF/lib" type="dir" property="lib.exist" />
+    <available file="${webappTargetDir}/WEB-INF/web.xml" property="web.xml.exist" />
         
     <antcall target="WSF-WebUninstallation" />
 
     <antcall target="createLibLink" />
     <antcall target="createConfigLink" />
+    <antcall target="copyWebXml" />
 
     <antcall target="deployService" />
 
@@ -147,14 +149,18 @@
 
 
   <target name="WSF/Service-WebInstallation" depends="WSF/Service-Installation">
+
     <ant target="defaultWebComponentInstall">
       <property name="project" value="WSF"/>
       <property name="component" value="Service"/>
     </ant>
+
   </target>
 
 
     <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
+
+
     <target name="verifyWebPropFile">
     
         <fail unless="webServiceBaseUrl">The 'webServiceBaseUrl' is missing from the web property file. Example: http://localhost:8080/axis</fail>
@@ -200,14 +206,22 @@
     </delete>
   
   </target>
+
    
   <target name="createLibLink" unless="lib.exist">
     <symlink link="${webappTargetDir}/WEB-INF/lib" resource="${targetDir}/lib/java"/>
   </target>
+
  
   <target name="createConfigLink" unless="wsf-config.exist">
     <symlink link="${webappTargetDir}/WEB-INF/wsf-config" resource="${targetDir}/config"/>
   </target>
+
+ 
+  <target name="copyWebXml" unless="web.xml.exist">
+    <copy file="${webappTargetDir}/WEB-INF/wsf-web.xml" toFile="${webappTargetDir}/WEB-INF/web.xml"/>
+  </target>
+
   
   <!-- ooooooooooooooooooooo  Install web components  ooooooooooooooooooooo -->
   
