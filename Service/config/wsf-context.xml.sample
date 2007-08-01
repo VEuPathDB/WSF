@@ -1,0 +1,4 @@
+<!-- The contents of this file will be loaded for each web application -->
+<Context docBase="<your_wsf_web_service_path>">
+
+</Context>

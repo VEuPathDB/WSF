@@ -64,17 +64,10 @@
     
     <delete dir="../WSF/Client" quiet="true" />
     <mkdir dir="../WSF/Client/src/java"/>
-    <mkdir dir="../WSF/Client/lib/java"/>
-    <mkdir dir="../WSF/Client/config"/>
-    <copy todir="../WSF/Client/lib/java">
-      <fileset dir="../WSF/Service/lib/java"/>
-    </copy>
-    <copy file="${targetDir}/lib/java/WSF-Service.jar" todir="../WSF/Client/lib/java" />
-    <copy file="${targetDir}/lib/java/WSF-Plugin.jar" todir="../WSF/Client/lib/java" />
 
     <path id="classpath">
       <pathelement path="${classpath}" />
-      <fileset dir="../WSF/Client/lib/java">
+      <fileset dir="${targetDir}/lib/java">
         <include name="**/*.jar"/>
       </fileset>
     </path>
@@ -83,7 +76,7 @@
         
     <java classname="org.apache.axis.wsdl.Java2WSDL" fork="true">
       <classpath refid="classpath" />
-      <arg line="-o ../WSF/Client/config/WsfService.wsdl" />
+      <arg line="-o ${targetDir}/config/WsfService.wsdl" />
       <arg line="-l${webServiceBaseUrl}/services/WsfService" />
       <arg line="-n .client.wsf.gusdb.org" />
       <!--arg line="-y WRAPPED" /-->
@@ -101,17 +94,17 @@
       <arg line="-c org.gusdb.wsf.service.WsfService" />
       <arg line="-Nurn:wsf_classes=org.gusdb.wsf.service" />
       <arg line="-s" />
-      <arg line="../WSF/Client/config/WsfService.wsdl" />
+      <arg line="${targetDir}/config/WsfService.wsdl" />
     </java>
         
     <delete file="../WSF/Client/src/java/org/gusdb/wsf/service/WsfService.java" />
           
     <move file="../WSF/Client/src/java/org/gusdb/wsf/client/deploy.wsdd" 
-          tofile="../WSF/Client/config/wsfService-deploy.wsdd" />
+          tofile="${targetDir}/config/wsfService-deploy.wsdd" />
     <move file="../WSF/Client/src/java/org/gusdb/wsf/client/undeploy.wsdd" 
-          tofile="../WSF/Client/config/wsfService-undeploy.wsdd" />
+          tofile="${targetDir}/config/wsfService-undeploy.wsdd" />
 
-    <replace file="../WSF/Client/config/wsfService-deploy.wsdd" 
+    <replace file="${targetDir}/config/wsfService-deploy.wsdd" 
              token="org.gusdb.wsf.client." value="org.gusdb.wsf.service."/>
 
     <!-- install WSF-Client.jar -->
@@ -138,6 +131,9 @@
         
     <antcall target="WSF-WebUninstallation" />
 
+    <!-- create necessary directory structure -->
+    <mkdir dir="${webappTargetDir}/WEB-INF/"/>
+    
     <antcall target="createLibLink" />
     <antcall target="createConfigLink" />
     <antcall target="copyWebXml" />
