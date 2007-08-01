@@ -58,7 +58,7 @@ public class WsfService {
                 plugin = plugins.get(pluginClassName);
             } else {
                 logger.info("Creating plugin " + pluginClassName);
-                Class pluginClass = Class.forName(pluginClassName);
+                Class<?> pluginClass = Class.forName(pluginClassName);
                 plugin = (IWsfPlugin) pluginClass.newInstance();
                 plugin.setLogger(Logger.getLogger(pluginClass));
                 plugins.put(pluginClassName, plugin);
