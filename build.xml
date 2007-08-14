@@ -190,8 +190,9 @@
 
     <!-- must either reload axis or GET the AxisServlet page before deleting
          the extracted temp Wsf*.class files. -->
-    <get src="${webServiceBaseUrl}/servlet/AxisServlet" dest="/dev/null"/>
-
+    <get src="${webServiceBaseUrl}/servlet/AxisServlet" dest="${targetDir}/temp.html"/>
+    <delete file="${targetDir}/temp.html" quiet="yes" />
+    
     <chmod dir="${webappTargetDir}/WEB-INF" perm="755"/>
 
     <delete includeEmptyDirs="true" quiet="true">
