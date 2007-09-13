@@ -41,6 +41,11 @@
       <property name="component" value="Plugin"/>
     </ant>
 
+    <!-- post installation process -->
+    <!-- use default log4j.properties, if it does not exist -->
+    <available file="${targetDir}/config/log4j.properties" property="log4j.config.exist" />
+    <antcall target="copyLog4jConfig" />
+    
   </target>
 
   <target name="WSF/Service-Installation" depends="WSF/Plugin-Installation">
@@ -114,6 +119,10 @@
     </ant>
     
   </target>
+ 
+  <target name="copyLog4jConfig" unless="log4j.config.exist">
+    <copy file="${targetDir}/config/log4j.properties.sample" toFile="${targetDir}/config/log4j.properties"/>
+  </target>
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
@@ -140,6 +149,13 @@
 
     <antcall target="deployService" />
 
+    <!-- copy the log4j.properties to webapp's classes, if necessary -->
+    <available file="${webappTargetDir}/WEB-INF/classes/log4j.properties" property="log4j.webconfig.exist" />
+    <antcall target="copyLog4jWebconfig" />
+
+    <!-- use default context.xml, if it does not exist -->
+    <available file="${targetDir}/config/context.xml" property="context.xml.exist" />
+    <antcall target="copyContextXml" />
 
   </target>
 
@@ -217,6 +233,15 @@
  
   <target name="copyWebXml" unless="web.xml.exist">
     <copy file="${webappTargetDir}/WEB-INF/wsf-web.xml" toFile="${webappTargetDir}/WEB-INF/web.xml"/>
+  </target>
+ 
+ 
+  <target name="copyLog4jWebconfig" unless="log4j.webconfig.exist">
+    <copy file="${targetDir}/config/log4j.properties" toDir="${webappTargetDir}/WEB-INF/classes"/>
+  </target>
+ 
+  <target name="copyContextXml" unless="context.xml.exist">
+    <copy file="${targetDir}/config/wsf-context.xml.sample" toFile="${targetDir}/config/wsf-context.xml"/>
   </target>
 
   

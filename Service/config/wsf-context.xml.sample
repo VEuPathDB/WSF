@@ -1,4 +1,12 @@
 <!-- The contents of this file will be loaded for each web application -->
-<Context docBase="<your_wsf_web_service_path>">
+<Context docBase="@webappTargetDir@"
+         path="wsf"
+         swallowOutput="true">
+         
+    <Logger verbosity="2"
+            className="org.apache.catalina.logger.FileLogger"
+            directory="@targetDir@/logs"
+            prefix="wsf-"
+            timestamp="true"/>
 
 </Context>
