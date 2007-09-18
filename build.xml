@@ -241,7 +241,11 @@
   </target>
  
   <target name="copyContextXml" unless="context.xml.exist">
-    <copy file="${targetDir}/config/wsf-context.xml.sample" toFile="${targetDir}/config/wsf-context.xml"/>
+    <filter token="targetDir" value="${targetDir}"/>
+    <filter token="webappTargetDir" value="${webappTargetDir}"/>
+    <copy file="${targetDir}/config/wsf-context.xml.sample" 
+          toFile="${targetDir}/config/wsf-context.xml"
+          filtering="true"/>
   </target>
 
   
