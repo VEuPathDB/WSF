@@ -3,8 +3,8 @@
 	<classpathentry excluding="org/gusdb/wsf/test/WsfPortalClientTest.java" kind="src" path="src/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/WSF - Plugin"/>
-	<classpathentry kind="lib" path="/WSF - Plugin/lib/java/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="lib/java/jaxrpc-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/java/junit-4.3.1.jar"/>
+	<classpathentry kind="lib" path="/WSF - Plugin/lib/java/log4j-1.2.15.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

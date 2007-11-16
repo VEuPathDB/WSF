@@ -2,8 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/java/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="lib/java/axis-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/java/servlet-api-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/java/log4j-1.2.15.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
