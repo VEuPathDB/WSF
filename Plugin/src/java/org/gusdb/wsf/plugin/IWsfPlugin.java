@@ -21,13 +21,8 @@ public interface IWsfPlugin {
      * @return
      * @throws WsfServiceException
      */
-    public String[][] invoke(String invokeKey, Map<String, String> params,
+    public WsfResult invoke(String projectId, Map<String, String> params,
             String[] orderedColumns) throws WsfServiceException;
-
-    /**
-     * @return get the result message
-     */
-    public String getMessage();
 
     void setLogger(Logger logger);
 }

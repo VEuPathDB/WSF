@@ -11,6 +11,7 @@ import javax.xml.rpc.ServiceException;
 
 import org.apache.log4j.Logger;
 import org.gusdb.wsf.plugin.IWsfPlugin;
+import org.gusdb.wsf.plugin.WsfResult;
 import org.gusdb.wsf.plugin.WsfServiceException;
 
 /**
@@ -31,8 +32,8 @@ public class WsfService {
      * to the client in tabular format.
      * 
      * @param pluginClassName
-     * @param queryName
-     *          the name of the query that invokes the plugin
+     * @param projectId
+     *          The id of the project that invokes the service
      * @param paramValues
      *            an array of "param=value" pairs. The param and value and
      *            separated by the first "="
@@ -40,12 +41,12 @@ public class WsfService {
      * @return
      * @throws WsfServiceException
      */
-    public WsfResponse invoke(String pluginClassName, String queryName,
+    public WsfResult invoke(String pluginClassName, String projectId,
             String[] paramValues, String[] columns) throws ServiceException {
         int resultSize = 0;
         long start = System.currentTimeMillis();
-        logger.info("Invoking: " + pluginClassName + ", queryName: "
-                + queryName);
+        logger.info("Invoking: " + pluginClassName + ", projectId: "
+                + projectId);
 
         Map<String, String> params = convertParams(paramValues);
         try {
@@ -66,16 +67,9 @@ public class WsfService {
 
             // invoke the plugin
             logger.debug("Invoking Plugin " + pluginClassName);
-            String[][] result = plugin.invoke(queryName, params, columns);
-            resultSize = result.length;
-            String message = plugin.getMessage();
-
-            // prepare the response message
-            WsfResponse response = new WsfResponse();
-            response.setMessage(message);
-            response.setResults(result);
-
-            return response;
+            WsfResult result = plugin.invoke(projectId, params, columns);
+            resultSize = result.getResult().length;
+            return result;
         } catch (Exception ex) {
             ex.printStackTrace();
             logger.error(ex);
