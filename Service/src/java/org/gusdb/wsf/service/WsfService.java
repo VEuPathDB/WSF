@@ -27,6 +27,24 @@ public class WsfService {
     private static Map<String, IWsfPlugin> plugins = new LinkedHashMap<String, IWsfPlugin>();
 
     /**
+     * This method is left for backward compatibility purpose
+     * @param pluginClassName
+     * @param projectId
+     * @param paramValues
+     * @param columns
+     * @return
+     * @throws ServiceException 
+     */
+    public WsfResponse invoke(String pluginClassName, String projectId,
+            String[] paramValues, String[] columns) throws ServiceException {
+        WsfResult result = invokeEx(pluginClassName, projectId, paramValues, columns);
+        WsfResponse response = new WsfResponse();
+        response.setMessage(result.getMessage());
+        response.setResults(result.getResult());
+        return response;
+    }
+    
+    /**
      * Client requests to run a plugin by providing the complete class name of
      * the plugin, and the service will invoke the plugin and return the result
      * to the client in tabular format.
@@ -41,7 +59,7 @@ public class WsfService {
      * @return
      * @throws WsfServiceException
      */
-    public WsfResult invoke(String pluginClassName, String projectId,
+    public WsfResult invokeEx(String pluginClassName, String projectId,
             String[] paramValues, String[] columns) throws ServiceException {
         int resultSize = 0;
         long start = System.currentTimeMillis();

@@ -34,7 +34,7 @@ public class TimeServiceTest {
         String projectId = "TestDB";
         String[] params = { TimePlugin.REQUIRED_PARAMS[0] + "=true",
                 TimePlugin.REQUIRED_PARAMS[1] + "=true" };
-        WsfResult result = service.invoke(plugin, projectId, params,
+        WsfResult result = service.invokeEx(plugin, projectId, params,
                 TimePlugin.COLUMNS);
 
         assertEquals("signal", 0, result.getSignal());

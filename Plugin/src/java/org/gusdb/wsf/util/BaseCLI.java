@@ -41,6 +41,8 @@ public abstract class BaseCLI {
         declareOptions();
     }
 
+    public abstract void invoke();
+
     protected abstract void declareOptions();
 
     public void parseCommandLine(String[] args) throws ParseException {
@@ -77,12 +79,16 @@ public abstract class BaseCLI {
         printOptionGroups(syntax, requiredGroups);
         for (Option option : requiredOptions) {
             syntax.append(" ");
+            if (!option.isRequired()) syntax.append("[");
             printOption(syntax, option);
+            if (!option.isRequired()) syntax.append("]");
         }
         printOptionGroups(syntax, optionalGroups);
         for (Option option : optionalOptions) {
             syntax.append(" ");
+            if (!option.isRequired()) syntax.append("[");
             printOption(syntax, option);
+            if (!option.isRequired()) syntax.append("]");
         }
 
         String header = newline + description + newline + newline + "Options:";
@@ -96,14 +102,14 @@ public abstract class BaseCLI {
 
     protected void addNonValueOption(String name, Boolean defaultValue,
             String description) {
-        Option option = new Option(name, false, description);
+        Option option = new Option(name, name, false, description);
         options.addOption(option);
-        defaults.put(description, defaultValue);
+        defaults.put(name, defaultValue);
     }
 
     protected void addSingleValueOption(String name, boolean required,
             String defaultValue, String description) {
-        Option option = new Option(name, true, description);
+        Option option = new Option(name, name, true, description);
         option.setRequired(required);
         option.setArgs(1);
         options.addOption(option);
@@ -116,7 +122,7 @@ public abstract class BaseCLI {
         if (numArgs != Option.UNLIMITED_VALUES && numArgs < 2)
             throw new IndexOutOfBoundsException("The number of arguments must "
                     + "be greater than 1, or Option.UNLIMITED_VALUES");
-        Option option = new Option(name, true, description);
+        Option option = new Option(name, name, true, description);
         option.setRequired(required);
         option.setArgs(numArgs);
         options.addOption(option);
@@ -128,7 +134,7 @@ public abstract class BaseCLI {
         OptionGroup group = new OptionGroup();
         group.setRequired(groupRequired);
         for (String optionName : optionNames) {
-            Option option = options.getOption(optionName);
+            Option option = options.getOption("-" + optionName);
             if (option == null)
                 throw new NullPointerException("Option '" + optionName
                         + "' does not exist.");
@@ -140,9 +146,9 @@ public abstract class BaseCLI {
     protected Object getOptionValue(String name) {
         if (!commandLine.hasOption(name)) return defaults.get(name);
 
-        Option option = options.getOption(name);
+        Option option = options.getOption("-" + name);
         if (!option.hasArg()) return true;
-        else if (option.getArgs() == 0) return commandLine.getOptionValue(name);
+        else if (option.getArgs() == 1) return commandLine.getOptionValue(name);
         else return commandLine.getOptionValues(name);
     }
 
@@ -162,13 +168,11 @@ public abstract class BaseCLI {
     }
 
     private void printOption(StringBuffer syntax, Option option) {
-        if (!option.isRequired()) syntax.append("[");
-        syntax.append("-" + option.getArgName());
+        syntax.append("-" + option.getOpt());
         if (option.hasArg()) {
-            syntax.append("<" + option.getArgName() + "_value");
+            syntax.append(" <" + option.getOpt() + "_value");
             if (option.getArgs() > 1) syntax.append("s");
             syntax.append(">");
         }
-        if (!option.isRequired()) syntax.append("]");
     }
 }
