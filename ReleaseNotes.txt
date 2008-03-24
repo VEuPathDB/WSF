@@ -1,4 +1,21 @@
 ------------------------------------------------------------------------------
+ooooooooooooooooooooooooooo  WSF Version 1.17  ooooooooooooooooooooooooooooooo
+------------------------------------------------------------------------------
+
+Summary: Add a new method in the interface of the WsfService
+
+* Solved a synchronization issue in base plugin when invoking commands;
+
+* Added a new method, solveEx() in WsfService interface, which returns a new
+  type, WsfResult, and it contains String[][] result, String message, int signal;
+  
+* Added BaseCLI, which is a base helper class for constructing command-line
+  tools. 
+  
+* Added separate unit test component for WSF plugin and service;
+
+
+------------------------------------------------------------------------------
 ooooooooooooooooooooooooooo  WSF Version 1.12  ooooooooooooooooooooooooooooooo
 ------------------------------------------------------------------------------
 
