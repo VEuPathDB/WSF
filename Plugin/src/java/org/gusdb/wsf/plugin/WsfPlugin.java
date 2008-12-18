@@ -19,6 +19,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 
 import org.apache.axis.MessageContext;
+import org.apache.axis.transport.http.HTTPConstants;
 import org.apache.log4j.Logger;
 
 /**
@@ -31,18 +32,6 @@ import org.apache.log4j.Logger;
 public abstract class WsfPlugin implements IWsfPlugin {
 
     protected static final String newline = System.getProperty("line.separator");
-
-    /**
-     * The logger for this plugin. It is a recommended way to record standard
-     * output and error messages.
-     */
-    protected Logger logger;
-
-    /**
-     * It stores the properties defined in the configuration file. If the plugin
-     * doesn't use a configuration file, this map is empty.
-     */
-    private Properties properties;
 
     /**
      * The Plugin needs to provide a list of required parameter names; the base
@@ -83,11 +72,29 @@ public abstract class WsfPlugin implements IWsfPlugin {
             throws WsfServiceException;
 
     /**
+     * The logger for this plugin. It is a recommended way to record standard
+     * output and error messages.
+     */
+    protected Logger logger;
+
+    protected ServletContext servletContext;
+
+    /**
+     * It stores the properties defined in the configuration file. If the plugin
+     * doesn't use a configuration file, this map is empty.
+     */
+    private Properties properties;
+
+    /**
      * Initialize a plugin with empty properties
      */
     public WsfPlugin() {
         this.logger = Logger.getLogger(WsfPlugin.class); // use default
         properties = new Properties();
+
+        MessageContext msgContext = MessageContext.getCurrentContext();
+        Servlet servlet = (Servlet) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLET);
+        servletContext = servlet.getServletConfig().getServletContext();
     }
 
     /**
@@ -200,9 +207,6 @@ public abstract class WsfPlugin implements IWsfPlugin {
     private void loadPropertyFile(String propertyFile)
             throws InvalidPropertiesFormatException, IOException {
 
-        MessageContext msgContext = MessageContext.getCurrentContext();
-        ServletContext servletContext = ((Servlet) msgContext.getProperty(org.apache.axis.transport.http.HTTPConstants.MC_HTTP_SERVLET)).getServletConfig().getServletContext();
-
         String wsfConfigDir = servletContext.getInitParameter("wsfConfigDir_param");
         if (wsfConfigDir == null) {
             wsfConfigDir = "WEB-INF/wsf-config/";
@@ -231,13 +235,14 @@ public abstract class WsfPlugin implements IWsfPlugin {
     }
 
     /**
-     * @param command   the command array. If you have param values with spaces 
-     *                  in it, put the value into one cell to avoid the value to 
-     *                  be splitted.
-     * @param timeout   the maximum allowed time for the command to run, 
-     *                  in seconds
-     * @param result    Contains raw output of the command.
-     * @return          the exit code of the invoked command
+     * @param command
+     *            the command array. If you have param values with spaces in it,
+     *            put the value into one cell to avoid the value to be splitted.
+     * @param timeout
+     *            the maximum allowed time for the command to run, in seconds
+     * @param result
+     *            Contains raw output of the command.
+     * @return the exit code of the invoked command
      * @throws IOException
      */
     protected int invokeCommand(String[] command, StringBuffer result,
