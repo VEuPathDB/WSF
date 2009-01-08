@@ -19,7 +19,7 @@ import org.apache.commons.cli.ParseException;
 
 /**
  * @author xingao
- *
+ * 
  */
 public abstract class BaseCLI {
 
@@ -41,7 +41,7 @@ public abstract class BaseCLI {
         declareOptions();
     }
 
-    public abstract void invoke();
+    public abstract void invoke() throws Exception;
 
     protected abstract void declareOptions();
 
@@ -143,6 +143,14 @@ public abstract class BaseCLI {
         options.addOptionGroup(group);
     }
 
+    /**
+     * @param name
+     * @return If the option doesn't exist, a default value of the option will
+     *         be returned. If the option exists, and it doesn't require value,
+     *         it will return true; if the option requires a single value, the
+     *         string of that value will be returned; if the option allows
+     *         multiple value, a String[] will be returned.
+     */
     protected Object getOptionValue(String name) {
         if (!commandLine.hasOption(name)) return defaults.get(name);
 
