@@ -41,7 +41,7 @@ public abstract class BaseCLI {
         declareOptions();
     }
 
-    public abstract void invoke();
+    public abstract void invoke() throws Exception;
 
     protected abstract void declareOptions();
 
