@@ -142,7 +142,6 @@ public abstract class WsfPlugin implements IWsfPlugin {
         // execute the main function, and obtain result
         logger.debug("WsfPlugin.execute()");
         WsfResult result = execute(projectId, params, orderedColumns);
-
         // TEST
         logger.info("Result Message: '" + result.getMessage() + "'");
 

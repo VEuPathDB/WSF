@@ -17,7 +17,7 @@ public class WsfResponse {
      */
     public String getMessage() {
         return message;
-        
+
     }
 
     /**
@@ -42,5 +42,4 @@ public class WsfResponse {
     public void setResults(String[][] results) {
         this.results = results;
     }
-
 }

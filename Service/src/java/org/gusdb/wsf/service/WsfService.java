@@ -28,22 +28,24 @@ public class WsfService {
 
     /**
      * This method is left for backward compatibility purpose
+     * 
      * @param pluginClassName
      * @param projectId
      * @param paramValues
      * @param columns
      * @return
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     public WsfResponse invoke(String pluginClassName, String projectId,
             String[] paramValues, String[] columns) throws ServiceException {
-        WsfResult result = invokeEx(pluginClassName, projectId, paramValues, columns);
+        WsfResult result = invokeEx(pluginClassName, projectId, paramValues,
+                columns);
         WsfResponse response = new WsfResponse();
         response.setMessage(result.getMessage());
         response.setResults(result.getResult());
         return response;
     }
-    
+
     /**
      * Client requests to run a plugin by providing the complete class name of
      * the plugin, and the service will invoke the plugin and return the result
@@ -51,7 +53,7 @@ public class WsfService {
      * 
      * @param pluginClassName
      * @param projectId
-     *          The id of the project that invokes the service
+     *            The id of the project that invokes the service
      * @param paramValues
      *            an array of "param=value" pairs. The param and value and
      *            separated by the first "="
@@ -87,6 +89,7 @@ public class WsfService {
             logger.debug("Invoking Plugin " + pluginClassName);
             WsfResult result = plugin.invoke(projectId, params, columns);
             resultSize = result.getResult().length;
+
             return result;
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -97,6 +100,10 @@ public class WsfService {
             logger.info("WSF finshed in: " + ((end - start) / 1000.0)
                     + " seconds with " + resultSize + " results.");
         }
+    }
+
+    public WsfResult requestMessage(long messageId, int packetId) {
+        return null;
     }
 
     private Map<String, String> convertParams(String[] paramValues) {
