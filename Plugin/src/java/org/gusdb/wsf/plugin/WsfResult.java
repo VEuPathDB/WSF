@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 /**
  * @author xingao
- * 
+ *
  */
 public class WsfResult implements Serializable {
 
@@ -32,10 +32,6 @@ public class WsfResult implements Serializable {
      */
     protected String message;
 
-    private long requestId;
-    private int totalPackets = 1;
-    private int currentPacket = 1;
-
     public WsfResult() {}
 
     public String[][] getResult() {
@@ -54,71 +50,25 @@ public class WsfResult implements Serializable {
     }
 
     /**
-     * @param message
-     *            the message to set
+     * @param message the message to set
      */
     public void setMessage(String message) {
         this.message = message;
     }
 
     /**
-     * @return the exit code returned by the invoked command, or any user
-     *         defined code if the plugin doesn't invoke any external command
+     * @return  the exit code returned by the invoked command, or any user 
+     *          defined code if the plugin doesn't invoke any external command
      */
     public int getSignal() {
         return this.signal;
     }
 
     /**
-     * @param signal
-     *            the signal to set
+     * @param signal the signal to set
      */
     public void setSignal(int signal) {
         this.signal = signal;
     }
 
-    /**
-     * @return the requestId
-     */
-    public long getRequestId() {
-        return requestId;
-    }
-
-    /**
-     * @param requestId
-     *            the requestId to set
-     */
-    public void setRequestId(long requestId) {
-        this.requestId = requestId;
-    }
-
-    /**
-     * @return the totalPackets
-     */
-    public int getTotalPackets() {
-        return totalPackets;
-    }
-
-    /**
-     * @param totalPackets
-     *            the totalPackets to set
-     */
-    public void setTotalPackets(int totalPackets) {
-        this.totalPackets = totalPackets;
-    }
-
-    /**
-     * @return the currentPacket
-     */
-    public int getCurrentPacket() {
-        return currentPacket;
-    }
-
-    /**
-     * @param currentPacket
-     *            the currentPacket to set
-     */
-    public void setCurrentPacket(int currentPacket) {
-        this.currentPacket = currentPacket;
-    }
 }
