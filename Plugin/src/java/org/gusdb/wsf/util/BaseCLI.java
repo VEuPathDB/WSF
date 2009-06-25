@@ -23,6 +23,8 @@ import org.apache.commons.cli.ParseException;
  */
 public abstract class BaseCLI {
 
+    protected static final String ARG_PROJECT_ID = "model";
+
     private String command;
     private String description;
     protected String footer;
@@ -41,16 +43,25 @@ public abstract class BaseCLI {
         declareOptions();
     }
 
-    public abstract void invoke() throws Exception;
+    protected abstract void execute() throws Exception;
 
     protected abstract void declareOptions();
 
-    public void parseCommandLine(String[] args) throws ParseException {
+    public void invoke(String[] args) throws Exception {
+        try {
+            parseCommandLine(args);
+            execute();
+        } catch (ParseException ex) {
+            printUsage();
+        }
+    }
+
+    private void parseCommandLine(String[] args) throws ParseException {
         CommandLineParser parser = new BasicParser();
         commandLine = parser.parse(options, args);
     }
 
-    public void printUsage() {
+    private void printUsage() {
         String newline = System.getProperty("line.separator");
 
         StringBuffer syntax = new StringBuffer(command);
