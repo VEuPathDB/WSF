@@ -3,8 +3,8 @@
  */
 package org.gusdb.wsf.util;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,7 +38,7 @@ public abstract class BaseCLI {
         this.description = description;
         this.footer = "";
         options = new Options();
-        defaults = new HashMap<String, Object>();
+        defaults = new LinkedHashMap<String, Object>();
 
         declareOptions();
     }
@@ -53,6 +53,9 @@ public abstract class BaseCLI {
             execute();
         } catch (ParseException ex) {
             printUsage();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw ex;
         }
     }
 
