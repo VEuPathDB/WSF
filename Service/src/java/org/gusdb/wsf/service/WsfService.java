@@ -123,22 +123,27 @@ public class WsfService {
     }
 
     public String requestResult(String requestId, int packetId)
-            throws WsfServiceException, IOException {
-        File file = new File(tempDir, requestId + ".out");
-        if (!file.exists())
-            throw new WsfServiceException("The requestId doesn't match any "
-                    + "previous request.");
-        double packets = Math.ceil(file.length() / PACKET_SIZE);
-        if (packetId < 0 || packets < packetId)
-            throw new WsfServiceException("The packet id is beyond the scope: "
-                    + packets);
-        RandomAccessFile reader = new RandomAccessFile(file, "r");
-        long pos = packetId * (long) PACKET_SIZE;
-        reader.seek(pos);
-        int size = (int)Math.min(PACKET_SIZE, file.length() - pos);
-        byte[] buffer = new byte[size];
-        reader.read(buffer);
-        return new String(buffer);
+            throws ServiceException {
+        try {
+            File file = new File(tempDir, requestId + ".out");
+            if (!file.exists())
+                throw new WsfServiceException(
+                        "The requestId doesn't match any "
+                                + "previous request.");
+            double packets = Math.ceil(file.length() / PACKET_SIZE);
+            if (packetId < 0 || packets < packetId)
+                throw new WsfServiceException(
+                        "The packet id is beyond the scope: " + packets);
+            RandomAccessFile reader = new RandomAccessFile(file, "r");
+            long pos = packetId * (long) PACKET_SIZE;
+            reader.seek(pos);
+            int size = (int) Math.min(PACKET_SIZE, file.length() - pos);
+            byte[] buffer = new byte[size];
+            reader.read(buffer);
+            return new String(buffer);
+        } catch (Exception ex) {
+            throw new ServiceException(ex);
+        }
     }
 
     private Map<String, String> convertParams(String[] paramValues) {
