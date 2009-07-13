@@ -126,6 +126,7 @@ public class WsfService {
             throws ServiceException {
         try {
             File file = new File(tempDir, requestId + ".out");
+           logger.debug("Get WSF message: " + requestId + ", packet = " + packetId + ", at " + file.getAbsolutePath());
             if (!file.exists())
                 throw new WsfServiceException(
                         "The requestId doesn't match any "
@@ -140,6 +141,11 @@ public class WsfService {
             int size = (int) Math.min(PACKET_SIZE, file.length() - pos);
             byte[] buffer = new byte[size];
             reader.read(buffer);
+            reader.close();            
+
+            // check if the packet is the last piece, if so, remove the cache
+            if (packetId + 1 == packets) file.delete();
+
             return new String(buffer);
         } catch (Exception ex) {
             throw new ServiceException(ex);
@@ -170,7 +176,7 @@ public class WsfService {
         result.setCurrentPacket(1);
 
         if (packets > 1) {
-            String fileName = tempDir.getAbsolutePath() + requestId + ".out";
+            String fileName = tempDir.getAbsolutePath() + "/" + requestId + ".out";
             FileWriter writer = new FileWriter(fileName);
             writer.write(content);
             writer.flush();
