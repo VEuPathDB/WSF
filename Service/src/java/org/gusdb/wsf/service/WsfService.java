@@ -3,9 +3,14 @@
  */
 package org.gusdb.wsf.service;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.xml.rpc.ServiceException;
 
@@ -13,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.gusdb.wsf.plugin.IWsfPlugin;
 import org.gusdb.wsf.plugin.WsfResult;
 import org.gusdb.wsf.plugin.WsfServiceException;
+import org.json.JSONArray;
 
 /**
  * The WSF Web service entry point.
@@ -22,9 +28,21 @@ import org.gusdb.wsf.plugin.WsfServiceException;
  */
 public class WsfService {
 
+    private static double PACKET_SIZE = 1000000;
+
     private static Logger logger = Logger.getLogger(WsfService.class);
 
     private static Map<String, IWsfPlugin> plugins = new LinkedHashMap<String, IWsfPlugin>();
+
+    private File tempDir;
+
+    public WsfService() {
+        // initialize temp Dir
+        String temp = System.getProperty("java.io.tmpdir", "/tmp");
+        tempDir = new File(temp + "/wsf-service/cache/");
+        if (!tempDir.exists() || !tempDir.isDirectory()) tempDir.mkdirs();
+
+    }
 
     /**
      * This method is left for backward compatibility purpose
@@ -90,6 +108,8 @@ public class WsfService {
             WsfResult result = plugin.invoke(projectId, params, columns);
             resultSize = result.getResult().length;
 
+            prepareResult(result);
+
             return result;
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -102,8 +122,23 @@ public class WsfService {
         }
     }
 
-    public WsfResult requestMessage(long messageId, int packetId) {
-        return null;
+    public String requestResult(String requestId, int packetId)
+            throws WsfServiceException, IOException {
+        File file = new File(tempDir, requestId + ".out");
+        if (!file.exists())
+            throw new WsfServiceException("The requestId doesn't match any "
+                    + "previous request.");
+        double packets = Math.ceil(file.length() / PACKET_SIZE);
+        if (packetId < 0 || packets < packetId)
+            throw new WsfServiceException("The packet id is beyond the scope: "
+                    + packets);
+        RandomAccessFile reader = new RandomAccessFile(file, "r");
+        long pos = packetId * (long) PACKET_SIZE;
+        reader.seek(pos);
+        int size = (int)Math.min(PACKET_SIZE, file.length() - pos);
+        byte[] buffer = new byte[size];
+        reader.read(buffer);
+        return new String(buffer);
     }
 
     private Map<String, String> convertParams(String[] paramValues) {
@@ -119,5 +154,48 @@ public class WsfService {
             }
         }
         return params;
+    }
+
+    private void prepareResult(WsfResult result) throws IOException {
+        String requestId = getNextId();
+        result.setRequestId(requestId);
+        String content = convertResult(result.getResult());
+        int packets = (int) Math.ceil(content.length() / PACKET_SIZE);
+        result.setTotalPackets(packets);
+        result.setCurrentPacket(1);
+
+        if (packets > 1) {
+            String fileName = tempDir.getAbsolutePath() + requestId + ".out";
+            FileWriter writer = new FileWriter(fileName);
+            writer.write(content);
+            writer.flush();
+            writer.close();
+            String part = content.substring(0, (int) PACKET_SIZE);
+            result.setResult(new String[][] { { part } });
+        }
+    }
+
+    private String getNextId() throws IOException {
+        String requestId = null;
+        while (true) {
+            requestId = UUID.randomUUID().toString();
+            File file = new File(tempDir, requestId + ".out");
+            // atomic method, return uuid if file created successfully,
+            // otherwise, the file already exists, and try a next uuid.
+            if (file.createNewFile()) break;
+        }
+        return requestId;
+    }
+
+    private String convertResult(String[][] array) {
+        JSONArray jsResult = new JSONArray();
+        for (int row = 0; row < array.length; row++) {
+            JSONArray jsRow = new JSONArray();
+            for (int col = 0; col < array[row].length; col++) {
+                jsRow.put(array[row][col]);
+            }
+            jsResult.put(jsRow);
+        }
+        return jsResult.toString();
     }
 }

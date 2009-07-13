@@ -32,9 +32,9 @@ public class WsfResult implements Serializable {
      */
     protected String message;
 
-    private long requestId;
+    private String requestId;
     private int totalPackets = 1;
-    private int currentPacket = 1;
+    private int currentPacket = 0;
 
     public WsfResult() {}
 
@@ -80,7 +80,7 @@ public class WsfResult implements Serializable {
     /**
      * @return the requestId
      */
-    public long getRequestId() {
+    public String getRequestId() {
         return requestId;
     }
 
@@ -88,7 +88,7 @@ public class WsfResult implements Serializable {
      * @param requestId
      *            the requestId to set
      */
-    public void setRequestId(long requestId) {
+    public void setRequestId(String requestId) {
         this.requestId = requestId;
     }
 
