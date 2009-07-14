@@ -10,7 +10,6 @@ import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.xml.rpc.ServiceException;
 
@@ -126,7 +125,7 @@ public class WsfService {
     public String requestResult(String requestId, int packetId)
             throws ServiceException {
         try {
-            File file = new File(tempDir, requestId + ".out");
+            File file = new File(tempDir, requestId);
             logger.debug("Get WSF message: " + requestId + ", packet = "
                     + packetId + ", at " + file.getAbsolutePath());
             if (!file.exists())
@@ -177,28 +176,22 @@ public class WsfService {
         result.setTotalPackets(packets);
         result.setCurrentPacket(1);
 
+        File file = new File(tempDir, requestId);
         if (packets > 1) {
-            String fileName = tempDir.getAbsolutePath() + "/" + requestId
-                    + ".out";
-            FileWriter writer = new FileWriter(fileName);
+            FileWriter writer = new FileWriter(file);
             writer.write(content);
             writer.flush();
             writer.close();
             String part = content.substring(0, (int) PACKET_SIZE);
             result.setResult(new String[][] { { part } });
+        } else {    // no cache needed, delete the file handle
+            if (file.exists()) file.delete();
         }
     }
 
     private String getNextId() throws IOException {
-        String requestId = null;
-        while (true) {
-            requestId = UUID.randomUUID().toString();
-            File file = new File(tempDir, requestId + ".out");
-            // atomic method, return uuid if file created successfully,
-            // otherwise, the file already exists, and try a next uuid.
-            if (file.createNewFile()) break;
-        }
-        return requestId;
+        File file = File.createTempFile("wsf-", ".cache", tempDir);
+        return file.getName();
     }
 
     private String convertResult(String[][] array) {
