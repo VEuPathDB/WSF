@@ -1,0 +1,41 @@
+------------------------------------------------------------------------------
+ooooooooooooooooooooooooooo  WSF Version 1.20  ooooooooooooooooooooooooooooooo
+------------------------------------------------------------------------------
+
+A synchronsized release with WDK. no changes.
+
+
+
+------------------------------------------------------------------------------
+ooooooooooooooooooooooooooo  WSF Version 1.17  ooooooooooooooooooooooooooooooo
+------------------------------------------------------------------------------
+
+Summary: Add a new method in the interface of the WsfService
+
+* Solved a synchronization issue in base plugin when invoking commands;
+
+* Added a new method, solveEx() in WsfService interface, which returns a new
+  type, WsfResult, and it contains String[][] result, String message, int signal;
+  
+* Added BaseCLI, which is a base helper class for constructing command-line
+  tools. 
+  
+* Added separate unit test component for WSF plugin and service;
+
+
+------------------------------------------------------------------------------
+ooooooooooooooooooooooooooo  WSF Version 1.12  ooooooooooooooooooooooooooooooo
+------------------------------------------------------------------------------
+
+Summary: Add support to optional extra messages returned from WSF compatible
+         plugins. Some minor bug fixes
+
+
+------------------------------------------------------------------------------
+ooooooooooooooooooooooooooo  WSF Version 1.11  ooooooooooooooooooooooooooooooo
+------------------------------------------------------------------------------
+
+Summary: this is the first release of WSF as a separate project as part of WDK release (1.11).
+         It is factored from the (Web)Service component of prior WDK releases. It provides
+         a generic plugin API to facilitate Webservice based WDK process queries.
+         See WSFToy project for an example plugin that demonstrates the uses of this framework.

@@ -1,0 +1,294 @@
+<project name="WSF" default="Installation" basedir=".">
+
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooo   Properties   oooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+
+
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooo  Dependencies  oooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooo    Checkout    oooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <target name="WSF-ChildCheckout" />
+  
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooo    Update    oooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <target name="WSF-ChildUpdate" />
+
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooo  Installation  oooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+
+  <target name="WSF-Installation" depends="WSF/Service-Installation,
+                                           WSF/Plugin-Installation,
+                                           WSF/Client-Installation">
+
+    <ant target="defaultProjectInstall"/>
+
+  </target>
+  
+
+ <!-- ooooooooooooooooooooooo  Install Components  ooooooooooooooooooooooo -->
+
+  <target name="WSF/Plugin-Installation">
+
+    <ant target="defaultComponentInstall">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Plugin"/>
+    </ant>
+
+    <!-- post installation process -->
+    <!-- use default log4j.properties, if it does not exist -->
+    <available file="${targetDir}/config/log4j.properties" property="log4j.config.exist" />
+    <antcall target="copyLog4jConfig" />
+    
+  </target>
+
+  <target name="WSF/Service-Installation" depends="WSF/Plugin-Installation">
+
+    <ant target="defaultComponentInstall">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Service"/>
+    </ant>
+
+  </target>
+
+  <target name="WSF/Client-Installation" depends="WSF/Plugin-Installation,
+                                                  WSF/Service-Installation">
+
+    <!-- use a default webServiceBaseUrl, if not specified -->
+    <condition property="webServiceBaseUrl" value="http://localhost:8080/axis">
+      <not>
+        <isset property="webServiceBaseUrl" />
+      </not>
+    </condition>
+    
+    <delete dir="../WSF/Client" quiet="true" />
+    <mkdir dir="../WSF/Client/src/java"/>
+
+    <path id="classpath">
+      <pathelement path="${classpath}" />
+      <fileset dir="${targetDir}/lib/java">
+        <include name="**/*.jar"/>
+      </fileset>
+    </path>
+	
+    <echo>Creating WSDL file.</echo>
+        
+    <java classname="org.apache.axis.wsdl.Java2WSDL" fork="true">
+      <classpath refid="classpath" />
+      <arg line="-o ${targetDir}/config/WsfService.wsdl" />
+      <arg line="-l${webServiceBaseUrl}/services/WsfService" />
+      <arg line="-n .client.wsf.gusdb.org" />
+      <!--arg line="-y WRAPPED" /-->
+      <!--arg line="-u LITERAL" /-->
+      <arg line="-porg.gusdb.wsf.service=urn:wsf_classes" />
+      <arg line="org.gusdb.wsf.service.WsfService" />
+    </java>
+          
+    <echo>Generating client stub and deployment files from WSDL.</echo>
+        
+    <java classname="org.apache.axis.wsdl.WSDL2Java" fork="true">
+      <classpath refid="classpath" />
+      <arg line="-o ../WSF/Client/src/java" />
+      <arg line="-d Application" />
+      <arg line="-c org.gusdb.wsf.service.WsfService" />
+      <arg line="-Nurn:wsf_classes=org.gusdb.wsf.service" />
+      <arg line="-s" />
+      <arg line="${targetDir}/config/WsfService.wsdl" />
+    </java>
+        
+    <delete file="../WSF/Client/src/java/org/gusdb/wsf/service/WsfService.java" />
+          
+    <move file="../WSF/Client/src/java/org/gusdb/wsf/client/deploy.wsdd" 
+          tofile="${targetDir}/config/wsfService-deploy.wsdd" />
+    <move file="../WSF/Client/src/java/org/gusdb/wsf/client/undeploy.wsdd" 
+          tofile="${targetDir}/config/wsfService-undeploy.wsdd" />
+
+    <replace file="${targetDir}/config/wsfService-deploy.wsdd" 
+             token="org.gusdb.wsf.client." value="org.gusdb.wsf.service."/>
+
+    <!-- install WSF-Client.jar -->
+    <ant target="defaultComponentInstall">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Client"/>
+    </ant>
+    
+  </target>
+ 
+  <target name="copyLog4jConfig" unless="log4j.config.exist">
+    <copy file="${targetDir}/config/log4j.properties.sample" toFile="${targetDir}/config/log4j.properties"/>
+  </target>
+
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+
+
+  <target name="WSF-WebInstallation" depends="verifyWebPropFile,
+                                              WSF-Installation,
+                                              WSF/Service-WebInstallation">
+
+    <available file="${targetDir}/config/wsfService-undeploy.wsdd" property="undeploy.exist" />
+    <available file="${webappTargetDir}/WEB-INF/wsf-config" type="dir" property="wsf-config.exist" />
+    <available file="${webappTargetDir}/WEB-INF/lib" type="dir" property="lib.exist" />
+    <available file="${webappTargetDir}/WEB-INF/web.xml" property="web.xml.exist" />
+        
+    <antcall target="WSF-WebUninstallation" />
+
+    <!-- create necessary directory structure -->
+    <mkdir dir="${webappTargetDir}/WEB-INF/"/>
+    
+    <antcall target="createLibLink" />
+    <antcall target="createConfigLink" />
+    <antcall target="copyWebXml" />
+
+    <antcall target="deployService" />
+
+    <!-- copy the log4j.properties to webapp's classes, if necessary -->
+    <available file="${webappTargetDir}/WEB-INF/classes/log4j.properties" property="log4j.webconfig.exist" />
+    <antcall target="copyLog4jWebconfig" />
+
+    <!-- use default context.xml, if it does not exist -->
+    <available file="${targetDir}/config/context.xml" property="context.xml.exist" />
+    <antcall target="copyContextXml" />
+
+  </target>
+
+
+  <target name="WSF/Service-WebInstallation" depends="WSF/Service-Installation">
+
+    <ant target="defaultWebComponentInstall">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Service"/>
+    </ant>
+
+  </target>
+
+
+    <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
+
+
+    <target name="verifyWebPropFile">
+    
+        <fail unless="webServiceBaseUrl">The 'webServiceBaseUrl' is missing from the web property file. Example: http://localhost:8080/axis</fail>
+        <fail unless="webappTargetDir">The 'webappTargetDir' is missing from the web property file. Example: /usr/local/tomcat/webapps/axis</fail>
+    
+    </target>
+
+
+  <target name="deployService">
+  
+    <!-- Extract class files to workaround requirement to build/reload/build  
+         because AdminClient won't find classes in jar files until the jars
+         are loaded. We remove these extracted class files after deploymnet. -->
+    <unzip src="${webappTargetDir}/WEB-INF/lib/WSF-Service.jar"
+           dest="${webappTargetDir}/WEB-INF/classes">
+      <patternset>
+        <include name="org/gusdb/wsf/service/WsfResponse.class"/>
+        <include name="org/gusdb/wsf/service/WsfService.class"/>
+      </patternset>
+    </unzip>
+    
+    <!-- temporary write permissions for server-config.wsdd -->
+    <chmod dir="${webappTargetDir}/WEB-INF" perm="777"/>
+
+    <java classname="org.apache.axis.client.AdminClient" 
+          fork="true">
+      <classpath refid="classpath" />
+      <arg line="-l${webServiceBaseUrl}/servlet/AxisServlet" />
+      <arg line="${targetDir}/config/wsfService-deploy.wsdd" />
+    </java>
+
+    <!-- must either reload axis or GET the AxisServlet page before deleting
+         the extracted temp Wsf*.class files. -->
+    <get src="${webServiceBaseUrl}/servlet/AxisServlet" dest="${targetDir}/temp.html"/>
+    <delete file="${targetDir}/temp.html" quiet="yes" />
+    
+    <chmod dir="${webappTargetDir}/WEB-INF" perm="755"/>
+
+    <delete includeEmptyDirs="true" quiet="true">
+      <fileset dir="${webappTargetDir}/WEB-INF/classes/org/gusdb/wsf/service/">
+        <include name="WsfResponse.class"/>
+        <include name="WsfService.class"/>
+      </fileset>
+    </delete>
+  
+  </target>
+
+   
+  <target name="createLibLink" unless="lib.exist">
+    <symlink link="${webappTargetDir}/WEB-INF/lib" resource="${targetDir}/lib/java"/>
+  </target>
+
+ 
+  <target name="createConfigLink" unless="wsf-config.exist">
+    <symlink link="${webappTargetDir}/WEB-INF/wsf-config" resource="${targetDir}/config"/>
+  </target>
+
+ 
+  <target name="copyWebXml" unless="web.xml.exist">
+    <copy file="${webappTargetDir}/WEB-INF/wsf-web.xml" toFile="${webappTargetDir}/WEB-INF/web.xml"/>
+  </target>
+ 
+ 
+  <target name="copyLog4jWebconfig" unless="log4j.webconfig.exist">
+    <copy file="${targetDir}/config/log4j.properties" toDir="${webappTargetDir}/WEB-INF/classes"/>
+  </target>
+ 
+  <target name="copyContextXml" unless="context.xml.exist">
+    <filter token="targetDir" value="${targetDir}"/>
+    <filter token="webappTargetDir" value="${webappTargetDir}"/>
+    <copy file="${targetDir}/config/wsf-context.xml.sample" 
+          toFile="${targetDir}/config/wsf-context.xml"
+          filtering="true"/>
+  </target>
+
+  
+  <!-- ooooooooooooooooooooo  Install web components  ooooooooooooooooooooo -->
+  
+  <target name="WSF-WebUninstallation" if="undeploy.exist">
+  
+    <echo>Unregistering web service from Axis. Tomcat/Axis must be up and running.</echo>
+
+    <!-- temporary write permissions for server-config.wsdd -->
+    <chmod dir="${webappTargetDir}/WEB-INF" perm="777"/>
+           
+    <java classname="org.apache.axis.client.AdminClient" fork="true">
+      <classpath refid="classpath" />
+      <arg line="-l${webServiceBaseUrl}/servlet/AxisServlet" />
+      <arg line="${targetDir}/config/wsfService-undeploy.wsdd" />
+    </java>
+
+    <chmod dir="${webappTargetDir}/WEB-INF" perm="755"/>
+  
+  </target>
+  
+
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooo  Release  ooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+
+  <target name="WSF-Release">
+    
+    <echo>"WSF-Release" is not supported at this moment.</echo>
+
+  </target>  
+
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooo  Distributable  ooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+
+  <target name="WSF-Distributable">
+
+    <echo>"WSF-Distributable" is not supported at this moment.</echo>
+
+  </target>  
+
+</project>
+
+
