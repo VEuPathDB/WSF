@@ -44,6 +44,7 @@
     <!-- post installation process -->
     <!-- use default log4j.properties, if it does not exist -->
     <available file="${targetDir}/config/log4j.properties" property="log4j.config.exist" />
+    <available file="${targetDir}/config/log4j.xml" property="log4j.config.exist" />
     <antcall target="copyLog4jConfig" />
     
   </target>
@@ -151,6 +152,7 @@
 
     <!-- copy the log4j.properties to webapp's classes, if necessary -->
     <available file="${webappTargetDir}/WEB-INF/classes/log4j.properties" property="log4j.webconfig.exist" />
+    <available file="${webappTargetDir}/WEB-INF/classes/log4j.xml" property="log4j.webconfig.exist" />
     <antcall target="copyLog4jWebconfig" />
 
     <!-- use default context.xml, if it does not exist -->
