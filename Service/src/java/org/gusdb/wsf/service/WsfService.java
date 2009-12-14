@@ -6,7 +6,9 @@ package org.gusdb.wsf.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -18,6 +20,8 @@ import org.gusdb.wsf.plugin.IWsfPlugin;
 import org.gusdb.wsf.plugin.WsfResult;
 import org.gusdb.wsf.plugin.WsfServiceException;
 import org.json.JSONArray;
+
+import com.sun.tools.javac.jvm.ClassWriter.StringOverflow;
 
 /**
  * The WSF Web service entry point.
@@ -112,8 +116,10 @@ public class WsfService {
 
             return result;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            StringWriter writer = new StringWriter();
+            ex.printStackTrace(new PrintWriter(writer));
             logger.error(ex);
+            logger.error(writer.toString());
             throw new ServiceException(ex);
         } finally {
             long end = System.currentTimeMillis();
