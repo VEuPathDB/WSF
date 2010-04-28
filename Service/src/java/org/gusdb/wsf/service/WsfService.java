@@ -21,8 +21,6 @@ import org.gusdb.wsf.plugin.WsfResult;
 import org.gusdb.wsf.plugin.WsfServiceException;
 import org.json.JSONArray;
 
-import com.sun.tools.javac.jvm.ClassWriter.StringOverflow;
-
 /**
  * The WSF Web service entry point.
  * 
@@ -49,7 +47,8 @@ public class WsfService {
     }
 
     /**
-     * This method is left for backward compatibility purpose
+     * This method is left for backward compatibility purpose. It might be
+     * removed in the future. Please user InvokeEx2() instead.
      * 
      * @param pluginClassName
      * @param projectId
@@ -58,6 +57,7 @@ public class WsfService {
      * @return
      * @throws ServiceException
      */
+    @Deprecated
     public WsfResponse invoke(String pluginClassName, String projectId,
             String[] paramValues, String[] columns) throws ServiceException {
         WsfResult result = invokeEx(pluginClassName, projectId, paramValues,
@@ -69,6 +69,9 @@ public class WsfService {
     }
 
     /**
+     * This method is deprecated and may be removed in the future release.
+     * Please user invokeEx2() instead.
+     * 
      * Client requests to run a plugin by providing the complete class name of
      * the plugin, and the service will invoke the plugin and return the result
      * to the client in tabular format.
@@ -83,8 +86,15 @@ public class WsfService {
      * @return
      * @throws WsfServiceException
      */
+    @Deprecated
     public WsfResult invokeEx(String pluginClassName, String projectId,
             String[] paramValues, String[] columns) throws ServiceException {
+        return invokeEx2(pluginClassName, projectId, null, paramValues, columns);
+    }
+
+    public WsfResult invokeEx2(String pluginClassName, String projectId,
+            String userSignature, String[] paramValues, String[] columns)
+            throws ServiceException {
         int resultSize = 0;
         long start = System.currentTimeMillis();
         logger.info("Invoking: " + pluginClassName + ", projectId: "
@@ -109,7 +119,8 @@ public class WsfService {
 
             // invoke the plugin
             logger.debug("Invoking Plugin " + pluginClassName);
-            WsfResult result = plugin.invoke(projectId, params, columns);
+            WsfResult result = plugin.invoke(projectId, userSignature, params,
+                    columns);
             resultSize = result.getResult().length;
 
             prepareResult(result);
@@ -190,7 +201,7 @@ public class WsfService {
             writer.close();
             String part = content.substring(0, (int) PACKET_SIZE);
             result.setResult(new String[][] { { part } });
-        } else {    // no cache needed, delete the file handle
+        } else { // no cache needed, delete the file handle
             if (file.exists()) file.delete();
         }
     }

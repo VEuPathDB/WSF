@@ -12,9 +12,10 @@ import java.util.Map;
 /**
  * @author xingao
  * 
- * This time plugin runs 'date' system command, and parses out the result, and
- * returns the parts chosen by the params. The signal contains the return code
- * of the command, and the message contains the raw output of 'time'
+ *         This time plugin runs 'date' system command, and parses out the
+ *         result, and returns the parts chosen by the params. The signal
+ *         contains the return code of the command, and the message contains the
+ *         raw output of 'time'
  */
 public class TimePlugin extends WsfPlugin {
 
@@ -35,13 +36,12 @@ public class TimePlugin extends WsfPlugin {
      * (non-Javadoc)
      * 
      * @see org.gusdb.wsf.plugin.WsfPlugin#execute(java.lang.String,
-     *      java.util.Map, java.lang.String[])
-     * 
-     * 
+     * java.util.Map, java.lang.String[])
      */
     @Override
-    protected WsfResult execute(String projectId, Map<String, String> params,
-            String[] orderedColumns) throws WsfServiceException {
+    protected WsfResult execute(String projectId, String userSignature,
+            Map<String, String> params, String[] orderedColumns)
+            throws WsfServiceException {
         // decide the param values;
         boolean hasDate = Boolean.parseBoolean(params.get(REQUIRED_PARAMS[0]));
         boolean hasTime = Boolean.parseBoolean(params.get(REQUIRED_PARAMS[1]));

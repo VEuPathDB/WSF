@@ -67,9 +67,9 @@ public abstract class WsfPlugin implements IWsfPlugin {
      * @return returns the result in 2-dimensional array of strings format.
      * @throws WsfServiceException
      */
-    protected abstract WsfResult execute(String queryName,
-            Map<String, String> params, String[] orderedColumns)
-            throws WsfServiceException;
+    protected abstract WsfResult execute(String projectId,
+            String userSignature, Map<String, String> params,
+            String[] orderedColumns) throws WsfServiceException;
 
     /**
      * The logger for this plugin. It is a recommended way to record standard
@@ -133,22 +133,24 @@ public abstract class WsfPlugin implements IWsfPlugin {
      * 
      * @see org.gusdb.wsf.IWsfPlugin#invoke(java.util.Map, java.lang.String[])
      */
-    public final WsfResult invoke(String projectId, Map<String, String> params,
-            String[] orderedColumns) throws WsfServiceException {
+    public final WsfResult invoke(String projectId, String userSignature,
+            Map<String, String> params, String[] orderedColumns)
+            throws WsfServiceException {
         // validate the input
         logger.debug("WsfPlugin.validateInput()");
-        validateInput(params, orderedColumns);
+        validateInput(projectId, params, orderedColumns);
 
         // execute the main function, and obtain result
         logger.debug("WsfPlugin.execute()");
-        WsfResult result = execute(projectId, params, orderedColumns);
+        WsfResult result = execute(projectId, userSignature, params,
+                orderedColumns);
         // TEST
         logger.info("Result Message: '" + result.getMessage() + "'");
 
         return result;
     }
 
-    private void validateInput(Map<String, String> params,
+    private void validateInput(String projectId, Map<String, String> params,
             String[] orderedColumns) throws WsfServiceException {
         // validate required parameters
         validateRequiredParameters(params);
