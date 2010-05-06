@@ -81,10 +81,14 @@ public abstract class AbstractPlugin implements Plugin {
     public String[] getContextKeys() {
         String[] keys = defineContextKeys();
 
-        String[] newKeys = new String[keys.length + 1];
-        newKeys[0] = CTX_CONFIG_PATH;
-        System.arraycopy(keys, 0, newKeys, 1, keys.length);
-        return newKeys;
+        if (keys == null) {
+            return new String[] { CTX_CONFIG_PATH };
+        } else {
+            String[] newKeys = new String[keys.length + 1];
+            newKeys[0] = CTX_CONFIG_PATH;
+            System.arraycopy(keys, 0, newKeys, 1, keys.length);
+            return newKeys;
+        }
     }
 
     public void setContext(Map<String, Object> context) {
@@ -93,18 +97,17 @@ public abstract class AbstractPlugin implements Plugin {
 
     private void loadConfiguration(String configFile)
             throws InvalidPropertiesFormatException, IOException {
-        String configDir = (String)context.get(CTX_CONFIG_PATH);
+        String configDir = (String) context.get(CTX_CONFIG_PATH);
         String filePath;
         if (configDir == null) {
             URL url = this.getClass().getResource("/" + configFile);
             filePath = url.toString();
         } else {
-            if (!configDir.endsWith("/")) configDir +="/";
+            if (!configDir.endsWith("/")) configDir += "/";
             filePath = configDir + configFile;
         }
         logger.debug("WSF Plugin prop file: " + filePath);
 
-        
         InputStream in = new FileInputStream(filePath);
         properties.loadFromXML(in);
         in.close();

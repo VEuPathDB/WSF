@@ -184,7 +184,7 @@ public class WsfService {
         validateRequiredParameters(plugin, request);
 
         // validate columns
-        validateColumns(plugin, request);
+        validateColumns(plugin, request.getOrderedColumns());
 
         // validate parameters
         plugin.validateParameters(request);
@@ -209,12 +209,11 @@ public class WsfService {
         }
     }
 
-    private void validateColumns(Plugin plugin, WsfRequest request)
+    private void validateColumns(Plugin plugin, String[] orderedColumns)
             throws WsfServiceException {
         String[] reqColumns = plugin.getColumns();
 
         Set<String> colSet = new HashSet<String>();
-        String[] orderedColumns = request.getOrderedColumns();
         for (String col : orderedColumns) {
             colSet.add(col);
         }
