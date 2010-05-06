@@ -25,9 +25,9 @@ import org.apache.log4j.Logger;
  */
 public abstract class AbstractPlugin implements Plugin {
 
-    protected static final String newline = System.getProperty("line.separator");
+    public static final String CTX_CONFIG_PATH = "wsfConfigDir_param";
 
-    private static final String CTX_CONFIG_PATH = "wsfConfigDir_param";
+    protected static final String newline = System.getProperty("line.separator");
 
     protected abstract String[] defineContextKeys();
 
