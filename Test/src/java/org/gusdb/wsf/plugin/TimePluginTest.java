@@ -21,22 +21,26 @@ public class TimePluginTest {
 
     private Plugin plugin;
     private WsfRequest request;
+    private Map<String, String> params;
 
     public TimePluginTest() {
         plugin = new TimePlugin();
         request = new WsfRequest();
         request.setProjectId("TestDB");
-        request.setParam(TimePlugin.REQUIRED_PARAMS[0], "true");
-        request.setParam(TimePlugin.REQUIRED_PARAMS[1], "true");
-        for (String column : TimePlugin.COLUMNS) {
-            request.addOrderedColumn(column);
-        }
+
+        params = new HashMap<String, String>();
+        params.put(TimePlugin.REQUIRED_PARAMS[0], "true");
+        params.put(TimePlugin.REQUIRED_PARAMS[1], "true");
+        request.setParams(params);
+
+        request.setOrderedColumns(TimePlugin.COLUMNS);
     }
 
     @Test
     public void testGetDate() throws WsfServiceException {
         // prepare params
-        request.setParam(TimePlugin.REQUIRED_PARAMS[1], "false");
+        params.put(TimePlugin.REQUIRED_PARAMS[1], "false");
+        request.setParams(params);
 
         WsfResponse result = plugin.execute(request);
         Map<String, String> resultMap = buildResultMap(result.getResult(), 0);
@@ -57,7 +61,8 @@ public class TimePluginTest {
     @Test
     public void testGetTime() throws WsfServiceException {
         // prepare params
-        request.setParam(TimePlugin.REQUIRED_PARAMS[0], "false");
+        params.put(TimePlugin.REQUIRED_PARAMS[0], "false");
+        request.setParams(params);
 
         String[][] result = plugin.execute(request).getResult();
         Map<String, String> resultMap = buildResultMap(result, 0);
@@ -74,10 +79,11 @@ public class TimePluginTest {
 
     @Test
     public void testGetWeekDay() throws WsfServiceException {
+        params.put(TimePlugin.REQUIRED_PARAMS[0], "false");
+        params.put(TimePlugin.REQUIRED_PARAMS[1], "false");
+        params.put(TimePlugin.OPTIONAL_PARAMS[0], "true");
+        request.setParams(params);
         // prepare params
-        request.setParam(TimePlugin.REQUIRED_PARAMS[0], "false");
-        request.setParam(TimePlugin.REQUIRED_PARAMS[1], "false");
-        request.setParam(TimePlugin.OPTIONAL_PARAMS[0], "true");
 
         String[][] result = plugin.execute(request).getResult();
         assertEquals("result size", 1, result.length);
@@ -91,8 +97,9 @@ public class TimePluginTest {
 
     @Test
     public void testGetAll() throws WsfServiceException {
-        request.setParam(TimePlugin.OPTIONAL_PARAMS[0], "true");
-        request.setParam("-u", null);
+        params.put(TimePlugin.OPTIONAL_PARAMS[0], "true");
+        params.put("-u", null);
+        request.setParams(params);
         String[][] result = plugin.execute(request).getResult();
         assertEquals("result size", 8, result.length);
 
@@ -100,29 +107,28 @@ public class TimePluginTest {
 
     @Test(expected = WsfServiceException.class)
     public void testMissingParam() throws WsfServiceException {
-        request.removeParam(TimePlugin.REQUIRED_PARAMS[0]);
+        params.remove(TimePlugin.REQUIRED_PARAMS[0]);
+        request.setParams(params);
         plugin.execute(request);
     }
 
     @Test(expected = WsfServiceException.class)
     public void testInvalidParam() throws WsfServiceException {
-        request.setParam(TimePlugin.REQUIRED_PARAMS[1], "bad");
+        params.put(TimePlugin.REQUIRED_PARAMS[1], "bad");
+        request.setParams(params);
         plugin.execute(request);
     }
 
     @Test(expected = WsfServiceException.class)
     public void testInvalidColumn() throws WsfServiceException {
-        request.clearOrderedColumns();
-        request.addOrderedColumn(TimePlugin.COLUMNS[0]);
-        request.addOrderedColumn(TimePlugin.COLUMNS[1]);
-        request.addOrderedColumn("Bad");
+        request.setOrderedColumns(new String[] { TimePlugin.COLUMNS[0],
+                TimePlugin.COLUMNS[1], "Bad" });
         plugin.execute(request);
     }
 
     @Test(expected = WsfServiceException.class)
     public void testMissingColumn() throws WsfServiceException {
-        request.clearOrderedColumns();
-        request.addOrderedColumn(TimePlugin.COLUMNS[0]);
+        request.setOrderedColumns(new String[] { TimePlugin.COLUMNS[0] });
         plugin.execute(request);
     }
 

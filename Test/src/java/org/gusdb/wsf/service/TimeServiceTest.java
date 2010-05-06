@@ -25,16 +25,18 @@ public class TimeServiceTest {
 
     private WsfRequest request;
     private WsfService service;
+    private Map<String, String> params;
 
     public TimeServiceTest() {
         service = new WsfService();
         request = new WsfRequest();
         request.setProjectId("TestDB");
-        request.setParam(TimePlugin.REQUIRED_PARAMS[0], "true");
-        request.setParam(TimePlugin.REQUIRED_PARAMS[1], "true");
-        for (String column : TimePlugin.COLUMNS) {
-            request.addOrderedColumn(column);
-        }
+
+        params = new HashMap<String, String>();
+        params.put(TimePlugin.REQUIRED_PARAMS[0], "true");
+        params.put(TimePlugin.REQUIRED_PARAMS[1], "true");
+        request.setParams(params);
+        request.setOrderedColumns(TimePlugin.COLUMNS);
     }
 
     @Test
@@ -43,11 +45,9 @@ public class TimeServiceTest {
 
         WsfRequest request = new WsfRequest();
         request.setProjectId("TestDB");
-        request.setParam(TimePlugin.REQUIRED_PARAMS[0], "true");
-        request.setParam(TimePlugin.REQUIRED_PARAMS[1], "true");
-        for (String column : TimePlugin.COLUMNS) {
-            request.addOrderedColumn(column);
-        }
+        params.put(TimePlugin.REQUIRED_PARAMS[0], "true");
+        params.put(TimePlugin.REQUIRED_PARAMS[1], "true");
+        request.setParams(params);
 
         WsfResponse result = service.invoke(plugin, request);
 

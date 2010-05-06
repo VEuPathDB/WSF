@@ -40,11 +40,12 @@ public class TimePlugin extends AbstractPlugin {
      */
     public WsfResponse execute(WsfRequest request) throws WsfServiceException {
         // decide the param values;
-        boolean hasDate = Boolean.parseBoolean(request.getParam(REQUIRED_PARAMS[0]));
-        boolean hasTime = Boolean.parseBoolean(request.getParam(REQUIRED_PARAMS[1]));
+        Map<String, String> params = request.getParams();
+        boolean hasDate = Boolean.parseBoolean(params.get(REQUIRED_PARAMS[0]));
+        boolean hasTime = Boolean.parseBoolean(params.get(REQUIRED_PARAMS[1]));
         boolean hasWeekDay = false;
-        if (request.getParam(OPTIONAL_PARAMS[0]) != null)
-            hasWeekDay = Boolean.parseBoolean(request.getParam(OPTIONAL_PARAMS[0]));
+        if (params.get(OPTIONAL_PARAMS[0]) != null)
+            hasWeekDay = Boolean.parseBoolean(params.get(OPTIONAL_PARAMS[0]));
 
         String[] command = buildCommand(request);
         try {
@@ -120,19 +121,20 @@ public class TimePlugin extends AbstractPlugin {
      */
     public void validateParameters(WsfRequest request)
             throws WsfServiceException {
+        Map<String, String> params = request.getParams();
         // the known params should all have boolean values
         for (String param : REQUIRED_PARAMS) {
-            String value = request.getParam(param).trim().toLowerCase();
+            String value = params.get(param).trim().toLowerCase();
             if (!value.equals("true") && !value.equals("false"))
                 throw new WsfServiceException("The param " + param + " has "
-                        + "invalid value: '" + request.getParam(param) + "'");
+                        + "invalid value: '" + params.get(param) + "'");
         }
         for (String param : OPTIONAL_PARAMS) {
-            if (request.getParam(param) == null) continue;
-            String value = request.getParam(param).trim().toLowerCase();
+            if (params.get(param) == null) continue;
+            String value = params.get(param).trim().toLowerCase();
             if (!value.equals("true") && !value.equals("false"))
                 throw new WsfServiceException("The param " + param + " has "
-                        + "invalid value: '" + request.getParam(param) + "'");
+                        + "invalid value: '" + params.get(param) + "'");
         }
     }
 
@@ -147,11 +149,12 @@ public class TimePlugin extends AbstractPlugin {
         for (String param : OPTIONAL_PARAMS)
             knownParams.put(param, null);
 
-        for (String param : request.getParamKeys()) {
+        Map<String, String> params = request.getParams();
+        for (String param : params.keySet()) {
             if (knownParams.containsKey(param)) continue;
 
             command.add(param);
-            String value = request.getParam(param);
+            String value = params.get(param);
             if (value != null && value.length() != 0) command.add(value);
         }
 

@@ -200,8 +200,9 @@ public class WsfService {
         String[] reqParams = plugin.getRequiredParameterNames();
 
         // validate parameters
+        Map<String, String> params = request.getParams();
         for (String param : reqParams) {
-            if (request.getParam(param) == null) {
+            if (!params.containsKey(param)) {
                 throw new WsfServiceException(
                         "The required parameter is missing: " + param);
             }
