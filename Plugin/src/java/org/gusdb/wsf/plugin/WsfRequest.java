@@ -1,9 +1,12 @@
 package org.gusdb.wsf.plugin;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.sun.jmx.remote.util.OrderClassLoaders;
 
 public class WsfRequest {
 
@@ -34,10 +37,12 @@ public class WsfRequest {
         return params.get(key);
     }
 
-    public String[] getParamKeys() {
-        String[] keys = new String[params.size()];
-        params.keySet().toArray(keys);
-        return keys;
+    public Map<String, String> getParams() {
+        return new HashMap<String, String>(params);
+    }
+    
+    public void setParams(Map<String, String> params) {
+        this.params = new HashMap<String, String>(params);
     }
 
     /**
@@ -59,6 +64,13 @@ public class WsfRequest {
         String[] columns = new String[orderedColumns.size()];
         orderedColumns.toArray(columns);
         return columns;
+    }
+    
+    public void setOrderedColumns(String[] columns) {
+        this.orderedColumns.clear();
+        for (String column : columns) {
+            orderedColumns.add(column);
+        }
     }
 
     /**

@@ -147,7 +147,7 @@ public class TimePlugin extends AbstractPlugin {
         for (String param : OPTIONAL_PARAMS)
             knownParams.put(param, null);
 
-        for (String param : request.getParamKeys()) {
+        for (String param : request.getParams().keySet()) {
             if (knownParams.containsKey(param)) continue;
 
             command.add(param);

@@ -49,7 +49,7 @@ public class TimeServiceTest {
             request.addOrderedColumn(column);
         }
 
-        WsfResponse result = service.invokeEx2(plugin, request);
+        WsfResponse result = service.invoke(plugin, request);
 
         assertEquals("signal", 0, result.getSignal());
 
@@ -74,6 +74,6 @@ public class TimeServiceTest {
 
     @Test(expected = ServiceException.class)
     public void testInvalidPlugin() throws ServiceException {
-        service.invokeEx2("Invalid.plugin", request);
+        service.invoke("Invalid.plugin", request);
     }
 }
