@@ -5,5 +5,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/WSF Plugin"/>
 	<classpathentry kind="lib" path="lib/java/jaxrpc-1.4.jar"/>
 	<classpathentry kind="lib" path="/WSF Plugin/lib/java/log4j-1.2.15.jar"/>
+	<classpathentry kind="lib" path="lib/java/axis-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/java/not-deployed/servlet-api-2.4.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

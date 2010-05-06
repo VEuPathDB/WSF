@@ -13,29 +13,43 @@ import java.util.Map;
 import javax.xml.rpc.ServiceException;
 
 import org.gusdb.wsf.plugin.TimePlugin;
-import org.gusdb.wsf.plugin.WsfResult;
+import org.gusdb.wsf.plugin.WsfRequest;
+import org.gusdb.wsf.plugin.WsfResponse;
 import org.junit.Test;
 
 /**
  * @author xingao
- *
+ * 
  */
 public class TimeServiceTest {
 
+    private WsfRequest request;
     private WsfService service;
 
     public TimeServiceTest() {
         service = new WsfService();
+        request = new WsfRequest();
+        request.setProjectId("TestDB");
+        request.setParam(TimePlugin.REQUIRED_PARAMS[0], "true");
+        request.setParam(TimePlugin.REQUIRED_PARAMS[1], "true");
+        for (String column : TimePlugin.COLUMNS) {
+            request.addOrderedColumn(column);
+        }
     }
 
     @Test
     public void testTimePlugin() throws ServiceException {
         String plugin = "org.gusdb.wsf.plugin.TimePlugin";
-        String projectId = "TestDB";
-        String[] params = { TimePlugin.REQUIRED_PARAMS[0] + "=true",
-                TimePlugin.REQUIRED_PARAMS[1] + "=true" };
-        WsfResult result = service.invokeEx(plugin, projectId, params,
-                TimePlugin.COLUMNS);
+
+        WsfRequest request = new WsfRequest();
+        request.setProjectId("TestDB");
+        request.setParam(TimePlugin.REQUIRED_PARAMS[0], "true");
+        request.setParam(TimePlugin.REQUIRED_PARAMS[1], "true");
+        for (String column : TimePlugin.COLUMNS) {
+            request.addOrderedColumn(column);
+        }
+
+        WsfResponse result = service.invokeEx2(plugin, request);
 
         assertEquals("signal", 0, result.getSignal());
 
@@ -60,8 +74,6 @@ public class TimeServiceTest {
 
     @Test(expected = ServiceException.class)
     public void testInvalidPlugin() throws ServiceException {
-        String[] params = { "param=value" };
-        String[] columns = { "column1", "column2" };
-        service.invoke("Invalid.plugin", "TestDB", params, columns);
+        service.invokeEx2("Invalid.plugin", request);
     }
 }

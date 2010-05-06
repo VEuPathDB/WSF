@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @author xingao
  * 
  */
-public class WsfResult implements Serializable {
+public class WsfResponse implements Serializable {
 
     /**
      * 
@@ -36,7 +36,7 @@ public class WsfResult implements Serializable {
     private int totalPackets = 1;
     private int currentPacket = 0;
 
-    public WsfResult() {}
+    public WsfResponse() {}
 
     public String[][] getResult() {
         return this.result;

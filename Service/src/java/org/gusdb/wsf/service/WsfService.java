@@ -10,14 +10,21 @@ import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 import javax.xml.rpc.ServiceException;
 
+import org.apache.axis.MessageContext;
+import org.apache.axis.transport.http.HTTPConstants;
 import org.apache.log4j.Logger;
-import org.gusdb.wsf.plugin.IWsfPlugin;
-import org.gusdb.wsf.plugin.WsfResult;
+import org.gusdb.wsf.plugin.Plugin;
+import org.gusdb.wsf.plugin.WsfRequest;
+import org.gusdb.wsf.plugin.WsfResponse;
 import org.gusdb.wsf.plugin.WsfServiceException;
 import org.json.JSONArray;
 
@@ -33,7 +40,7 @@ public class WsfService {
 
     private static Logger logger = Logger.getLogger(WsfService.class);
 
-    private static Map<String, IWsfPlugin> plugins = new LinkedHashMap<String, IWsfPlugin>();
+    private static Map<String, Plugin> plugins = new LinkedHashMap<String, Plugin>();
 
     private File tempDir;
 
@@ -46,84 +53,51 @@ public class WsfService {
         }
     }
 
-    /**
-     * This method is left for backward compatibility purpose. It might be
-     * removed in the future. Please user InvokeEx2() instead.
-     * 
-     * @param pluginClassName
-     * @param projectId
-     * @param paramValues
-     * @param columns
-     * @return
-     * @throws ServiceException
-     */
-    @Deprecated
-    public WsfResponse invoke(String pluginClassName, String projectId,
-            String[] paramValues, String[] columns) throws ServiceException {
-        WsfResult result = invokeEx(pluginClassName, projectId, paramValues,
-                columns);
-        WsfResponse response = new WsfResponse();
-        response.setMessage(result.getMessage());
-        response.setResults(result.getResult());
-        return response;
-    }
-
-    /**
-     * This method is deprecated and may be removed in the future release.
-     * Please user invokeEx2() instead.
-     * 
-     * Client requests to run a plugin by providing the complete class name of
-     * the plugin, and the service will invoke the plugin and return the result
-     * to the client in tabular format.
-     * 
-     * @param pluginClassName
-     * @param projectId
-     *            The id of the project that invokes the service
-     * @param paramValues
-     *            an array of "param=value" pairs. The param and value and
-     *            separated by the first "="
-     * @param cols
-     * @return
-     * @throws WsfServiceException
-     */
-    @Deprecated
-    public WsfResult invokeEx(String pluginClassName, String projectId,
-            String[] paramValues, String[] columns) throws ServiceException {
-        return invokeEx2(pluginClassName, projectId, null, paramValues, columns);
-    }
-
-    public WsfResult invokeEx2(String pluginClassName, String projectId,
-            String userSignature, String[] paramValues, String[] columns)
+    public WsfResponse invoke(String pluginClassName, WsfRequest request)
             throws ServiceException {
-        int resultSize = 0;
         long start = System.currentTimeMillis();
         logger.info("Invoking: " + pluginClassName + ", projectId: "
-                + projectId);
+                + request.getProjectId());
 
-        Map<String, String> params = convertParams(paramValues);
         try {
+
             // use reflection to load the plugin object
             logger.debug("Loading object " + pluginClassName);
 
             // check if the plugin has been cached
-            IWsfPlugin plugin;
+            Plugin plugin;
             if (plugins.containsKey(pluginClassName)) {
                 plugin = plugins.get(pluginClassName);
             } else {
                 logger.info("Creating plugin " + pluginClassName);
                 Class<?> pluginClass = Class.forName(pluginClassName);
-                plugin = (IWsfPlugin) pluginClass.newInstance();
-                plugin.setLogger(Logger.getLogger(pluginClass));
+                plugin = (Plugin) pluginClass.newInstance();
+
+                // get context
+                Map<String, Object> context = new HashMap<String, Object>();
+
+                MessageContext msgContext = MessageContext.getCurrentContext();
+                Servlet servlet = (Servlet) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLET);
+                ServletContext scontext = servlet.getServletConfig().getServletContext();
+                for (String key : plugin.getContextKeys()) {
+                    Object value = scontext.getAttribute(key);
+                    context.put(key, value);
+                }
+
+                plugin.setContext(context);
                 plugins.put(pluginClassName, plugin);
             }
 
             // invoke the plugin
             logger.debug("Invoking Plugin " + pluginClassName);
-            WsfResult result = plugin.invoke(projectId, userSignature, params,
-                    columns);
-            resultSize = result.getResult().length;
-
+            WsfResponse result = invokePlugin(plugin, request);
+            logger.info("Result Message: '" + result.getMessage() + "'");
             prepareResult(result);
+
+            long end = System.currentTimeMillis();
+            logger.info("WSF finshed in: " + ((end - start) / 1000.0)
+                    + " seconds with " + result.getResult().length
+                    + " results.");
 
             return result;
         } catch (Exception ex) {
@@ -132,10 +106,6 @@ public class WsfService {
             logger.error(ex);
             logger.error(writer.toString());
             throw new ServiceException(ex);
-        } finally {
-            long end = System.currentTimeMillis();
-            logger.info("WSF finshed in: " + ((end - start) / 1000.0)
-                    + " seconds with " + resultSize + " results.");
         }
     }
 
@@ -170,22 +140,7 @@ public class WsfService {
         }
     }
 
-    private Map<String, String> convertParams(String[] paramValues) {
-        Map<String, String> params = new HashMap<String, String>(
-                paramValues.length);
-        for (String paramValue : paramValues) {
-            int pos = paramValue.indexOf('=');
-            if (pos < 0) params.put(paramValue.trim(), "");
-            else {
-                String param = paramValue.substring(0, pos).trim();
-                String value = paramValue.substring(pos + 1).trim();
-                params.put(param, value);
-            }
-        }
-        return params;
-    }
-
-    private void prepareResult(WsfResult result) throws IOException {
+    private void prepareResult(WsfResponse result) throws IOException {
         String requestId = getNextId();
         result.setRequestId(requestId);
         String content = convertResult(result.getResult());
@@ -222,4 +177,63 @@ public class WsfService {
         }
         return jsResult.toString();
     }
+
+    private WsfResponse invokePlugin(Plugin plugin, WsfRequest request)
+            throws WsfServiceException {
+        // validate required parameters
+        validateRequiredParameters(plugin, request);
+
+        // validate columns
+        validateColumns(plugin, request);
+
+        // validate parameters
+        plugin.validateParameters(request);
+
+        // execute the main function, and obtain result
+        WsfResponse result = plugin.execute(request);
+
+        return result;
+    }
+
+    private void validateRequiredParameters(Plugin plugin, WsfRequest request)
+            throws WsfServiceException {
+        String[] reqParams = plugin.getRequiredParameterNames();
+
+        // validate parameters
+        for (String param : reqParams) {
+            if (request.getParam(param) == null) {
+                throw new WsfServiceException(
+                        "The required parameter is missing: " + param);
+            }
+        }
+    }
+
+    private void validateColumns(Plugin plugin, WsfRequest request)
+            throws WsfServiceException {
+        String[] reqColumns = plugin.getColumns();
+
+        Set<String> colSet = new HashSet<String>();
+        String[] orderedColumns = request.getOrderedColumns();
+        for (String col : orderedColumns) {
+            colSet.add(col);
+        }
+        for (String col : reqColumns) {
+            if (!colSet.contains(col)) {
+                throw new WsfServiceException(
+                        "The required column is missing: " + col);
+            }
+        }
+        // cross check
+        colSet.clear();
+        colSet = new HashSet<String>(reqColumns.length);
+        for (String col : reqColumns) {
+            colSet.add(col);
+        }
+        for (String col : orderedColumns) {
+            if (!colSet.contains(col)) {
+                throw new WsfServiceException("Unknown column: " + col);
+            }
+        }
+    }
+
 }
