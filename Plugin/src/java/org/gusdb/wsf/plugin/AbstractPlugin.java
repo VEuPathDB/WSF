@@ -4,6 +4,7 @@
 package org.gusdb.wsf.plugin;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,7 +38,7 @@ public abstract class AbstractPlugin implements Plugin {
      */
     protected Logger logger;
 
-    protected Map<String, Object> context;
+    protected Map<String, Object> context = new HashMap<String, Object>();
 
     /**
      * It stores the properties defined in the configuration file. If the plugin
@@ -98,19 +99,23 @@ public abstract class AbstractPlugin implements Plugin {
     private void loadConfiguration(String configFile)
             throws InvalidPropertiesFormatException, IOException {
         String configDir = (String) context.get(CTX_CONFIG_PATH);
-        String filePath;
+        String filePath = null;
         if (configDir == null) {
             URL url = this.getClass().getResource("/" + configFile);
-            filePath = url.toString();
+            if (url != null) filePath = url.toString();
         } else {
             if (!configDir.endsWith("/")) configDir += "/";
-            filePath = configDir + configFile;
+            String path = configDir + configFile;
+            File file = new File(path);
+            if (file.exists() && file.isFile()) filePath = path;
         }
         logger.debug("WSF Plugin prop file: " + filePath);
 
-        InputStream in = new FileInputStream(filePath);
-        properties.loadFromXML(in);
-        in.close();
+        if (filePath != null) {
+            InputStream in = new FileInputStream(filePath);
+            properties.loadFromXML(in);
+            in.close();
+        }
     }
 
     protected String getProperty(String propertyName) {
