@@ -10,7 +10,7 @@ public class WsfRequest {
     private String projectId;
     private Map<String, String> params;
     private List<String> orderedColumns;
-    private Map<String, String> context;
+    private Map<String, String> context = new HashMap<String, String>();
 
     /**
      * @return the projectId
