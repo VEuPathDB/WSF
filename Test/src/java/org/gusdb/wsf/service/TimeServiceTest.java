@@ -44,12 +44,13 @@ public class TimeServiceTest {
         String plugin = "org.gusdb.wsf.plugin.TimePlugin";
 
         WsfRequest request = new WsfRequest();
+        request.setPluginClass(plugin);
         request.setProjectId("TestDB");
         params.put(TimePlugin.REQUIRED_PARAMS[0], "true");
         params.put(TimePlugin.REQUIRED_PARAMS[1], "true");
         request.setParams(params);
 
-        WsfResponse result = service.invoke(plugin, request);
+        WsfResponse result = service.invoke(request.toString());
 
         assertEquals("signal", 0, result.getSignal());
 
@@ -74,6 +75,7 @@ public class TimeServiceTest {
 
     @Test(expected = ServiceException.class)
     public void testInvalidPlugin() throws ServiceException {
-        service.invoke("Invalid.plugin", request);
+        request.setPluginClass("Invalid.plugin");
+        service.invoke(request.toString());
     }
 }
