@@ -26,8 +26,6 @@ import org.apache.log4j.Logger;
  */
 public abstract class AbstractPlugin implements Plugin {
 
-    public static final String CTX_CONFIG_PATH = "wsfConfigDir_param";
-
     protected static final String newline = System.getProperty("line.separator");
 
     protected abstract String[] defineContextKeys();
@@ -91,15 +89,7 @@ public abstract class AbstractPlugin implements Plugin {
      */
     public String[] getContextKeys() {
         String[] keys = defineContextKeys();
-
-        if (keys == null) {
-            return new String[] { CTX_CONFIG_PATH };
-        } else {
-            String[] newKeys = new String[keys.length + 1];
-            newKeys[0] = CTX_CONFIG_PATH;
-            System.arraycopy(keys, 0, newKeys, 1, keys.length);
-            return newKeys;
-        }
+        return (keys == null) ? new String[0] : keys;
     }
 
     private void loadConfiguration() throws InvalidPropertiesFormatException,

@@ -12,6 +12,8 @@ import java.util.Map;
  */
 public interface Plugin {
 
+    public static final String CTX_CONFIG_PATH = "wsfConfigDir_param";
+
     /**
      * @param params
      * @param cols

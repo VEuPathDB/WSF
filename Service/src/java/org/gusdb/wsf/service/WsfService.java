@@ -74,16 +74,7 @@ public class WsfService {
                 plugin = (Plugin) pluginClass.newInstance();
 
                 // get context
-                Map<String, Object> context = new HashMap<String, Object>();
-
-                MessageContext msgContext = MessageContext.getCurrentContext();
-                Servlet servlet = (Servlet) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLET);
-                ServletContext scontext = servlet.getServletConfig().getServletContext();
-                for (String key : plugin.getContextKeys()) {
-                    Object value = scontext.getAttribute(key);
-                    context.put(key, value);
-                }
-
+                Map<String, Object> context = loadContext(plugin.getContextKeys());
                 plugin.initialize(context);
                 plugins.put(pluginClassName, plugin);
             }
@@ -107,6 +98,27 @@ public class WsfService {
             logger.error(writer.toString());
             throw new ServiceException(ex);
         }
+    }
+
+    private Map<String, Object> loadContext(String[] keys) {
+        Map<String, Object> context = new HashMap<String, Object>();
+
+        MessageContext msgContext = MessageContext.getCurrentContext();
+        Servlet servlet = (Servlet) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLET);
+        ServletContext scontext = servlet.getServletConfig().getServletContext();
+
+        // get the configuration path:
+        String configPath = scontext.getRealPath(scontext.getInitParameter(Plugin.CTX_CONFIG_PATH));
+        context.put(Plugin.CTX_CONFIG_PATH, configPath);
+
+        for (String key : keys) {
+            String initValue = scontext.getInitParameter(key);
+            context.put(key, initValue);
+            Object value = scontext.getAttribute(key);
+            context.put(key, value);
+        }
+
+        return context;
     }
 
     public String requestResult(String requestId, int packetId)
