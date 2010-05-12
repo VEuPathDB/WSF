@@ -53,13 +53,15 @@ public class WsfService {
         }
     }
 
-    public WsfResponse invoke(String pluginClassName, WsfRequest request)
-            throws ServiceException {
+    public WsfResponse invoke(String jsonRequest) throws ServiceException {
         long start = System.currentTimeMillis();
-        logger.info("Invoking: " + pluginClassName + ", projectId: "
-                + request.getProjectId());
-
         try {
+            WsfRequest request = new WsfRequest(jsonRequest);
+            String pluginClassName = request.getPluginClass();
+
+            logger.info("Invoking: " + pluginClassName + ", projectId: "
+                    + request.getProjectId());
+            logger.debug("request: " + jsonRequest);
 
             // use reflection to load the plugin object
             logger.debug("Loading object " + pluginClassName);
