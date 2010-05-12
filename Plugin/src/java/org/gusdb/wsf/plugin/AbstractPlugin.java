@@ -46,6 +46,8 @@ public abstract class AbstractPlugin implements Plugin {
      */
     private Properties properties;
 
+    private String propertyFile;
+
     /**
      * Initialize a plugin with empty properties
      */
@@ -63,14 +65,22 @@ public abstract class AbstractPlugin implements Plugin {
      *            webapps.
      * @throws WsfServiceException
      */
-    public AbstractPlugin(String propertyFile) throws WsfServiceException {
+    public AbstractPlugin(String propertyFile) {
         this();
+        this.propertyFile = propertyFile;
+    }
+
+    public void initialize(Map<String, Object> context)
+            throws WsfServiceException {
+        this.context = new HashMap<String, Object>(context);
         // load the properties
-        try {
-            loadConfiguration(propertyFile);
-        } catch (IOException ex) {
-            logger.error(ex);
-            throw new WsfServiceException(ex);
+        if (propertyFile != null) {
+            try {
+                loadConfiguration();
+            } catch (IOException ex) {
+                logger.error(ex);
+                throw new WsfServiceException(ex);
+            }
         }
     }
 
@@ -92,30 +102,32 @@ public abstract class AbstractPlugin implements Plugin {
         }
     }
 
-    public void setContext(Map<String, Object> context) {
-        this.context = new HashMap<String, Object>(context);
-    }
-
-    private void loadConfiguration(String configFile)
-            throws InvalidPropertiesFormatException, IOException {
+    private void loadConfiguration() throws InvalidPropertiesFormatException,
+            IOException, WsfServiceException {
         String configDir = (String) context.get(CTX_CONFIG_PATH);
         String filePath = null;
         if (configDir == null) {
-            URL url = this.getClass().getResource("/" + configFile);
-            if (url != null) filePath = url.toString();
+            URL url = this.getClass().getResource("/" + propertyFile);
+            if (url == null)
+                throw new WsfServiceException("property file cannot be found "
+                        + "in the class path: " + propertyFile);
+
+            filePath = url.toString();
         } else {
             if (!configDir.endsWith("/")) configDir += "/";
-            String path = configDir + configFile;
+            String path = configDir + propertyFile;
             File file = new File(path);
-            if (file.exists() && file.isFile()) filePath = path;
+            if (!file.exists() || !file.isFile())
+                throw new WsfServiceException("property file cannot be found "
+                        + " in the configuration path: " + path);
+
+            filePath = path;
         }
         logger.debug("WSF Plugin prop file: " + filePath);
 
-        if (filePath != null) {
-            InputStream in = new FileInputStream(filePath);
-            properties.loadFromXML(in);
-            in.close();
-        }
+        InputStream in = new FileInputStream(filePath);
+        properties.loadFromXML(in);
+        in.close();
     }
 
     protected String getProperty(String propertyName) {

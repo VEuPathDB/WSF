@@ -40,7 +40,7 @@ public interface Plugin {
 
     public String[] getContextKeys();
 
-    public void setContext(Map<String, Object> context);
+    public void initialize(Map<String, Object> context) throws WsfServiceException;
 
     public void validateParameters(WsfRequest request)
             throws WsfServiceException;

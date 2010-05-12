@@ -84,7 +84,7 @@ public class WsfService {
                     context.put(key, value);
                 }
 
-                plugin.setContext(context);
+                plugin.initialize(context);
                 plugins.put(pluginClassName, plugin);
             }
 
