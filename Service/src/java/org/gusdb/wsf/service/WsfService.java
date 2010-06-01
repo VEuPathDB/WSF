@@ -106,18 +106,19 @@ public class WsfService {
         Map<String, Object> context = new HashMap<String, Object>();
 
         MessageContext msgContext = MessageContext.getCurrentContext();
-        Servlet servlet = (Servlet) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLET);
-        ServletContext scontext = servlet.getServletConfig().getServletContext();
+        if (msgContext != null) {
+            Servlet servlet = (Servlet) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLET);
+            ServletContext scontext = servlet.getServletConfig().getServletContext();
 
-        // get the configuration path:
-        String configPath = scontext.getRealPath(scontext.getInitParameter(Plugin.CTX_CONFIG_PATH));
-        context.put(Plugin.CTX_CONFIG_PATH, configPath);
-
-        for (String key : keys) {
-            String initValue = scontext.getInitParameter(key);
-            context.put(key, initValue);
-            Object value = scontext.getAttribute(key);
-            context.put(key, value);
+            // get the configuration path:
+            String configPath = scontext.getRealPath(scontext.getInitParameter(Plugin.CTX_CONFIG_PATH));
+            context.put(Plugin.CTX_CONFIG_PATH, configPath);
+            for (String key : keys) {
+                String initValue = scontext.getInitParameter(key);
+                context.put(key, initValue);
+                Object value = scontext.getAttribute(key);
+                context.put(key, value);
+            }
         }
 
         return context;
