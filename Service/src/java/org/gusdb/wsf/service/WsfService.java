@@ -21,8 +21,6 @@ import org.gusdb.wsf.plugin.WsfResult;
 import org.gusdb.wsf.plugin.WsfServiceException;
 import org.json.JSONArray;
 
-import com.sun.tools.javac.jvm.ClassWriter.StringOverflow;
-
 /**
  * The WSF Web service entry point.
  * 
