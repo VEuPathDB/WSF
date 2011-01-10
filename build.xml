@@ -199,6 +199,14 @@
     <!-- temporary write permissions for server-config.wsdd -->
     <chmod dir="${webappTargetDir}/WEB-INF" perm="777"/>
 
+
+    <path id="classpath">
+      <pathelement path="${classpath}" />
+      <fileset dir="${targetDir}/lib/java">
+        <include name="**/*.jar"/>
+      </fileset>
+    </path>
+
     <java classname="org.apache.axis.client.AdminClient" 
           fork="true">
       <classpath refid="classpath" />
@@ -259,7 +267,15 @@
 
     <!-- temporary write permissions for server-config.wsdd -->
     <chmod dir="${webappTargetDir}/WEB-INF" perm="777"/>
-           
+       
+
+    <path id="classpath">
+      <pathelement path="${classpath}" />
+      <fileset dir="${targetDir}/lib/java">
+        <include name="**/*.jar"/>
+      </fileset>
+    </path>
+    
     <java classname="org.apache.axis.client.AdminClient" fork="true">
       <classpath refid="classpath" />
       <arg line="-l${webServiceBaseUrl}/servlet/AxisServlet" />
