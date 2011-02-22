@@ -104,6 +104,7 @@
     </java>
         
     <delete file="../WSF/Client/src/java/org/gusdb/wsf/service/WsfService.java" />
+    <delete file="../WSF/Client/src/java/org/gusdb/wsf/plugin/WsfRequest.java" />
           
     <move file="../WSF/Client/src/java/org/gusdb/wsf/client/deploy.wsdd" 
           tofile="${targetDir}/config/wsfService-deploy.wsdd" />

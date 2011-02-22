@@ -12,11 +12,12 @@ import java.util.Map;
 /**
  * @author xingao
  * 
- * This time plugin runs 'date' system command, and parses out the result, and
- * returns the parts chosen by the params. The signal contains the return code
- * of the command, and the message contains the raw output of 'time'
+ *         This time plugin runs 'date' system command, and parses out the
+ *         result, and returns the parts chosen by the params. The signal
+ *         contains the return code of the command, and the message contains the
+ *         raw output of 'time'
  */
-public class TimePlugin extends WsfPlugin {
+public class TimePlugin extends AbstractPlugin {
 
     public static final String[] REQUIRED_PARAMS = { "hasDate", "hasTime" };
     public static final String[] OPTIONAL_PARAMS = { "hasWeekDay" };
@@ -35,21 +36,18 @@ public class TimePlugin extends WsfPlugin {
      * (non-Javadoc)
      * 
      * @see org.gusdb.wsf.plugin.WsfPlugin#execute(java.lang.String,
-     *      java.util.Map, java.lang.String[])
-     * 
-     * 
+     * java.util.Map, java.lang.String[])
      */
-    @Override
-    protected WsfResult execute(String projectId, Map<String, String> params,
-            String[] orderedColumns) throws WsfServiceException {
+    public WsfResponse execute(WsfRequest request) throws WsfServiceException {
         // decide the param values;
+        Map<String, String> params = request.getParams();
         boolean hasDate = Boolean.parseBoolean(params.get(REQUIRED_PARAMS[0]));
         boolean hasTime = Boolean.parseBoolean(params.get(REQUIRED_PARAMS[1]));
         boolean hasWeekDay = false;
-        if (params.containsKey(OPTIONAL_PARAMS[0]))
+        if (params.get(OPTIONAL_PARAMS[0]) != null)
             hasWeekDay = Boolean.parseBoolean(params.get(OPTIONAL_PARAMS[0]));
 
-        String[] command = buildCommand(params);
+        String[] command = buildCommand(request);
         try {
             StringBuffer result = new StringBuffer();
             int signal = invokeCommand(command, result, 60);
@@ -76,6 +74,7 @@ public class TimePlugin extends WsfPlugin {
 
             String[][] buffer = new String[results.size()][2];
             int row = 0;
+            String[] orderedColumns = request.getOrderedColumns();
             for (String field : results.keySet()) {
                 String value = results.get(field);
                 for (int i = 0; i < orderedColumns.length; i++) {
@@ -87,7 +86,7 @@ public class TimePlugin extends WsfPlugin {
                 }
                 row++;
             }
-            WsfResult wsfResult = new WsfResult();
+            WsfResponse wsfResult = new WsfResponse();
             wsfResult.setMessage(message);
             wsfResult.setSignal(signal);
             wsfResult.setResult(buffer);
@@ -102,8 +101,7 @@ public class TimePlugin extends WsfPlugin {
      * 
      * @see org.gusdb.wsf.plugin.WsfPlugin#getColumns()
      */
-    @Override
-    protected String[] getColumns() {
+    public String[] getColumns() {
         return COLUMNS;
     }
 
@@ -112,8 +110,7 @@ public class TimePlugin extends WsfPlugin {
      * 
      * @see org.gusdb.wsf.plugin.WsfPlugin#getRequiredParameterNames()
      */
-    @Override
-    protected String[] getRequiredParameterNames() {
+    public String[] getRequiredParameterNames() {
         return REQUIRED_PARAMS;
     }
 
@@ -122,26 +119,26 @@ public class TimePlugin extends WsfPlugin {
      * 
      * @see org.gusdb.wsf.plugin.WsfPlugin#validateParameters(java.util.Map)
      */
-    @Override
-    protected void validateParameters(Map<String, String> params)
+    public void validateParameters(WsfRequest request)
             throws WsfServiceException {
+        Map<String, String> params = request.getParams();
         // the known params should all have boolean values
         for (String param : REQUIRED_PARAMS) {
             String value = params.get(param).trim().toLowerCase();
             if (!value.equals("true") && !value.equals("false"))
-                throw new WsfServiceException("The param " + param
-                        + " has invalid value: '" + params.get(param) + "'");
+                throw new WsfServiceException("The param " + param + " has "
+                        + "invalid value: '" + params.get(param) + "'");
         }
         for (String param : OPTIONAL_PARAMS) {
-            if (!params.containsKey(param)) continue;
+            if (params.get(param) == null) continue;
             String value = params.get(param).trim().toLowerCase();
             if (!value.equals("true") && !value.equals("false"))
-                throw new WsfServiceException("The param " + param
-                        + " has invalid value: '" + params.get(param) + "'");
+                throw new WsfServiceException("The param " + param + " has "
+                        + "invalid value: '" + params.get(param) + "'");
         }
     }
 
-    private String[] buildCommand(Map<String, String> params) {
+    private String[] buildCommand(WsfRequest request) {
         List<String> command = new ArrayList<String>();
         command.add("date");
 
@@ -152,6 +149,7 @@ public class TimePlugin extends WsfPlugin {
         for (String param : OPTIONAL_PARAMS)
             knownParams.put(param, null);
 
+        Map<String, String> params = request.getParams();
         for (String param : params.keySet()) {
             if (knownParams.containsKey(param)) continue;
 
@@ -191,5 +189,10 @@ public class TimePlugin extends WsfPlugin {
         else if (weekDay.equalsIgnoreCase("sat")) return "6";
         else if (weekDay.equalsIgnoreCase("sun")) return "0";
         else return "-1";
+    }
+
+    @Override
+    protected String[] defineContextKeys() {
+        return new String[0];
     }
 }

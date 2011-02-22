@@ -11,42 +11,38 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
  * @author xingao
- *
+ * 
  */
 public class TimePluginTest {
 
-    private IWsfPlugin plugin;
-    private final String projectId = "TestDB";
+    private Plugin plugin;
+    private WsfRequest request;
     private Map<String, String> params;
 
     public TimePluginTest() {
         plugin = new TimePlugin();
-        params = new HashMap<String, String>();
-    }
+        request = new WsfRequest();
+        request.setProjectId("TestDB");
 
-    @Before
-    public void createParams() {
+        params = new HashMap<String, String>();
         params.put(TimePlugin.REQUIRED_PARAMS[0], "true");
         params.put(TimePlugin.REQUIRED_PARAMS[1], "true");
-    }
+        request.setParams(params);
 
-    @After
-    public void clearParams() {
-        params.clear();
+        request.setOrderedColumns(TimePlugin.COLUMNS);
     }
 
     @Test
     public void testGetDate() throws WsfServiceException {
         // prepare params
         params.put(TimePlugin.REQUIRED_PARAMS[1], "false");
+        request.setParams(params);
 
-        WsfResult result = plugin.invoke(projectId, params, TimePlugin.COLUMNS);
+        WsfResponse result = plugin.execute(request);
         Map<String, String> resultMap = buildResultMap(result.getResult(), 0);
         String message = result.getMessage();
         assertEquals("result size", 3, resultMap.size());
@@ -66,8 +62,9 @@ public class TimePluginTest {
     public void testGetTime() throws WsfServiceException {
         // prepare params
         params.put(TimePlugin.REQUIRED_PARAMS[0], "false");
+        request.setParams(params);
 
-        String[][] result = plugin.invoke(projectId, params, TimePlugin.COLUMNS).getResult();
+        String[][] result = plugin.execute(request).getResult();
         Map<String, String> resultMap = buildResultMap(result, 0);
         assertEquals("result size", 4, result.length);
 
@@ -82,14 +79,13 @@ public class TimePluginTest {
 
     @Test
     public void testGetWeekDay() throws WsfServiceException {
-        // prepare params
         params.put(TimePlugin.REQUIRED_PARAMS[0], "false");
         params.put(TimePlugin.REQUIRED_PARAMS[1], "false");
         params.put(TimePlugin.OPTIONAL_PARAMS[0], "true");
+        request.setParams(params);
+        // prepare params
 
-        String[] columns = { TimePlugin.COLUMNS[1], TimePlugin.COLUMNS[0] };
-
-        String[][] result = plugin.invoke(projectId, params, columns).getResult();
+        String[][] result = plugin.execute(request).getResult();
         assertEquals("result size", 1, result.length);
         assertEquals("weekday field", TimePlugin.WEEK_DAY, result[0][1]);
 
@@ -103,7 +99,8 @@ public class TimePluginTest {
     public void testGetAll() throws WsfServiceException {
         params.put(TimePlugin.OPTIONAL_PARAMS[0], "true");
         params.put("-u", null);
-        String[][] result = plugin.invoke(projectId, params, TimePlugin.COLUMNS).getResult();
+        request.setParams(params);
+        String[][] result = plugin.execute(request).getResult();
         assertEquals("result size", 8, result.length);
 
     }
@@ -111,26 +108,28 @@ public class TimePluginTest {
     @Test(expected = WsfServiceException.class)
     public void testMissingParam() throws WsfServiceException {
         params.remove(TimePlugin.REQUIRED_PARAMS[0]);
-        plugin.invoke(projectId, params, TimePlugin.COLUMNS);
+        request.setParams(params);
+        plugin.execute(request);
     }
 
     @Test(expected = WsfServiceException.class)
     public void testInvalidParam() throws WsfServiceException {
         params.put(TimePlugin.REQUIRED_PARAMS[1], "bad");
-        plugin.invoke(projectId, params, TimePlugin.COLUMNS);
+        request.setParams(params);
+        plugin.execute(request);
     }
 
     @Test(expected = WsfServiceException.class)
     public void testInvalidColumn() throws WsfServiceException {
-        String[] columns = { TimePlugin.COLUMNS[0], TimePlugin.COLUMNS[1],
-                "Bad" };
-        plugin.invoke(projectId, params, columns);
+        request.setOrderedColumns(new String[] { TimePlugin.COLUMNS[0],
+                TimePlugin.COLUMNS[1], "Bad" });
+        plugin.execute(request);
     }
 
     @Test(expected = WsfServiceException.class)
     public void testMissingColumn() throws WsfServiceException {
-        String[] columns = { TimePlugin.COLUMNS[0] };
-        plugin.invoke(projectId, params, columns);
+        request.setOrderedColumns(new String[] { TimePlugin.COLUMNS[0] });
+        plugin.execute(request);
     }
 
     private Map<String, String> buildResultMap(String[][] result, int fieldIndex) {
