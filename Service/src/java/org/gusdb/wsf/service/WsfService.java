@@ -239,16 +239,16 @@ public class WsfService {
             }
         }
         // cross check
-        colSet.clear();
-        colSet = new HashSet<String>(reqColumns.length);
-        for (String col : reqColumns) {
-            colSet.add(col);
-        }
-        for (String col : orderedColumns) {
-            if (!colSet.contains(col)) {
-                throw new WsfServiceException("Unknown column: " + col);
-            }
-        }
+        //colSet.clear();
+        //colSet = new HashSet<String>(reqColumns.length);
+        //for (String col : reqColumns) {
+        //    colSet.add(col);
+        //}
+        //for (String col : orderedColumns) {
+        //    if (!colSet.contains(col)) {
+        //        throw new WsfServiceException("Unknown column: " + col);
+        //    }
+        //}
     }
 
 }
