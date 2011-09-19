@@ -98,7 +98,7 @@ public class WsfService {
             ex.printStackTrace(new PrintWriter(writer));
             logger.error(ex);
             logger.error(writer.toString());
-            throw new ServiceException(ex);
+            throw new ServiceException(ex.getMessage(), ex);
         }
     }
 
