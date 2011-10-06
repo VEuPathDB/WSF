@@ -36,6 +36,8 @@ import org.json.JSONArray;
  */
 public class WsfService {
 
+    public static ServletContext SERVLET_CONTEXT;
+
     private static double PACKET_SIZE = 1000000;
 
     private static Logger logger = Logger.getLogger(WsfService.class);
@@ -93,7 +95,8 @@ public class WsfService {
                     + " results.");
 
             return result;
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             StringWriter writer = new StringWriter();
             ex.printStackTrace(new PrintWriter(writer));
             logger.error(ex);
@@ -105,11 +108,14 @@ public class WsfService {
     private Map<String, Object> loadContext(String[] keys) {
         Map<String, Object> context = new HashMap<String, Object>();
 
+        ServletContext scontext = null;
         MessageContext msgContext = MessageContext.getCurrentContext();
         if (msgContext != null) {
             Servlet servlet = (Servlet) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLET);
-            ServletContext scontext = servlet.getServletConfig().getServletContext();
-
+            scontext = servlet.getServletConfig().getServletContext();
+        }
+        if (scontext == null) scontext = SERVLET_CONTEXT;
+        if (scontext != null) {
             // get the configuration path:
             String configPath = scontext.getRealPath(scontext.getInitParameter(Plugin.CTX_CONFIG_PATH));
             context.put(Plugin.CTX_CONFIG_PATH, configPath);
@@ -150,7 +156,8 @@ public class WsfService {
             if (packetId + 1 == packets) file.delete();
 
             return new String(buffer);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             throw new ServiceException(ex);
         }
     }
@@ -239,16 +246,16 @@ public class WsfService {
             }
         }
         // cross check
-        //colSet.clear();
-        //colSet = new HashSet<String>(reqColumns.length);
-        //for (String col : reqColumns) {
-        //    colSet.add(col);
-        //}
-        //for (String col : orderedColumns) {
-        //    if (!colSet.contains(col)) {
-        //        throw new WsfServiceException("Unknown column: " + col);
-        //    }
-        //}
+        // colSet.clear();
+        // colSet = new HashSet<String>(reqColumns.length);
+        // for (String col : reqColumns) {
+        // colSet.add(col);
+        // }
+        // for (String col : orderedColumns) {
+        // if (!colSet.contains(col)) {
+        // throw new WsfServiceException("Unknown column: " + col);
+        // }
+        // }
     }
 
 }
