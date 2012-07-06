@@ -175,8 +175,14 @@ public abstract class AbstractPlugin implements Plugin {
                 // otherwise, check if time's up
                 long time = System.currentTimeMillis() - start;
                 if (time > limit) {
+                  // convert string array to string
+                  StringBuilder buffer = new StringBuilder();
+                  for (String piece : command) {
+                    if (buffer.length() >0)buffer.append(" ");
+                    buffer.append(piece);
+                  }
                     logger.warn("Time out, the command is cancelled: "
-                            + command);
+                            + buffer);
                     outputGobbler.close();
                     errorGobbler.close();
                     process.destroy();
