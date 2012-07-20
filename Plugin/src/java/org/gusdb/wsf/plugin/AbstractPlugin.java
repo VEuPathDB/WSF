@@ -26,7 +26,7 @@ import org.apache.log4j.Logger;
  */
 public abstract class AbstractPlugin implements Plugin {
 
-    protected static final String newline = System.getProperty("line.separator");
+    public static final String newline = System.getProperty("line.separator");
 
     protected abstract String[] defineContextKeys();
 
@@ -42,7 +42,7 @@ public abstract class AbstractPlugin implements Plugin {
      * It stores the properties defined in the configuration file. If the plugin
      * doesn't use a configuration file, this map is empty.
      */
-    private Properties properties;
+    protected Properties properties;
 
     private String propertyFile;
 
@@ -96,6 +96,15 @@ public abstract class AbstractPlugin implements Plugin {
             IOException, WsfServiceException {
         String configDir = (String) context.get(CTX_CONFIG_PATH);
         String filePath = null;
+        
+        // if configDir is null, try resolving it in gus home
+        if (configDir == null) {
+          String gusHome = System.getProperty("GUS_HOME");
+          if (gusHome != null)
+            configDir = gusHome + "/config/";
+        }
+        
+        // if config is null, try loading the resource from class path root.
         if (configDir == null) {
             URL url = this.getClass().getResource("/" + propertyFile);
             if (url == null)
@@ -123,7 +132,11 @@ public abstract class AbstractPlugin implements Plugin {
     protected String getProperty(String propertyName) {
         return properties.getProperty(propertyName);
     }
-
+    
+    protected boolean hasProperty(String propertyName) {
+      return properties.containsKey(propertyName);
+    }
+    
     /**
      * @param command
      *            the command array. If you have param values with spaces in it,
