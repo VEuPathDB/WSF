@@ -194,6 +194,7 @@ public class WsfService {
             JSONArray jsRow = new JSONArray();
             for (int col = 0; col < array[row].length; col++) {
                 jsRow.put(array[row][col]);
+                array[row][col] = null;
             }
             jsResult.put(jsRow);
         }
