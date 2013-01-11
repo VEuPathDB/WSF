@@ -12,39 +12,51 @@ import java.util.Map;
  */
 public interface Plugin {
 
-    public static final String CTX_CONFIG_PATH = "wsfConfigDir_param";
+  public static final String CTX_CONFIG_PATH = "wsfConfigDir_param";
 
-    /**
-     * @param params
-     * @param cols
-     *            specify the columns of the result, and the order of them
-     * @return
-     * @throws WsfServiceException
-     */
-    public WsfResponse execute(WsfRequest request) throws WsfServiceException;
+  /**
+   * @param params
+   * @param cols
+   *          specify the columns of the result, and the order of them
+   * @return
+   * @throws WsfServiceException
+   */
+  public WsfResponse execute(WsfRequest request) throws WsfServiceException;
 
-    /**
-     * The Plugin needs to provide a list of required parameter names; the base
-     * class will use this template method in the input validation process.
-     * 
-     * @return returns an array the names of the required parameters
-     */
-    public String[] getRequiredParameterNames();
+  /**
+   * The Plugin needs to provide a list of required parameter names; the base
+   * class will use this template method in the input validation process.
+   * 
+   * @return returns an array the names of the required parameters
+   */
+  public String[] getRequiredParameterNames();
 
-    /**
-     * The Plugin needs to provides a list of the columns expected in the
-     * result; the base class will use this template method in the input
-     * validation process.
-     * 
-     * @return returns an array the columns expected in the result
-     */
-    public String[] getColumns();
+  /**
+   * The Plugin needs to provides a list of the columns expected in the result;
+   * the base class will use this template method in the input validation
+   * process.
+   * 
+   * @return returns an array the columns expected in the result
+   */
+  public String[] getColumns();
 
-    public String[] getContextKeys();
+  /**
+   * @return an array of keys that a used in the servlet context.
+   */
+  public String[] getContextKeys();
 
-    public void initialize(Map<String, Object> context) throws WsfServiceException;
+  /**
+   * the service will get the objects from the serlvet context using the the
+   * context keys, and send the fetched objects as parameters.
+   * 
+   * @param context
+   *          a map of the objects fetched from servlet context, using the
+   *          context keys.
+   * @throws WsfServiceException
+   */
+  public void initialize(Map<String, Object> context)
+      throws WsfServiceException;
 
-    public void validateParameters(WsfRequest request)
-            throws WsfServiceException;
+  public void validateParameters(WsfRequest request) throws WsfServiceException;
 
 }
