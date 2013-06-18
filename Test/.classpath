@@ -4,8 +4,8 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/WSF Plugin"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/WSF Service"/>
-	<classpathentry kind="lib" path="lib/java/junit-4.4.jar"/>
-	<classpathentry kind="lib" path="/WSF Plugin/lib/java/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="/WSF Service/lib/java/jaxrpc-1.4.jar"/>
+	<classpathentry kind="lib" path="/WSF Plugin/lib/java/log4j-1.2.17.jar"/>
+	<classpathentry kind="lib" path="/WSF Plugin/lib/java/junit-4.10.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
