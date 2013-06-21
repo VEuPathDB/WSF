@@ -41,12 +41,6 @@
       <property name="component" value="Plugin"/>
     </ant>
 
-    <!-- post installation process -->
-    <!-- use default log4j.properties, if it does not exist -->
-    <available file="${targetDir}/config/log4j.properties" property="log4j.config.exist" />
-    <available file="${targetDir}/config/log4j.xml" property="log4j.config.exist" />
-    <antcall target="copyLog4jConfig" />
-    
   </target>
 
   <target name="WSF/Service-Installation" depends="WSF/Plugin-Installation">
@@ -122,10 +116,6 @@
     
   </target>
  
-  <target name="copyLog4jConfig" unless="log4j.config.exist">
-    <copy file="${targetDir}/config/log4j.properties.sample" toFile="${targetDir}/config/log4j.properties"/>
-  </target>
-
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
