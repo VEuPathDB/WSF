@@ -161,18 +161,17 @@ public class WsfRequest {
       orderedColumns.add(jsColumns.getString(i));
     }
 
-    JSONObject jsParams = jsRequest.getJSONObject("parameters");
-    Iterator<String> keys = jsParams.keys();
-    while (keys.hasNext()) {
-      String key = keys.next();
-      params.put(key, jsParams.getString(key));
-    }
+    addToMap(params, jsRequest.getJSONObject("parameters"));
+    addToMap(context, jsRequest.getJSONObject("context"));
+  }
 
-    JSONObject jsContext = jsRequest.getJSONObject("context");
-    keys = jsContext.keys();
+  private static void addToMap(Map<String, String> map, JSONObject newValues)
+      throws JSONException {
+    @SuppressWarnings("unchecked")
+    Iterator<String> keys = newValues.keys();
     while (keys.hasNext()) {
       String key = keys.next();
-      context.put(key, jsContext.getString(key));
+      map.put(key, newValues.getString(key));
     }
   }
 }

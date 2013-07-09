@@ -38,6 +38,7 @@ public class TimePlugin extends AbstractPlugin {
      * @see org.gusdb.wsf.plugin.WsfPlugin#execute(java.lang.String,
      * java.util.Map, java.lang.String[])
      */
+    @Override
     public WsfResponse execute(WsfRequest request) throws WsfServiceException {
         // decide the param values;
         Map<String, String> params = request.getParams();
@@ -101,6 +102,7 @@ public class TimePlugin extends AbstractPlugin {
      * 
      * @see org.gusdb.wsf.plugin.WsfPlugin#getColumns()
      */
+    @Override
     public String[] getColumns() {
         return COLUMNS;
     }
@@ -110,6 +112,7 @@ public class TimePlugin extends AbstractPlugin {
      * 
      * @see org.gusdb.wsf.plugin.WsfPlugin#getRequiredParameterNames()
      */
+    @Override
     public String[] getRequiredParameterNames() {
         return REQUIRED_PARAMS;
     }
@@ -119,6 +122,7 @@ public class TimePlugin extends AbstractPlugin {
      * 
      * @see org.gusdb.wsf.plugin.WsfPlugin#validateParameters(java.util.Map)
      */
+    @Override
     public void validateParameters(WsfRequest request)
             throws WsfServiceException {
         Map<String, String> params = request.getParams();
