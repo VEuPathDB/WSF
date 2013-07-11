@@ -68,13 +68,13 @@ public abstract class AbstractPlugin implements Plugin {
    *          the name of the property file. The base class will resolve the
    *          path to this file, which should be under the WEB-INF of axis'
    *          webapps.
-   * @throws WsfServiceException
    */
   public AbstractPlugin(String propertyFile) {
     this();
     this.propertyFile = propertyFile;
   }
 
+  @Override
   public void initialize(Map<String, Object> context)
       throws WsfServiceException {
     this.context = new HashMap<String, Object>(context);
@@ -94,6 +94,7 @@ public abstract class AbstractPlugin implements Plugin {
    * 
    * @see org.gusdb.wsf.plugin.Plugin#getContextKeys()
    */
+  @Override
   public String[] getContextKeys() {
     String[] keys = defineContextKeys();
     return (keys == null) ? new String[0] : keys;
@@ -231,6 +232,7 @@ public abstract class AbstractPlugin implements Plugin {
       this.sb = sb;
     }
 
+    @Override
     public void run() {
       try {
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
