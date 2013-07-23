@@ -1,9 +1,10 @@
 /**
  * 
  */
-package org.gusdb.wsf.plugin;
+package org.gusdb.wsf.service;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * @author xingao
@@ -33,9 +34,11 @@ public class WsfResponse implements Serializable {
    */
   protected String message;
 
-  private String requestId;
-  private int totalPackets = 1;
-  private int currentPacket = 0;
+  private int invokeId;
+  private int pageCount = 1;
+  private int currentPage = 0;
+
+  private Map<String, String> attachments;
 
   public WsfResponse() {}
 
@@ -87,48 +90,35 @@ public class WsfResponse implements Serializable {
     this.signal = signal;
   }
 
-  /**
-   * @return the requestId
-   */
-  public String getRequestId() {
-    return requestId;
+  public int getInvokeId() {
+    return invokeId;
   }
 
-  /**
-   * @param requestId
-   *          the requestId to set
-   */
-  public void setRequestId(String requestId) {
-    this.requestId = requestId;
+  public void setInvokeId(int invokeId) {
+    this.invokeId = invokeId;
   }
 
-  /**
-   * @return the totalPackets
-   */
-  public int getTotalPackets() {
-    return totalPackets;
+  public int getPageCount() {
+    return pageCount;
   }
 
-  /**
-   * @param totalPackets
-   *          the totalPackets to set
-   */
-  public void setTotalPackets(int totalPackets) {
-    this.totalPackets = totalPackets;
+  public void setPageCount(int pageCount) {
+    this.pageCount = pageCount;
   }
 
-  /**
-   * @return the currentPacket
-   */
-  public int getCurrentPacket() {
-    return currentPacket;
+  public int getCurrentPage() {
+    return currentPage;
   }
 
-  /**
-   * @param currentPacket
-   *          the currentPacket to set
-   */
-  public void setCurrentPacket(int currentPacket) {
-    this.currentPacket = currentPacket;
+  public void setCurrentPage(int currentPage) {
+    this.currentPage = currentPage;
+  }
+
+  public Map<String, String> getAttachments() {
+    return attachments;
+  }
+
+  public void setAttachments(Map<String, String> attachments) {
+    this.attachments = attachments;
   }
 }

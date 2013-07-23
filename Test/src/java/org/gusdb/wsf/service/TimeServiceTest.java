@@ -14,7 +14,6 @@ import javax.xml.rpc.ServiceException;
 
 import org.gusdb.wsf.plugin.TimePlugin;
 import org.gusdb.wsf.plugin.WsfRequest;
-import org.gusdb.wsf.plugin.WsfResponse;
 import org.junit.Test;
 
 /**
@@ -50,14 +49,13 @@ public class TimeServiceTest {
         params.put(TimePlugin.REQUIRED_PARAMS[1], "true");
         request.setParams(params);
 
-        WsfResponse result = service.invoke(request.toString());
+        WsfResponse response = service.invoke(request.toString());
+        assertEquals("signal", 0, response.getSignal());
 
-        assertEquals("signal", 0, result.getSignal());
-
-        String message = result.getMessage();
+        String message = response.getMessage();
         assertTrue("Message: " + message, message.trim().length() > 0);
 
-        String[][] array = result.getResult();
+        String[][] array = response.getResult();
         Map<String, String> resultMap = new HashMap<String, String>();
         for (int i = 0; i < array.length; i++) {
             resultMap.put(array[i][0], array[i][1]);

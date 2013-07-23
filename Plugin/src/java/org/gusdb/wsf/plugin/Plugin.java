@@ -15,13 +15,15 @@ public interface Plugin {
   public static final String CTX_CONFIG_PATH = "wsfConfigDir_param";
 
   /**
-   * @param params
-   * @param cols
-   *          specify the columns of the result, and the order of them
-   * @return
+   * Invoke a plugin, using the parameters in the request, and save the result
+   * into response.
+   * 
+   * @param request
+   * @param response
    * @throws WsfServiceException
    */
-  public WsfResponse execute(WsfRequest request) throws WsfServiceException;
+  public void execute(WsfRequest request, PluginResponse response)
+      throws WsfServiceException;
 
   /**
    * The Plugin needs to provide a list of required parameter names; the base
