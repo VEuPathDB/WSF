@@ -23,7 +23,7 @@ import org.apache.axis.transport.http.HTTPConstants;
 import org.apache.log4j.Logger;
 import org.gusdb.wsf.plugin.Plugin;
 import org.gusdb.wsf.plugin.PluginResponse;
-import org.gusdb.wsf.plugin.WsfRequest;
+import org.gusdb.wsf.plugin.PluginRequest;
 import org.gusdb.wsf.plugin.WsfServiceException;
 
 /**
@@ -169,7 +169,7 @@ public class WsfService {
     return context;
   }
 
-  private WsfResponse invokePlugin(Plugin plugin, WsfRequest request)
+  private WsfResponse invokePlugin(Plugin plugin, PluginRequest request)
       throws WsfServiceException, IOException {
     // validate required parameters
     validateRequiredParameters(plugin, request);
@@ -236,7 +236,7 @@ public class WsfService {
     return invokeId;
   }
 
-  private void validateRequiredParameters(Plugin plugin, WsfRequest request)
+  private void validateRequiredParameters(Plugin plugin, PluginRequest request)
       throws WsfServiceException {
     String[] reqParams = plugin.getRequiredParameterNames();
 

@@ -22,7 +22,7 @@ public interface Plugin {
    * @param response
    * @throws WsfServiceException
    */
-  public void execute(WsfRequest request, PluginResponse response)
+  public void execute(PluginRequest request, PluginResponse response)
       throws WsfServiceException;
 
   /**
@@ -59,6 +59,6 @@ public interface Plugin {
   public void initialize(Map<String, Object> context)
       throws WsfServiceException;
 
-  public void validateParameters(WsfRequest request) throws WsfServiceException;
+  public void validateParameters(PluginRequest request) throws WsfServiceException;
 
 }

@@ -13,7 +13,6 @@ import java.util.Map;
 import javax.xml.rpc.ServiceException;
 
 import org.gusdb.wsf.plugin.TimePlugin;
-import org.gusdb.wsf.plugin.WsfRequest;
 import org.junit.Test;
 
 /**
@@ -41,13 +40,7 @@ public class TimeServiceTest {
     @Test
     public void testTimePlugin() throws ServiceException {
         String plugin = "org.gusdb.wsf.plugin.TimePlugin";
-
-        WsfRequest request = new WsfRequest();
         request.setPluginClass(plugin);
-        request.setProjectId("TestDB");
-        params.put(TimePlugin.REQUIRED_PARAMS[0], "true");
-        params.put(TimePlugin.REQUIRED_PARAMS[1], "true");
-        request.setParams(params);
 
         WsfResponse response = service.invoke(request.toString());
         assertEquals("signal", 0, response.getSignal());

@@ -44,7 +44,7 @@ public class TimePlugin extends AbstractPlugin {
    * java.util.Map, java.lang.String[])
    */
   @Override
-  public void execute(WsfRequest request, PluginResponse response)
+  public void execute(PluginRequest request, PluginResponse response)
       throws WsfServiceException {
     // decide the param values;
     Map<String, String> params = request.getParams();
@@ -133,7 +133,7 @@ public class TimePlugin extends AbstractPlugin {
    * @see org.gusdb.wsf.plugin.WsfPlugin#validateParameters(java.util.Map)
    */
   @Override
-  public void validateParameters(WsfRequest request) throws WsfServiceException {
+  public void validateParameters(PluginRequest request) throws WsfServiceException {
     Map<String, String> params = request.getParams();
     // the known params should all have boolean values
     for (String param : REQUIRED_PARAMS) {
@@ -151,7 +151,7 @@ public class TimePlugin extends AbstractPlugin {
     }
   }
 
-  private String[] buildCommand(WsfRequest request) {
+  private String[] buildCommand(PluginRequest request) {
     List<String> command = new ArrayList<String>();
     command.add("date");
 

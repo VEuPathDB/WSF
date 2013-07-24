@@ -23,7 +23,7 @@ public class TimePluginTest {
 
   private final Random random;
   private final Plugin plugin;
-  private final WsfRequest request;
+  private final PluginRequest request;
   private final Map<String, String> params;
   private final File storageDir;
 
@@ -35,7 +35,7 @@ public class TimePluginTest {
     params.put(TimePlugin.REQUIRED_PARAMS[0], "true");
     params.put(TimePlugin.REQUIRED_PARAMS[1], "true");
 
-    request = new WsfRequest();
+    request = new PluginRequest();
     request.setProjectId("TestDB");
     request.setParams(params);
     request.setOrderedColumns(TimePlugin.COLUMNS);
