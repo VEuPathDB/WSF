@@ -53,7 +53,7 @@ public class TimePluginTest {
 
     int invokeId = random.nextInt();
     PluginResponse response = new PluginResponse(storageDir, invokeId);
-    plugin.execute(request, response);
+    plugin.invoke(request, response);
 
     Map<String, String> resultMap = assertResponse(response, invokeId, 3);
 
@@ -74,7 +74,7 @@ public class TimePluginTest {
 
     int invokeId = random.nextInt();
     PluginResponse response = new PluginResponse(storageDir, invokeId);
-    plugin.execute(request, response);
+    plugin.invoke(request, response);
 
     Map<String, String> resultMap = assertResponse(response, invokeId, 4);
 
@@ -96,7 +96,7 @@ public class TimePluginTest {
 
     int invokeId = random.nextInt();
     PluginResponse response = new PluginResponse(storageDir, invokeId);
-    plugin.execute(request, response);
+    plugin.invoke(request, response);
 
     Map<String, String> resultMap = assertResponse(response, invokeId, 1);
 
@@ -116,7 +116,7 @@ public class TimePluginTest {
 
     int invokeId = random.nextInt();
     PluginResponse response = new PluginResponse(storageDir, invokeId);
-    plugin.execute(request, response);
+    plugin.invoke(request, response);
 
     assertResponse(response, invokeId, 8);
   }
@@ -128,7 +128,7 @@ public class TimePluginTest {
 
     int invokeId = random.nextInt();
     PluginResponse response = new PluginResponse(storageDir, invokeId);
-    plugin.execute(request, response);
+    plugin.invoke(request, response);
 
     assertResponse(response, invokeId, 8);
   }
@@ -140,7 +140,7 @@ public class TimePluginTest {
 
     int invokeId = random.nextInt();
     PluginResponse response = new PluginResponse(storageDir, invokeId);
-    plugin.execute(request, response);
+    plugin.invoke(request, response);
 
     assertResponse(response, invokeId, 8);
   }
@@ -152,7 +152,7 @@ public class TimePluginTest {
 
     int invokeId = random.nextInt();
     PluginResponse response = new PluginResponse(storageDir, invokeId);
-    plugin.execute(request, response);
+    plugin.invoke(request, response);
 
     assertResponse(response, invokeId, 8);
   }
@@ -163,7 +163,7 @@ public class TimePluginTest {
 
     int invokeId = random.nextInt();
     PluginResponse response = new PluginResponse(storageDir, invokeId);
-    plugin.execute(request, response);
+    plugin.invoke(request, response);
 
     assertResponse(response, invokeId, 8);
   }

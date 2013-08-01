@@ -88,6 +88,16 @@ public class PluginResponse {
 
       // delete the file since it's been accessed.
       file.delete();
+      // also check if the folder is empty, if so, delete it too.
+      String[] children = dir.list();
+      boolean empty = true;
+      for (String child : children) {
+        if (!child.equals(".") && !child.equals("..")) {
+          empty = false;
+          break;
+        }
+      }
+      if (empty) dir.delete();
 
       // convert JSON representation back into 2D String array.
       JSONArray jsRows = new JSONArray(new String(content, "utf-8"));
@@ -104,6 +114,21 @@ public class PluginResponse {
     } catch (IOException | JSONException ex) {
       throw new WsfServiceException(ex);
     }
+  }
+  
+  public void cleanup() {
+    // delete all the resources storage by the response
+    File dir = new File(storageDir, Integer.toString(invokeId));
+    deleteFolder(dir);
+  }
+  
+  /**
+   * Delete a folder and all the sub-folders and files under it recursively.
+   * @param dir
+   */
+  private void deleteFolder(File dir) {
+    if (!dir.exists()) return;
+    // delete
   }
 
   /**

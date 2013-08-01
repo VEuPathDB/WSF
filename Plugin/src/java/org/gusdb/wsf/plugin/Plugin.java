@@ -22,7 +22,7 @@ public interface Plugin {
    * @param response
    * @throws WsfServiceException
    */
-  public void execute(PluginRequest request, PluginResponse response)
+  public void invoke(PluginRequest request, PluginResponse response)
       throws WsfServiceException;
 
   /**

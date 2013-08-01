@@ -34,6 +34,9 @@ public abstract class AbstractPlugin implements Plugin {
    */
   protected abstract String[] defineContextKeys();
 
+  protected abstract void execute(PluginRequest request, PluginResponse response)
+      throws WsfServiceException;
+
   /**
    * The logger for this plugin. It is a recommended way to record standard
    * output and error messages.
@@ -100,6 +103,17 @@ public abstract class AbstractPlugin implements Plugin {
     return (keys == null) ? new String[0] : keys;
   }
 
+  @Override
+  public void invoke(PluginRequest request, PluginResponse response)
+      throws WsfServiceException {
+    try {
+      execute(request, response);
+    } catch (WsfServiceException ex) {
+      response.cleanup();
+      throw ex;
+    }
+  }
+
   private void loadConfiguration() throws InvalidPropertiesFormatException,
       IOException, WsfServiceException {
     String configDir = (String) context.get(CTX_CONFIG_PATH);
@@ -108,8 +122,7 @@ public abstract class AbstractPlugin implements Plugin {
     // if configDir is null, try resolving it in gus home
     if (configDir == null) {
       String gusHome = System.getProperty("GUS_HOME");
-      if (gusHome != null)
-        configDir = gusHome + "/config/";
+      if (gusHome != null) configDir = gusHome + "/config/";
     }
 
     // if config is null, try loading the resource from class path root.
@@ -121,8 +134,7 @@ public abstract class AbstractPlugin implements Plugin {
 
       filePath = url.toString();
     } else {
-      if (!configDir.endsWith("/"))
-        configDir += "/";
+      if (!configDir.endsWith("/")) configDir += "/";
       String path = configDir + propertyFile;
       File file = new File(path);
       if (!file.exists() || !file.isFile())
@@ -192,8 +204,7 @@ public abstract class AbstractPlugin implements Plugin {
       } catch (IllegalThreadStateException ex) {
         // if the timeout is set to <= 0, keep waiting till the process
         // is finished
-        if (timeout <= 0)
-          continue;
+        if (timeout <= 0) continue;
 
         // otherwise, check if time's up
         long time = System.currentTimeMillis() - start;
@@ -201,8 +212,7 @@ public abstract class AbstractPlugin implements Plugin {
           // convert string array to string
           StringBuilder buffer = new StringBuilder();
           for (String piece : command) {
-            if (buffer.length() > 0)
-              buffer.append(" ");
+            if (buffer.length() > 0) buffer.append(" ");
             buffer.append(piece);
           }
           logger.warn("Time out, the command is cancelled: " + buffer);

@@ -16,14 +16,13 @@ import java.util.Set;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
-import javax.xml.rpc.ServiceException;
 
 import org.apache.axis.MessageContext;
 import org.apache.axis.transport.http.HTTPConstants;
 import org.apache.log4j.Logger;
 import org.gusdb.wsf.plugin.Plugin;
-import org.gusdb.wsf.plugin.PluginResponse;
 import org.gusdb.wsf.plugin.PluginRequest;
+import org.gusdb.wsf.plugin.PluginResponse;
 import org.gusdb.wsf.plugin.WsfServiceException;
 
 /**
@@ -65,11 +64,11 @@ public class WsfService {
    *         split into multiple packets, and only the first packet is returned.
    *         Then the clients will need to call requestResult() to get
    *         additional packets.
-   * @throws ServiceException
+   * @throws WsfServiceException
    * 
    * @see org.gusdb.wsf.service.WsfService#requestResult()
    */
-  public WsfResponse invoke(String jsonRequest) throws ServiceException {
+  public WsfResponse invoke(String jsonRequest) throws WsfServiceException {
     long start = System.currentTimeMillis();
     try {
       WsfRequest request = new WsfRequest(jsonRequest);
@@ -110,9 +109,8 @@ public class WsfService {
     } catch (Exception ex) {
       StringWriter writer = new StringWriter();
       ex.printStackTrace(new PrintWriter(writer));
-      logger.error(ex);
-      logger.error(writer.toString());
-      throw new ServiceException(ex.getMessage(), ex);
+      logger.error(ex + "\n" + writer.toString());
+      throw new WsfServiceException(ex.getMessage(), ex);
     }
   }
 
@@ -122,14 +120,10 @@ public class WsfService {
    * @param invokeId
    * @param pageId
    * @return a string representation of the result for the requested packet.
-   * @throws ServiceException
-   *           If the requestId doesn't match any of the previous request, or if
-   *           all the packets in the previous request have been sent before, an
-   *           ServiceException will be thrown out.
    * @throws WsfServiceException
    */
   public WsfResponse requestResult(int invokeId, int pageId)
-      throws ServiceException, WsfServiceException {
+      throws WsfServiceException {
     PluginResponse pluginResponse = new PluginResponse(storageDir, invokeId);
     WsfResponse wsfResponse = new WsfResponse();
     wsfResponse.setInvokeId(invokeId);
@@ -169,7 +163,7 @@ public class WsfService {
     return context;
   }
 
-  private WsfResponse invokePlugin(Plugin plugin, PluginRequest request)
+  private WsfResponse invokePlugin(Plugin plugin, WsfRequest request)
       throws WsfServiceException, IOException {
     // validate required parameters
     validateRequiredParameters(plugin, request);
@@ -183,7 +177,7 @@ public class WsfService {
     // execute the main function, and obtain result
     int invokeId = newInvokeId();
     PluginResponse pluginResponse = new PluginResponse(storageDir, invokeId);
-    plugin.execute(request, pluginResponse);
+    plugin.invoke(request, pluginResponse);
     // make sure the results are flushed into storage
     pluginResponse.flush();
 
