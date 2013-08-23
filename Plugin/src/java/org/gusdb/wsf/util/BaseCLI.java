@@ -64,7 +64,7 @@ public abstract class BaseCLI {
         commandLine = parser.parse(options, args);
     }
 
-    private void printUsage() {
+    public void printUsage() {
         String newline = System.getProperty("line.separator");
 
         StringBuffer syntax = new StringBuffer(command);
