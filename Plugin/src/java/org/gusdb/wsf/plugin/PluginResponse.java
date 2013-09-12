@@ -139,7 +139,7 @@ public class PluginResponse {
    * @param row
    * @throws WsfServiceException
    */
-  public void addRow(String[] row) throws WsfServiceException {
+  public synchronized void addRow(String[] row) throws WsfServiceException {
     // check if we need to start a new page
     if (size >= PAGE_SIZE) flush();
 

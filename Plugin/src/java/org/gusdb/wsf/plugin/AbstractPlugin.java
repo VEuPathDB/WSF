@@ -77,6 +77,9 @@ public abstract class AbstractPlugin implements Plugin {
     this.propertyFile = propertyFile;
   }
 
+  /* (non-Javadoc)
+   * @see org.gusdb.wsf.plugin.Plugin#initialize(java.util.Map)
+   */
   @Override
   public void initialize(Map<String, Object> context)
       throws WsfServiceException {
