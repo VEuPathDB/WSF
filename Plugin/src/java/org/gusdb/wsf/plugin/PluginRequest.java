@@ -8,14 +8,22 @@ import java.util.Map;
 public class PluginRequest {
 
   private String projectId;
-  private Map<String, String> params = new HashMap<String, String>();
-  private List<String> orderedColumns = new ArrayList<String>();
-
-  /**
-   * The context can be used to hold additional information, such as user id,
-   * calling query name, etc, which can be used by plugins.
-   */
+  private Map<String, String> params;
+  private List<String> orderedColumns;
   private Map<String, String> context = new HashMap<String, String>();
+
+  public PluginRequest() {
+    this.params = new HashMap<String, String>();
+    this.orderedColumns = new ArrayList<String>();
+    this.context = new HashMap<String, String>();
+  }
+
+  public PluginRequest(PluginRequest request) {
+    this.projectId = request.projectId;
+    this.params = new HashMap<>(request.params);
+    this.orderedColumns = new ArrayList<>(request.orderedColumns);
+    this.context = new HashMap<>(request.context);
+  }
 
   /**
    * @return the projectId
@@ -46,6 +54,10 @@ public class PluginRequest {
   public void setParams(Map<String, String> params) {
     this.params = new HashMap<String, String>(params);
   }
+  
+  public void putParam(String name, String value) {
+    this.params.put(name, value);
+  }
 
   /**
    * @return the orderedColumns
@@ -66,8 +78,11 @@ public class PluginRequest {
       this.orderedColumns.add(column);
     }
   }
-  
+
   /**
+   * The context can be used to hold additional information, such as user id,
+   * calling query name, etc, which can be used by plugins.
+   * 
    * @return the context
    */
   public Map<String, String> getContext() {

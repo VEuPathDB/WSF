@@ -214,6 +214,10 @@ public class PluginResponse {
   public void setAttachments(Map<String, String> attachments) {
     this.attachments = attachments;
   }
+  
+  public void addAttachments(Map<String, String> attachments) {
+    this.attachments.putAll(attachments);
+  }
 
   /**
    * The invokeId represent a unique invocation of the plugin.

@@ -20,19 +20,21 @@ import org.json.JSONObject;
  */
 public class WsfRequest extends PluginRequest {
 
-  /**
-   * the full class name of the WSF plugin. The service will instantiate a
-   * plugin instance from this class name, and invoke it.
-   */
   private String pluginClass;
 
   public WsfRequest() {};
+  
+  public WsfRequest(PluginRequest pluginRequest) {
+    super(pluginRequest);
+  }
 
   public WsfRequest(String jsonString) throws JSONException {
     parseJSON(jsonString);
   }
 
   /**
+   * the full class name of the WSF plugin. The service will instantiate a
+   * plugin instance from this class name, and invoke it.
    * @return the pluginClass
    */
   public String getPluginClass() {
