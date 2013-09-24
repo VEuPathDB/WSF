@@ -45,7 +45,7 @@ public class TimePlugin extends AbstractPlugin {
    */
   @Override
   public void execute(PluginRequest request, PluginResponse response)
-      throws WsfServiceException {
+      throws WsfPluginException {
     // decide the param values;
     Map<String, String> params = request.getParams();
     boolean hasDate = Boolean.parseBoolean(params.get(REQUIRED_PARAMS[0]));
@@ -103,7 +103,7 @@ public class TimePlugin extends AbstractPlugin {
       response.setSignal(signal);
       response.setAttachments(attachments);
     } catch (IOException ex) {
-      throw new WsfServiceException(ex);
+      throw new WsfPluginException(ex);
     }
   }
 
@@ -133,20 +133,20 @@ public class TimePlugin extends AbstractPlugin {
    * @see org.gusdb.wsf.plugin.WsfPlugin#validateParameters(java.util.Map)
    */
   @Override
-  public void validateParameters(PluginRequest request) throws WsfServiceException {
+  public void validateParameters(PluginRequest request) throws WsfPluginException {
     Map<String, String> params = request.getParams();
     // the known params should all have boolean values
     for (String param : REQUIRED_PARAMS) {
       String value = params.get(param).trim().toLowerCase();
       if (!value.equals("true") && !value.equals("false"))
-        throw new WsfServiceException("The param " + param + " has "
+        throw new WsfPluginException("The param " + param + " has "
             + "invalid value: '" + params.get(param) + "'");
     }
     for (String param : OPTIONAL_PARAMS) {
       if (params.get(param) == null) continue;
       String value = params.get(param).trim().toLowerCase();
       if (!value.equals("true") && !value.equals("false"))
-        throw new WsfServiceException("The param " + param + " has "
+        throw new WsfPluginException("The param " + param + " has "
             + "invalid value: '" + params.get(param) + "'");
     }
   }

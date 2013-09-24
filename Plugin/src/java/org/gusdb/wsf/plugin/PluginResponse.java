@@ -73,9 +73,9 @@ public class PluginResponse {
    * @param pageId
    *          0 based page id, the maximum page id is pageCount - 1.
    * @return returns data of the current page.
-   * @throws WsfServiceException
+   * @throws WsfPluginException
    */
-  public String[][] getPage(int pageId) throws WsfServiceException {
+  public String[][] getPage(int pageId) throws WsfPluginException {
     File dir = new File(storageDir, Integer.toString(invokeId));
     File file = new File(dir, FILE_PREFIX + pageIndex);
     if (!file.exists()) return null;
@@ -112,7 +112,7 @@ public class PluginResponse {
       }
       return rows;
     } catch (IOException | JSONException ex) {
-      throw new WsfServiceException(ex);
+      throw new WsfPluginException(ex);
     }
   }
   
@@ -137,9 +137,9 @@ public class PluginResponse {
    * page will be created.
    * 
    * @param row
-   * @throws WsfServiceException
+   * @throws WsfPluginException
    */
-  public synchronized void addRow(String[] row) throws WsfServiceException {
+  public synchronized void addRow(String[] row) throws WsfPluginException {
     // check if we need to start a new page
     if (size >= PAGE_SIZE) flush();
 
@@ -161,16 +161,16 @@ public class PluginResponse {
    * This method should always be called at last when adding to storage is
    * finished.
    * 
-   * @throws WsfServiceException
+   * @throws WsfPluginException
    */
-  public void flush() throws WsfServiceException {
+  public void flush() throws WsfPluginException {
     // if there's no data, do nothing.
     if (rows.size() == 0) return;
 
     try {
       saveCurrentPage();
     } catch (IOException ex) {
-      throw new WsfServiceException(ex);
+      throw new WsfPluginException(ex);
     }
 
     // reset page

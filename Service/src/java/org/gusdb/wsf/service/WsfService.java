@@ -23,7 +23,8 @@ import org.apache.log4j.Logger;
 import org.gusdb.wsf.plugin.Plugin;
 import org.gusdb.wsf.plugin.PluginRequest;
 import org.gusdb.wsf.plugin.PluginResponse;
-import org.gusdb.wsf.plugin.WsfServiceException;
+import org.gusdb.wsf.plugin.WsfPluginException;
+import org.json.JSONException;
 
 /**
  * The WSF Web service entry point.
@@ -53,7 +54,8 @@ public class WsfService {
     random = new Random();
     String temp = System.getProperty("java.io.tmpdir", "/tmp");
     storageDir = new File(temp + STORAGE_DIR);
-    if (!storageDir.exists() || !storageDir.isDirectory()) storageDir.mkdirs();
+    if (!storageDir.exists() || !storageDir.isDirectory())
+      storageDir.mkdirs();
   }
 
   /**
@@ -106,7 +108,8 @@ public class WsfService {
           + " seconds with " + result.getResult().length + " results.");
 
       return result;
-    } catch (Exception ex) {
+    } catch (WsfPluginException | IOException | ClassNotFoundException
+        | InstantiationException | IllegalAccessException | JSONException ex) {
       StringWriter writer = new StringWriter();
       ex.printStackTrace(new PrintWriter(writer));
       logger.error(ex + "\n" + writer.toString());
@@ -128,7 +131,11 @@ public class WsfService {
     WsfResponse wsfResponse = new WsfResponse();
     wsfResponse.setInvokeId(invokeId);
     wsfResponse.setCurrentPage(pageId);
-    wsfResponse.setResult(pluginResponse.getPage(pageId));
+    try {
+      wsfResponse.setResult(pluginResponse.getPage(pageId));
+    } catch (WsfPluginException ex) {
+      throw new WsfServiceException();
+    }
     return wsfResponse;
   }
 
@@ -147,7 +154,8 @@ public class WsfService {
       Servlet servlet = (Servlet) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLET);
       scontext = servlet.getServletConfig().getServletContext();
     }
-    if (scontext == null) scontext = SERVLET_CONTEXT;
+    if (scontext == null)
+      scontext = SERVLET_CONTEXT;
     if (scontext != null) {
       // get the configuration path:
       String configPath = scontext.getRealPath(scontext.getInitParameter(Plugin.CTX_CONFIG_PATH));
@@ -164,7 +172,7 @@ public class WsfService {
   }
 
   private WsfResponse invokePlugin(Plugin plugin, WsfRequest request)
-      throws WsfServiceException, IOException {
+      throws WsfPluginException, IOException {
     // validate required parameters
     validateRequiredParameters(plugin, request);
 
@@ -194,7 +202,7 @@ public class WsfService {
   }
 
   private void validateColumns(Plugin plugin, String[] orderedColumns)
-      throws WsfServiceException {
+      throws WsfPluginException {
     String[] reqColumns = plugin.getColumns();
 
     Set<String> colSet = new HashSet<String>();
@@ -203,7 +211,7 @@ public class WsfService {
     }
     for (String col : reqColumns) {
       if (!colSet.contains(col)) {
-        throw new WsfServiceException("The required column is missing: " + col);
+        throw new WsfPluginException("The required column is missing: " + col);
       }
     }
     // cross check
@@ -225,20 +233,21 @@ public class WsfService {
       // generate a random id, and make sure the id is not being used.
       invokeId = random.nextInt(Integer.MAX_VALUE);
       File file = new File(storageDir, Integer.toString(invokeId));
-      if (!file.exists()) break;
+      if (!file.exists())
+        break;
     }
     return invokeId;
   }
 
   private void validateRequiredParameters(Plugin plugin, PluginRequest request)
-      throws WsfServiceException {
+      throws WsfPluginException {
     String[] reqParams = plugin.getRequiredParameterNames();
 
     // validate parameters
     Map<String, String> params = request.getParams();
     for (String param : reqParams) {
       if (!params.containsKey(param)) {
-        throw new WsfServiceException("The required parameter is missing: "
+        throw new WsfPluginException("The required parameter is missing: "
             + param);
       }
     }

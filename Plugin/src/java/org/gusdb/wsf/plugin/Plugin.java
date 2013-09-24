@@ -20,10 +20,10 @@ public interface Plugin {
    * 
    * @param request
    * @param response
-   * @throws WsfServiceException
+   * @throws WsfPluginException
    */
   public void invoke(PluginRequest request, PluginResponse response)
-      throws WsfServiceException;
+      throws WsfPluginException;
 
   /**
    * The Plugin needs to provide a list of required parameter names; the base
@@ -54,11 +54,11 @@ public interface Plugin {
    * @param context
    *          a map of the objects fetched from servlet context, using the
    *          context keys.
-   * @throws WsfServiceException
+   * @throws WsfPluginException
    */
   public void initialize(Map<String, Object> context)
-      throws WsfServiceException;
+      throws WsfPluginException;
 
-  public void validateParameters(PluginRequest request) throws WsfServiceException;
+  public void validateParameters(PluginRequest request) throws WsfPluginException;
 
 }

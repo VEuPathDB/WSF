@@ -46,7 +46,7 @@ public class TimePluginTest {
   }
 
   @Test
-  public void testGetDate() throws WsfServiceException {
+  public void testGetDate() throws WsfPluginException {
     // prepare params
     params.put(TimePlugin.REQUIRED_PARAMS[1], "false");
     request.setParams(params);
@@ -67,7 +67,7 @@ public class TimePluginTest {
   }
 
   @Test
-  public void testGetTime() throws WsfServiceException {
+  public void testGetTime() throws WsfPluginException {
     // prepare params
     params.put(TimePlugin.REQUIRED_PARAMS[0], "false");
     request.setParams(params);
@@ -88,7 +88,7 @@ public class TimePluginTest {
   }
 
   @Test
-  public void testGetWeekDay() throws WsfServiceException {
+  public void testGetWeekDay() throws WsfPluginException {
     params.put(TimePlugin.REQUIRED_PARAMS[0], "false");
     params.put(TimePlugin.REQUIRED_PARAMS[1], "false");
     params.put(TimePlugin.OPTIONAL_PARAMS[0], "true");
@@ -109,7 +109,7 @@ public class TimePluginTest {
   }
 
   @Test
-  public void testGetAll() throws WsfServiceException {
+  public void testGetAll() throws WsfPluginException {
     params.put(TimePlugin.OPTIONAL_PARAMS[0], "true");
     params.put("-u", null);
     request.setParams(params);
@@ -121,8 +121,8 @@ public class TimePluginTest {
     assertResponse(response, invokeId, 8);
   }
 
-  @Test(expected = WsfServiceException.class)
-  public void testMissingParam() throws WsfServiceException {
+  @Test(expected = WsfPluginException.class)
+  public void testMissingParam() throws WsfPluginException {
     params.remove(TimePlugin.REQUIRED_PARAMS[0]);
     request.setParams(params);
 
@@ -133,8 +133,8 @@ public class TimePluginTest {
     assertResponse(response, invokeId, 8);
   }
 
-  @Test(expected = WsfServiceException.class)
-  public void testInvalidParam() throws WsfServiceException {
+  @Test(expected = WsfPluginException.class)
+  public void testInvalidParam() throws WsfPluginException {
     params.put(TimePlugin.REQUIRED_PARAMS[1], "bad");
     request.setParams(params);
 
@@ -145,8 +145,8 @@ public class TimePluginTest {
     assertResponse(response, invokeId, 8);
   }
 
-  @Test(expected = WsfServiceException.class)
-  public void testInvalidColumn() throws WsfServiceException {
+  @Test(expected = WsfPluginException.class)
+  public void testInvalidColumn() throws WsfPluginException {
     request.setOrderedColumns(new String[] { TimePlugin.COLUMNS[0],
         TimePlugin.COLUMNS[1], "Bad" });
 
@@ -157,8 +157,8 @@ public class TimePluginTest {
     assertResponse(response, invokeId, 8);
   }
 
-  @Test(expected = WsfServiceException.class)
-  public void testMissingColumn() throws WsfServiceException {
+  @Test(expected = WsfPluginException.class)
+  public void testMissingColumn() throws WsfPluginException {
     request.setOrderedColumns(new String[] { TimePlugin.COLUMNS[0] });
 
     int invokeId = random.nextInt();
@@ -169,7 +169,7 @@ public class TimePluginTest {
   }
 
   private Map<String, String> assertResponse(PluginResponse response,
-      int invokeId, int resultSize) throws WsfServiceException {
+      int invokeId, int resultSize) throws WsfPluginException {
     Map<String, String> resultMap = buildResultMap(response, 0);
     String message = response.getMessage();
     int signal = response.getSignal();
@@ -190,7 +190,7 @@ public class TimePluginTest {
   }
 
   private Map<String, String> buildResultMap(PluginResponse response,
-      int fieldIndex) throws WsfServiceException {
+      int fieldIndex) throws WsfPluginException {
     String[][] result = response.getPage(0);
     Map<String, String> resultMap = new HashMap<String, String>();
     for (int i = 0; i < result.length; i++) {

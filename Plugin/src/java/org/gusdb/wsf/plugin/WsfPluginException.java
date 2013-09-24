@@ -1,6 +1,5 @@
 package org.gusdb.wsf.plugin;
 
-import java.io.Serializable;
 
 /**
  * 
@@ -10,17 +9,17 @@ import java.io.Serializable;
  * @author Jerric
  * @created Nov 2, 2005
  */
-public class WsfServiceException extends Exception implements Serializable {
+public class WsfPluginException extends Exception {
+
+    /**
+   * 
+   */
+  private static final long serialVersionUID = 4927047061317403654L;
 
     /**
      * 
      */
-    private static final long serialVersionUID = 6228934705413257448L;
-
-    /**
-     * 
-     */
-    public WsfServiceException() {
+    public WsfPluginException() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -28,7 +27,7 @@ public class WsfServiceException extends Exception implements Serializable {
     /**
      * @param message
      */
-    public WsfServiceException(String message) {
+    public WsfPluginException(String message) {
         super(message);
         // TODO Auto-generated constructor stub
     }
@@ -37,7 +36,7 @@ public class WsfServiceException extends Exception implements Serializable {
      * @param message
      * @param cause
      */
-    public WsfServiceException(String message, Throwable cause) {
+    public WsfPluginException(String message, Throwable cause) {
         super(message, cause);
         // TODO Auto-generated constructor stub
     }
@@ -45,7 +44,7 @@ public class WsfServiceException extends Exception implements Serializable {
     /**
      * @param cause
      */
-    public WsfServiceException(Throwable cause) {
+    public WsfPluginException(Throwable cause) {
         super(cause.getMessage(), cause);
     }
 
@@ -55,7 +54,7 @@ public class WsfServiceException extends Exception implements Serializable {
      * @param enableSuppression
      * @param writableStackTrace
      */
-    public WsfServiceException(String message, Throwable cause,
+    public WsfPluginException(String message, Throwable cause,
         boolean enableSuppression, boolean writableStackTrace) {
       super(message, cause, enableSuppression, writableStackTrace);
     }

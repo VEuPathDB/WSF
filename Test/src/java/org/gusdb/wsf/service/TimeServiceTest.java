@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.gusdb.wsf.plugin.TimePlugin;
-import org.gusdb.wsf.plugin.WsfServiceException;
+import org.gusdb.wsf.plugin.WsfPluginException;
 import org.junit.Test;
 
 /**
@@ -37,7 +37,7 @@ public class TimeServiceTest {
   }
 
   @Test
-  public void testTimePlugin() throws WsfServiceException {
+  public void testTimePlugin() throws WsfPluginException {
     String plugin = "org.gusdb.wsf.plugin.TimePlugin";
     request.setPluginClass(plugin);
 
@@ -63,8 +63,8 @@ public class TimeServiceTest {
     assertEquals(TimePlugin.DAY, now.get(Calendar.DAY_OF_MONTH), day);
   }
 
-  @Test(expected = WsfServiceException.class)
-  public void testInvalidPlugin() throws WsfServiceException {
+  @Test(expected = WsfPluginException.class)
+  public void testInvalidPlugin() throws WsfPluginException {
     request.setPluginClass("Invalid.plugin");
     service.invoke(request.toString());
   }

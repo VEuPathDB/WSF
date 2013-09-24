@@ -35,7 +35,7 @@ public abstract class AbstractPlugin implements Plugin {
   protected abstract String[] defineContextKeys();
 
   protected abstract void execute(PluginRequest request, PluginResponse response)
-      throws WsfServiceException;
+      throws WsfPluginException;
 
   /**
    * The logger for this plugin. It is a recommended way to record standard
@@ -82,7 +82,7 @@ public abstract class AbstractPlugin implements Plugin {
    */
   @Override
   public void initialize(Map<String, Object> context)
-      throws WsfServiceException {
+      throws WsfPluginException {
     this.context = new HashMap<String, Object>(context);
     // load the properties
     if (propertyFile != null) {
@@ -90,7 +90,7 @@ public abstract class AbstractPlugin implements Plugin {
         loadConfiguration();
       } catch (IOException ex) {
         logger.error(ex);
-        throw new WsfServiceException(ex);
+        throw new WsfPluginException(ex);
       }
     }
   }
@@ -108,17 +108,17 @@ public abstract class AbstractPlugin implements Plugin {
 
   @Override
   public void invoke(PluginRequest request, PluginResponse response)
-      throws WsfServiceException {
+      throws WsfPluginException {
     try {
       execute(request, response);
-    } catch (WsfServiceException ex) {
+    } catch (WsfPluginException ex) {
       response.cleanup();
       throw ex;
     }
   }
 
   private void loadConfiguration() throws InvalidPropertiesFormatException,
-      IOException, WsfServiceException {
+      IOException, WsfPluginException {
     String configDir = (String) context.get(CTX_CONFIG_PATH);
     String filePath = null;
 
@@ -132,7 +132,7 @@ public abstract class AbstractPlugin implements Plugin {
     if (configDir == null) {
       URL url = this.getClass().getResource("/" + propertyFile);
       if (url == null)
-        throw new WsfServiceException("property file cannot be found "
+        throw new WsfPluginException("property file cannot be found "
             + "in the class path: " + propertyFile);
 
       filePath = url.toString();
@@ -141,7 +141,7 @@ public abstract class AbstractPlugin implements Plugin {
       String path = configDir + propertyFile;
       File file = new File(path);
       if (!file.exists() || !file.isFile())
-        throw new WsfServiceException("property file cannot be found "
+        throw new WsfPluginException("property file cannot be found "
             + " in the configuration path: " + path);
 
       filePath = path;
