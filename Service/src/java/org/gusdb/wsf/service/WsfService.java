@@ -227,14 +227,16 @@ public class WsfService {
     // }
   }
 
-  private int newInvokeId() throws IOException {
+  private synchronized int newInvokeId() throws IOException {
     int invokeId;
     while (true) {
       // generate a random id, and make sure the id is not being used.
       invokeId = random.nextInt(Integer.MAX_VALUE);
       File file = new File(storageDir, Integer.toString(invokeId));
-      if (!file.exists())
+      if (!file.exists()) {
+        file.mkdirs();
         break;
+      }
     }
     return invokeId;
   }
