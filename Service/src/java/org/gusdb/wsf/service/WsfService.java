@@ -105,7 +105,7 @@ public class WsfService {
 
       long end = System.currentTimeMillis();
       logger.info("WSF finshed in: " + ((end - start) / 1000.0)
-          + " seconds with " + result.getResult().length + " results.");
+          + " seconds with " + result.getPageCount() + " pages, " + result.getResult().length + " results of current page.");
 
       return result;
     } catch (WsfPluginException | IOException | ClassNotFoundException
@@ -127,12 +127,15 @@ public class WsfService {
    */
   public WsfResponse requestResult(int invokeId, int pageId)
       throws WsfServiceException {
+    logger.info("Requesting result: invokeId=" + invokeId + ", pageId=" + pageId);
     PluginResponse pluginResponse = new PluginResponse(storageDir, invokeId);
     WsfResponse wsfResponse = new WsfResponse();
     wsfResponse.setInvokeId(invokeId);
     wsfResponse.setCurrentPage(pageId);
     try {
-      wsfResponse.setResult(pluginResponse.getPage(pageId));
+      String[][] results = pluginResponse.getPage(pageId);
+      wsfResponse.setResult(results);
+      logger.info("invokeId=" + invokeId + ", pageId=" + pageId + ", " + results.length + " results returned.");
     } catch (WsfPluginException ex) {
       throw new WsfServiceException();
     }
@@ -140,6 +143,7 @@ public class WsfService {
   }
 
   /**
+ *
    * Load the objects from context with the given keys.
    * 
    * @param keys

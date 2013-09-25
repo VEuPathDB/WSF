@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -28,6 +29,8 @@ public class PluginResponse {
 
   private static final String FILE_PREFIX = "cache.";
   private static final long PAGE_SIZE = 5 * 1024 * 1024;
+
+  private static final Logger logger = Logger.getLogger(PluginResponse.class);
 
   /**
    * it contains the exit value of the invoked application. If the last
@@ -76,9 +79,13 @@ public class PluginResponse {
    * @throws WsfPluginException
    */
   public String[][] getPage(int pageId) throws WsfPluginException {
+    flush();
     File dir = new File(storageDir, Integer.toString(invokeId));
-    File file = new File(dir, FILE_PREFIX + pageIndex);
-    if (!file.exists()) return null;
+    File file = new File(dir, FILE_PREFIX + pageId);
+
+    logger.debug("Reading file: " + file.getAbsolutePath());
+
+    if (!file.exists()) return new String[0][0];
     try {
       // read the content of the file into byte array.
       InputStream input = new FileInputStream(file);
@@ -140,9 +147,6 @@ public class PluginResponse {
    * @throws WsfPluginException
    */
   public synchronized void addRow(String[] row) throws WsfPluginException {
-    // check if we need to start a new page
-    if (size >= PAGE_SIZE) flush();
-
     // add in new rows;
     rows.add(row);
 
@@ -163,7 +167,7 @@ public class PluginResponse {
    * 
    * @throws WsfPluginException
    */
-  public void flush() throws WsfPluginException {
+  public synchronized void flush() throws WsfPluginException {
     // if there's no data, do nothing.
     if (rows.size() == 0) return;
 
@@ -185,7 +189,8 @@ public class PluginResponse {
    * 
    * @return
    */
-  public int getPageCount() {
+  public int getPageCount() throws WsfPluginException {
+    flush();
     return pageIndex;
   }
 
@@ -256,14 +261,12 @@ public class PluginResponse {
       jsRows.put(jsRow);
     }
     File dir = new File(storageDir, Integer.toString(invokeId));
-    if (dir.mkdir()) {
-      File file = new File(dir, FILE_PREFIX + pageIndex);
-      OutputStream output = new FileOutputStream(file, false);
-      output.write(jsRows.toString().getBytes("utf-8"));
-      output.flush();
-      output.close();
-    } else {
-      throw new IOException("cannot create directory: " + dir.getAbsolutePath());
-    }
+    File file = new File(dir, FILE_PREFIX + pageIndex);
+    OutputStream output = new FileOutputStream(file, false);
+    output.write(jsRows.toString().getBytes("utf-8"));
+    output.flush();
+    output.close();
+
+    logger.debug("Writing file: " + file.getAbsolutePath());
   }
 }

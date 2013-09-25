@@ -17,7 +17,7 @@ public class WsfResponse implements Serializable {
      */
   private static final long serialVersionUID = 9126955986713669742L;
 
-  private String[][] result;
+  private String[][] result = new String[0][0];
 
   /**
    * it contains the exit value of the invoked application. If the last
