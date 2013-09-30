@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.gusdb.wsf.util.Formatter;
 
 /**
  * The WsfPlugin provides the common routines a plugin needs to simplify the
@@ -174,7 +175,7 @@ public abstract class AbstractPlugin implements Plugin {
    */
   protected int invokeCommand(String[] command, StringBuffer result,
       long timeout) throws IOException {
-    logger.debug("WsfPlugin.invokeCommand()");
+    logger.info("WsfPlugin.invokeCommand: " + Formatter.printArray(command));
     // invoke the command
     Process process = Runtime.getRuntime().exec(command);
 
