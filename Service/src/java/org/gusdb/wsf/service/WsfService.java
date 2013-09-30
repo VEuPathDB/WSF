@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -25,6 +26,8 @@ import org.gusdb.wsf.plugin.PluginRequest;
 import org.gusdb.wsf.plugin.PluginResponse;
 import org.gusdb.wsf.plugin.WsfPluginException;
 import org.json.JSONException;
+
+import com.sun.org.apache.xpath.internal.axes.ChildIterator;
 
 /**
  * The WSF Web service entry point.
@@ -46,9 +49,14 @@ public class WsfService {
 
   private static final String STORAGE_DIR = "/wsf-storage/";
 
+  private static final long CLEANUP_INTERVAL = 1 * 3600;
+  private static final long MAX_CACHE_AGE = 1 * 24 * 3600;
+
   private final Random random;
 
   private final File storageDir;
+
+  private long lastCleanup = 0;
 
   public WsfService() {
     random = new Random();
@@ -73,6 +81,9 @@ public class WsfService {
   public WsfResponse invoke(String jsonRequest) throws WsfServiceException {
     long start = System.currentTimeMillis();
     try {
+      // clean up
+      cleanup();
+
       WsfRequest request = new WsfRequest(jsonRequest);
       String pluginClassName = request.getPluginClass();
 
@@ -105,7 +116,8 @@ public class WsfService {
 
       long end = System.currentTimeMillis();
       logger.info("WSF finshed in: " + ((end - start) / 1000.0)
-          + " seconds with " + result.getPageCount() + " pages, " + result.getResult().length + " results of current page.");
+          + " seconds with " + result.getPageCount() + " pages, "
+          + result.getResult().length + " results of current page.");
 
       return result;
     } catch (WsfPluginException | IOException | ClassNotFoundException
@@ -127,7 +139,8 @@ public class WsfService {
    */
   public WsfResponse requestResult(int invokeId, int pageId)
       throws WsfServiceException {
-    logger.info("Requesting result: invokeId=" + invokeId + ", pageId=" + pageId);
+    logger.info("Requesting result: invokeId=" + invokeId + ", pageId="
+        + pageId);
     PluginResponse pluginResponse = new PluginResponse(storageDir, invokeId);
     WsfResponse wsfResponse = new WsfResponse();
     wsfResponse.setInvokeId(invokeId);
@@ -135,7 +148,8 @@ public class WsfService {
     try {
       String[][] results = pluginResponse.getPage(pageId);
       wsfResponse.setResult(results);
-      logger.info("invokeId=" + invokeId + ", pageId=" + pageId + ", " + results.length + " results returned.");
+      logger.info("invokeId=" + invokeId + ", pageId=" + pageId + ", "
+          + results.length + " results returned.");
     } catch (WsfPluginException ex) {
       throw new WsfServiceException();
     }
@@ -143,7 +157,7 @@ public class WsfService {
   }
 
   /**
- *
+   * 
    * Load the objects from context with the given keys.
    * 
    * @param keys
@@ -189,9 +203,14 @@ public class WsfService {
     // execute the main function, and obtain result
     int invokeId = newInvokeId();
     PluginResponse pluginResponse = new PluginResponse(storageDir, invokeId);
-    plugin.invoke(request, pluginResponse);
-    // make sure the results are flushed into storage
-    pluginResponse.flush();
+    try {
+      plugin.invoke(request, pluginResponse);
+      // make sure the results are flushed into storage
+      pluginResponse.flush();
+    } catch (WsfPluginException ex) {
+      pluginResponse.cleanup();
+      throw ex;
+    }
 
     // convert the response
     WsfResponse wsfResponse = new WsfResponse();
@@ -259,4 +278,25 @@ public class WsfService {
     }
   }
 
+  private void cleanup() throws IOException {
+    long now = System.currentTimeMillis() / 1000;
+    long elapsed = now - lastCleanup;
+    if (elapsed < CLEANUP_INTERVAL)
+      return; // to short, no need to clean up
+
+    // start cleanup procedure.
+    lastCleanup = now;
+    File[] children = storageDir.listFiles();
+    for (File child : children) {
+      // check if child is old enough
+      long time = Files.getLastModifiedTime(child.toPath()).toMillis();
+      if ((now - time / 1000) < MAX_CACHE_AGE)
+        continue;
+
+      if (!child.isDirectory())
+        child.delete();
+      else
+        PluginResponse.deleteFolder(child);
+    }
+  }
 }

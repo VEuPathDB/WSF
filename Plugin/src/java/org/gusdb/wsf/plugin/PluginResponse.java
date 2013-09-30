@@ -33,6 +33,27 @@ public class PluginResponse {
   private static final Logger logger = Logger.getLogger(PluginResponse.class);
 
   /**
+   * Delete a folder and all the sub-folders and files under it recursively.
+   * 
+   * @param dir
+   */
+  public static void deleteFolder(File dir) {
+    if (!dir.exists())
+      return;
+    // delete the content of the folder first
+    File[] children = dir.listFiles();
+    if (children != null) {
+      for (File child : children) {
+        if (child.isDirectory())
+          deleteFolder(child);
+        else
+          child.delete();
+      }
+    }
+    dir.delete();
+  }
+
+  /**
    * it contains the exit value of the invoked application. If the last
    * invocation is successfully finished, this value is 0; if the plugin hasn't
    * invoked any application, this value is -1; if the last invocation is
@@ -85,7 +106,8 @@ public class PluginResponse {
 
     logger.debug("Reading file: " + file.getAbsolutePath());
 
-    if (!file.exists()) return new String[0][0];
+    if (!file.exists())
+      return new String[0][0];
     try {
       // read the content of the file into byte array.
       InputStream input = new FileInputStream(file);
@@ -104,7 +126,8 @@ public class PluginResponse {
           break;
         }
       }
-      if (empty) dir.delete();
+      if (empty)
+        dir.delete();
 
       // convert JSON representation back into 2D String array.
       JSONArray jsRows = new JSONArray(new String(content, "utf-8"));
@@ -122,20 +145,11 @@ public class PluginResponse {
       throw new WsfPluginException(ex);
     }
   }
-  
+
   public void cleanup() {
     // delete all the resources storage by the response
     File dir = new File(storageDir, Integer.toString(invokeId));
     deleteFolder(dir);
-  }
-  
-  /**
-   * Delete a folder and all the sub-folders and files under it recursively.
-   * @param dir
-   */
-  private void deleteFolder(File dir) {
-    if (!dir.exists()) return;
-    // delete
   }
 
   /**
@@ -154,7 +168,8 @@ public class PluginResponse {
     for (String value : row) {
       size += value.length();
     }
-    if (size > PAGE_SIZE) flush();
+    if (size > PAGE_SIZE)
+      flush();
   }
 
   /**
@@ -169,7 +184,8 @@ public class PluginResponse {
    */
   public synchronized void flush() throws WsfPluginException {
     // if there's no data, do nothing.
-    if (rows.size() == 0) return;
+    if (rows.size() == 0)
+      return;
 
     try {
       saveCurrentPage();
@@ -219,7 +235,7 @@ public class PluginResponse {
   public void setAttachments(Map<String, String> attachments) {
     this.attachments = attachments;
   }
-  
+
   public void addAttachments(Map<String, String> attachments) {
     this.attachments.putAll(attachments);
   }
