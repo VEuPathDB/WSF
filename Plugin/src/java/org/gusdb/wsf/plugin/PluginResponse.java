@@ -166,7 +166,7 @@ public class PluginResponse {
 
     // compute the current page size, and flush if it reaches max page size.
     for (String value : row) {
-      size += value.length();
+      if (value != null) size += value.length();
     }
     if (size > PAGE_SIZE)
       flush();
@@ -272,6 +272,7 @@ public class PluginResponse {
     for (String[] row : rows) {
       JSONArray jsRow = new JSONArray();
       for (String value : row) {
+        if (value == null) value = "";
         jsRow.put(value);
       }
       jsRows.put(jsRow);
