@@ -27,7 +27,6 @@ import org.gusdb.wsf.plugin.PluginResponse;
 import org.gusdb.wsf.plugin.WsfPluginException;
 import org.json.JSONException;
 
-import com.sun.org.apache.xpath.internal.axes.ChildIterator;
 
 /**
  * The WSF Web service entry point.
@@ -257,10 +256,11 @@ public class WsfService {
       invokeId = random.nextInt(Integer.MAX_VALUE);
       File file = new File(storageDir, Integer.toString(invokeId));
       if (!file.exists()) {
-        file.mkdirs();
+        if (file.mkdirs())
         break;
       }
     }
+    logger.debug("Generated invoke id: " + invokeId );
     return invokeId;
   }
 

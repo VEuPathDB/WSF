@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -237,7 +238,11 @@ public class PluginResponse {
   }
 
   public void addAttachments(Map<String, String> attachments) {
-    this.attachments.putAll(attachments);
+    if (attachments != null) {
+      if (this.attachments == null)
+        this.attachments = new LinkedHashMap<>();
+      this.attachments.putAll(attachments);
+    }
   }
 
   /**
