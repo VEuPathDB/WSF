@@ -61,24 +61,26 @@ public class WsfService {
 
   private long lastCleanup = 0;
 
-  public WsfService() throws WsfServiceException {
+  public WsfService() {
     random = new Random();
     String temp = System.getProperty("java.io.tmpdir", "/tmp");
     storageDir = new File(temp + STORAGE_DIR);
+    logger.debug("WSF storage: " + storageDir.getAbsolutePath());
     if (!storageDir.exists() || !storageDir.isDirectory()) {
       if (!storageDir.mkdirs())
-        throw new WsfServiceException("Cannot create storage directory: "
+        throw new RuntimeException("Cannot create storage directory: "
             + storageDir.getAbsolutePath());
-    }
 
-    // assign full permissions to the dir
-    Set<PosixFilePermission> permissions = new HashSet<>(
-        Arrays.asList(PosixFilePermission.values()));
-    try {
-      Files.setPosixFilePermissions(storageDir.toPath(), permissions);
-    } catch (IOException ex) {
-      throw new WsfServiceException();
+      // assign full permissions to the dir
+       Set<PosixFilePermission> permissions = new HashSet<>(
+           Arrays.asList(PosixFilePermission.values()));
+      try {
+        Files.setPosixFilePermissions(storageDir.toPath(), permissions);
+      } catch (IOException ex) {
+        throw new RuntimeException(ex);
+      }
     }
+    logger.debug("WsfService initialized");
   }
 
   /**
@@ -207,20 +209,26 @@ public class WsfService {
   private WsfResponse invokePlugin(Plugin plugin, WsfRequest request)
       throws WsfPluginException, IOException, WsfServiceException {
     // validate required parameters
+    logger.debug("validing required params...");
     validateRequiredParameters(plugin, request);
 
     // validate columns
+    logger.debug("validating columns...");
     validateColumns(plugin, request.getOrderedColumns());
 
     // validate parameters
+    logger.debug("validating params...");
     plugin.validateParameters(request);
 
     // execute the main function, and obtain result
+    logger.debug("getting invoke id...");
     int invokeId = newInvokeId();
     PluginResponse pluginResponse = new PluginResponse(storageDir, invokeId);
     try {
+      logger.debug("invoking plugin...");
       plugin.invoke(request, pluginResponse);
       // make sure the results are flushed into storage
+      logger.debug("flush plugin response...");
       pluginResponse.flush();
     } catch (WsfPluginException ex) {
       pluginResponse.cleanup();
@@ -267,7 +275,7 @@ public class WsfService {
 
   private synchronized int newInvokeId() throws IOException,
       WsfServiceException {
-    int invokeId = -1;
+    int invokeId = 0;
     int count = 0;
     while (count < ID_RETRY) {
       // generate a random id, and make sure the id is not being used.
@@ -279,7 +287,7 @@ public class WsfService {
       }
       count++;
     }
-    if (invokeId == -1)
+    if (count >= ID_RETRY)
       throw new WsfServiceException("Cannot create invoke id");
     logger.debug("Generated invoke id: " + invokeId);
     return invokeId;
