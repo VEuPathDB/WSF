@@ -138,10 +138,9 @@ public class WsfService {
 
       return result;
     } catch (WsfPluginException | IOException | ClassNotFoundException
-        | InstantiationException | IllegalAccessException | JSONException ex) {
-      StringWriter writer = new StringWriter();
-      ex.printStackTrace(new PrintWriter(writer));
-      logger.error(ex + "\n" + writer.toString());
+        | InstantiationException | IllegalAccessException | JSONException 
+        | WsfServiceException ex) {
+      logger.error("WSF Service failed.", ex);
       throw new WsfServiceException(ex.getMessage(), ex);
     }
   }
