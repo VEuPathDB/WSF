@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -26,7 +29,6 @@ import org.gusdb.wsf.plugin.PluginRequest;
 import org.gusdb.wsf.plugin.PluginResponse;
 import org.gusdb.wsf.plugin.WsfPluginException;
 import org.json.JSONException;
-
 
 /**
  * The WSF Web service entry point.
@@ -51,18 +53,32 @@ public class WsfService {
   private static final long CLEANUP_INTERVAL = 1 * 3600;
   private static final long MAX_CACHE_AGE = 1 * 24 * 3600;
 
+  private static final int ID_RETRY = 100;
+
   private final Random random;
 
   private final File storageDir;
 
   private long lastCleanup = 0;
 
-  public WsfService() {
+  public WsfService() throws WsfServiceException {
     random = new Random();
     String temp = System.getProperty("java.io.tmpdir", "/tmp");
     storageDir = new File(temp + STORAGE_DIR);
-    if (!storageDir.exists() || !storageDir.isDirectory())
-      storageDir.mkdirs();
+    if (!storageDir.exists() || !storageDir.isDirectory()) {
+      if (!storageDir.mkdirs())
+        throw new WsfServiceException("Cannot create storage directory: "
+            + storageDir.getAbsolutePath());
+    }
+
+    // assign full permissions to the dir
+    Set<PosixFilePermission> permissions = new HashSet<>(
+        Arrays.asList(PosixFilePermission.values()));
+    try {
+      Files.setPosixFilePermissions(storageDir.toPath(), permissions);
+    } catch (IOException ex) {
+      throw new WsfServiceException();
+    }
   }
 
   /**
@@ -189,7 +205,7 @@ public class WsfService {
   }
 
   private WsfResponse invokePlugin(Plugin plugin, WsfRequest request)
-      throws WsfPluginException, IOException {
+      throws WsfPluginException, IOException, WsfServiceException {
     // validate required parameters
     validateRequiredParameters(plugin, request);
 
@@ -249,18 +265,23 @@ public class WsfService {
     // }
   }
 
-  private synchronized int newInvokeId() throws IOException {
-    int invokeId;
-    while (true) {
+  private synchronized int newInvokeId() throws IOException,
+      WsfServiceException {
+    int invokeId = -1;
+    int count = 0;
+    while (count < ID_RETRY) {
       // generate a random id, and make sure the id is not being used.
       invokeId = random.nextInt(Integer.MAX_VALUE);
       File file = new File(storageDir, Integer.toString(invokeId));
       if (!file.exists()) {
         if (file.mkdirs())
-        break;
+          break;
       }
+      count++;
     }
-    logger.debug("Generated invoke id: " + invokeId );
+    if (invokeId == -1)
+      throw new WsfServiceException("Cannot create invoke id");
+    logger.debug("Generated invoke id: " + invokeId);
     return invokeId;
   }
 
