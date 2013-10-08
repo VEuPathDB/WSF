@@ -1,54 +1,40 @@
-package org.gusdb.wsf.plugin;
+/**
+ * 
+ */
+package org.gusdb.wsf.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.gusdb.wsf.plugin.PluginRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class WsfRequest {
+/**
+ * @author jerric
+ * 
+ */
+public class WsfRequest extends PluginRequest {
 
-  /**
-   * the full class name of the WSF plugin. The service will instantiate a
-   * plugin instance from this class name, and invoke it.
-   */
   private String pluginClass;
-  private String projectId;
-  private Map<String, String> params = new HashMap<String, String>();
-  private List<String> orderedColumns = new ArrayList<String>();
 
-  /**
-   * The context can be used to hold additional information, such as user id,
-   * calling query name, etc, which can be used by plugins.
-   */
-  private Map<String, String> context = new HashMap<String, String>();
-
-  public WsfRequest() {}
+  public WsfRequest() {};
+  
+  public WsfRequest(PluginRequest pluginRequest) {
+    super(pluginRequest);
+  }
 
   public WsfRequest(String jsonString) throws JSONException {
     parseJSON(jsonString);
   }
 
   /**
-   * @return the projectId
-   */
-  public String getProjectId() {
-    return projectId;
-  }
-
-  /**
-   * @param projectId
-   *          the projectId to set
-   */
-  public void setProjectId(String projectId) {
-    this.projectId = projectId;
-  }
-
-  /**
+   * the full class name of the WSF plugin. The service will instantiate a
+   * plugin instance from this class name, and invoke it.
    * @return the pluginClass
    */
   public String getPluginClass() {
@@ -63,56 +49,6 @@ public class WsfRequest {
     this.pluginClass = pluginClass;
   }
 
-  /**
-   * @return the params
-   */
-  public Map<String, String> getParams() {
-    return new HashMap<String, String>(params);
-  }
-
-  /**
-   * @param params
-   *          the params to set
-   */
-  public void setParams(Map<String, String> params) {
-    this.params = new HashMap<String, String>(params);
-  }
-
-  /**
-   * @return the orderedColumns
-   */
-  public String[] getOrderedColumns() {
-    String[] array = new String[orderedColumns.size()];
-    orderedColumns.toArray(array);
-    return array;
-  }
-
-  /**
-   * @param orderedColumns
-   *          the orderedColumns to set
-   */
-  public void setOrderedColumns(String[] orderedColumns) {
-    this.orderedColumns = new ArrayList<String>(orderedColumns.length);
-    for (String column : orderedColumns) {
-      this.orderedColumns.add(column);
-    }
-  }
-
-  /**
-   * @return the context
-   */
-  public Map<String, String> getContext() {
-    return new HashMap<String, String>(context);
-  }
-
-  /**
-   * @param context
-   *          the context to set
-   */
-  public void setContext(Map<String, String> context) {
-    this.context = new HashMap<String, String>(context);
-  }
-
   /*
    * (non-Javadoc)
    * 
@@ -122,18 +58,19 @@ public class WsfRequest {
   public String toString() {
     JSONObject jsRequest = new JSONObject();
     try {
-      jsRequest.put("project", projectId);
+      jsRequest.put("project", getProjectId());
       jsRequest.put("plugin", pluginClass);
 
       // output columns
       JSONArray jsColumns = new JSONArray();
-      for (String column : orderedColumns) {
+      for (String column : getOrderedColumns()) {
         jsColumns.put(column);
       }
       jsRequest.put("ordered-columns", jsColumns);
 
       // output params
       JSONObject jsParams = new JSONObject();
+      Map<String, String> params = getParams();
       for (String paramName : params.keySet()) {
         jsParams.put(paramName, params.get(paramName));
       }
@@ -141,6 +78,7 @@ public class WsfRequest {
 
       // output request context
       JSONObject jsContext = new JSONObject();
+      Map<String, String> context = getContext();
       for (String contextKey : context.keySet()) {
         jsContext.put(contextKey, context.get(contextKey));
       }
@@ -153,16 +91,23 @@ public class WsfRequest {
 
   private void parseJSON(String jsonString) throws JSONException {
     JSONObject jsRequest = new JSONObject(jsonString);
-    this.projectId = jsRequest.getString("project");
+    setProjectId(jsRequest.getString("project"));
     this.pluginClass = jsRequest.getString("plugin");
 
     JSONArray jsColumns = jsRequest.getJSONArray("ordered-columns");
+    List<String> columns = new ArrayList<>();
     for (int i = 0; i < jsColumns.length(); i++) {
-      orderedColumns.add(jsColumns.getString(i));
+      columns.add(jsColumns.getString(i));
     }
+    setOrderedColumns(columns.toArray(new String[0]));
 
+    Map<String, String> params = new LinkedHashMap<>();
     addToMap(params, jsRequest.getJSONObject("parameters"));
+    setParams(params);
+
+    Map<String, String> context = new LinkedHashMap<>();
     addToMap(context, jsRequest.getJSONObject("context"));
+    setContext(context);
   }
 
   private static void addToMap(Map<String, String> map, JSONObject newValues)
@@ -174,4 +119,5 @@ public class WsfRequest {
       map.put(key, newValues.getString(key));
     }
   }
+
 }

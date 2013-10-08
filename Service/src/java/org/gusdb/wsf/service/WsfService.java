@@ -4,29 +4,30 @@
 package org.gusdb.wsf.service;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.RandomAccessFile;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
-import javax.xml.rpc.ServiceException;
 
 import org.apache.axis.MessageContext;
 import org.apache.axis.transport.http.HTTPConstants;
 import org.apache.log4j.Logger;
 import org.gusdb.wsf.plugin.Plugin;
-import org.gusdb.wsf.plugin.WsfRequest;
-import org.gusdb.wsf.plugin.WsfResponse;
-import org.gusdb.wsf.plugin.WsfServiceException;
-import org.json.JSONArray;
+import org.gusdb.wsf.plugin.PluginRequest;
+import org.gusdb.wsf.plugin.PluginResponse;
+import org.gusdb.wsf.plugin.WsfPluginException;
+import org.json.JSONException;
 
 /**
  * The WSF Web service entry point.
@@ -42,21 +43,43 @@ public class WsfService {
    */
   public static ServletContext SERVLET_CONTEXT;
 
-  private static double PACKET_SIZE = 1000000;
+  private static final Logger logger = Logger.getLogger(WsfService.class);
 
-  private static Logger logger = Logger.getLogger(WsfService.class);
+  private static final Map<String, Plugin> plugins = new LinkedHashMap<String, Plugin>();
 
-  private static Map<String, Plugin> plugins = new LinkedHashMap<String, Plugin>();
+  private static final String STORAGE_DIR = "/wsf-storage/";
 
-  private File tempDir;
+  private static final long CLEANUP_INTERVAL = 1 * 3600;
+  private static final long MAX_CACHE_AGE = 1 * 24 * 3600;
+
+  private static final int ID_RETRY = 100;
+
+  private final Random random;
+
+  private final File storageDir;
+
+  private long lastCleanup = 0;
 
   public WsfService() {
-    // initialize temp Dir
+    random = new Random();
     String temp = System.getProperty("java.io.tmpdir", "/tmp");
-    tempDir = new File(temp);
-    if (!tempDir.exists() || !tempDir.isDirectory()) {
-      tempDir.mkdirs();
+    storageDir = new File(temp + STORAGE_DIR);
+    logger.debug("WSF storage: " + storageDir.getAbsolutePath());
+    if (!storageDir.exists() || !storageDir.isDirectory()) {
+      if (!storageDir.mkdirs())
+        throw new RuntimeException("Cannot create storage directory: "
+            + storageDir.getAbsolutePath());
+
+      // assign full permissions to the dir
+       Set<PosixFilePermission> permissions = new HashSet<>(
+           Arrays.asList(PosixFilePermission.values()));
+      try {
+        Files.setPosixFilePermissions(storageDir.toPath(), permissions);
+      } catch (IOException ex) {
+        throw new RuntimeException(ex);
+      }
     }
+    logger.debug("WsfService initialized");
   }
 
   /**
@@ -67,13 +90,16 @@ public class WsfService {
    *         split into multiple packets, and only the first packet is returned.
    *         Then the clients will need to call requestResult() to get
    *         additional packets.
-   * @throws ServiceException
+   * @throws WsfServiceException
    * 
    * @see org.gusdb.wsf.service.WsfService#requestResult()
    */
-  public WsfResponse invoke(String jsonRequest) throws ServiceException {
+  public WsfResponse invoke(String jsonRequest) throws WsfServiceException {
     long start = System.currentTimeMillis();
     try {
+      // clean up
+      cleanup();
+
       WsfRequest request = new WsfRequest(jsonRequest);
       String pluginClassName = request.getPluginClass();
 
@@ -103,24 +129,52 @@ public class WsfService {
       logger.debug("Invoking Plugin " + pluginClassName);
       WsfResponse result = invokePlugin(plugin, request);
       logger.info("Result Message: '" + result.getMessage() + "'");
-      prepareResult(result);
 
       long end = System.currentTimeMillis();
       logger.info("WSF finshed in: " + ((end - start) / 1000.0)
-          + " seconds with " + result.getResult().length + " results.");
+          + " seconds with " + result.getPageCount() + " pages, "
+          + result.getResult().length + " results of current page.");
 
       return result;
-    } catch (Exception ex) {
-      StringWriter writer = new StringWriter();
-      ex.printStackTrace(new PrintWriter(writer));
-      logger.error(ex);
-      logger.error(writer.toString());
-      throw new ServiceException(ex.getMessage(), ex);
+    } catch (WsfPluginException | IOException | ClassNotFoundException
+        | InstantiationException | IllegalAccessException | JSONException 
+        | WsfServiceException ex) {
+      logger.error("WSF Service failed.", ex);
+      throw new WsfServiceException(ex.getMessage(), ex);
     }
   }
 
   /**
-   * Load the objects from context with the given keys. 
+   * This method is for subsequent calls to get additional packets of a request.
+   * 
+   * @param invokeId
+   * @param pageId
+   * @return a string representation of the result for the requested packet.
+   * @throws WsfServiceException
+   */
+  public WsfResponse requestResult(int invokeId, int pageId)
+      throws WsfServiceException {
+    logger.info("Requesting result: invokeId=" + invokeId + ", pageId="
+        + pageId);
+    PluginResponse pluginResponse = new PluginResponse(storageDir, invokeId);
+    WsfResponse wsfResponse = new WsfResponse();
+    wsfResponse.setInvokeId(invokeId);
+    wsfResponse.setCurrentPage(pageId);
+    try {
+      String[][] results = pluginResponse.getPage(pageId);
+      wsfResponse.setResult(results);
+      logger.info("invokeId=" + invokeId + ", pageId=" + pageId + ", "
+          + results.length + " results returned.");
+    } catch (WsfPluginException ex) {
+      throw new WsfServiceException();
+    }
+    return wsfResponse;
+  }
+
+  /**
+   * 
+   * Load the objects from context with the given keys.
+   * 
    * @param keys
    * @return
    */
@@ -150,120 +204,49 @@ public class WsfService {
     return context;
   }
 
-  /**
-   * This method is for subsequent calls to get additional packets of a request.
-   * 
-   * @param requestId
-   * @param packetId
-   * @return a string representation of the result for the requested packet.
-   * @throws ServiceException
-   *           If the requestId doesn't match any of the previous request, or if
-   *           all the packets in the previous request have been sent before, an
-   *           ServiceException will be thrown out.
-   */
-  public String requestResult(String requestId, int packetId)
-      throws ServiceException {
-    try {
-      File file = new File(tempDir, requestId);
-      logger.debug("Get WSF message: " + requestId + ", packet = " + packetId
-          + ", at " + file.getAbsolutePath());
-      if (!file.exists())
-        throw new WsfServiceException("The requestId doesn't match any "
-            + "previous request.");
-      double packets = Math.ceil(file.length() / PACKET_SIZE);
-      if (packetId < 0 || packets < packetId)
-        throw new WsfServiceException("The packet id is beyond the scope: "
-            + packets);
-      RandomAccessFile reader = new RandomAccessFile(file, "r");
-      long pos = packetId * (long) PACKET_SIZE;
-      reader.seek(pos);
-      int size = (int) Math.min(PACKET_SIZE, file.length() - pos);
-      byte[] buffer = new byte[size];
-      reader.read(buffer);
-      reader.close();
-
-      // check if the packet is the last piece, if so, remove the cache
-      if (packetId + 1 == packets)
-        file.delete();
-
-      return new String(buffer);
-    } catch (Exception ex) {
-      throw new ServiceException(ex);
-    }
-  }
-
-  private void prepareResult(WsfResponse result) throws IOException {
-    String requestId = getNextId();
-    result.setRequestId(requestId);
-    String content = convertResult(result.getResult());
-    int packets = (int) Math.ceil(content.length() / PACKET_SIZE);
-    result.setTotalPackets(packets);
-    result.setCurrentPacket(1);
-
-    File file = new File(tempDir, requestId);
-    if (packets > 1) {
-      FileWriter writer = new FileWriter(file);
-      writer.write(content);
-      writer.flush();
-      writer.close();
-      String part = content.substring(0, (int) PACKET_SIZE);
-      result.setResult(new String[][] { { part } });
-    } else { // no cache needed, delete the file handle
-      if (file.exists())
-        file.delete();
-    }
-  }
-
-  private String getNextId() throws IOException {
-    File file = File.createTempFile("wsf-", ".cache", tempDir);
-    return file.getName();
-  }
-
-  private String convertResult(String[][] array) {
-    JSONArray jsResult = new JSONArray();
-    for (int row = 0; row < array.length; row++) {
-      JSONArray jsRow = new JSONArray();
-      for (int col = 0; col < array[row].length; col++) {
-        jsRow.put(array[row][col]);
-      }
-      jsResult.put(jsRow);
-    }
-    return jsResult.toString();
-  }
-
   private WsfResponse invokePlugin(Plugin plugin, WsfRequest request)
-      throws WsfServiceException {
+      throws WsfPluginException, IOException, WsfServiceException {
     // validate required parameters
+    logger.debug("validing required params...");
     validateRequiredParameters(plugin, request);
 
     // validate columns
+    logger.debug("validating columns...");
     validateColumns(plugin, request.getOrderedColumns());
 
     // validate parameters
+    logger.debug("validating params...");
     plugin.validateParameters(request);
 
     // execute the main function, and obtain result
-    WsfResponse result = plugin.execute(request);
-
-    return result;
-  }
-
-  private void validateRequiredParameters(Plugin plugin, WsfRequest request)
-      throws WsfServiceException {
-    String[] reqParams = plugin.getRequiredParameterNames();
-
-    // validate parameters
-    Map<String, String> params = request.getParams();
-    for (String param : reqParams) {
-      if (!params.containsKey(param)) {
-        throw new WsfServiceException("The required parameter is missing: "
-            + param);
-      }
+    logger.debug("getting invoke id...");
+    int invokeId = newInvokeId();
+    PluginResponse pluginResponse = new PluginResponse(storageDir, invokeId);
+    try {
+      logger.debug("invoking plugin...");
+      plugin.invoke(request, pluginResponse);
+      // make sure the results are flushed into storage
+      logger.debug("flush plugin response...");
+      pluginResponse.flush();
+    } catch (WsfPluginException ex) {
+      pluginResponse.cleanup();
+      throw ex;
     }
+
+    // convert the response
+    WsfResponse wsfResponse = new WsfResponse();
+    wsfResponse.setInvokeId(pluginResponse.getInvokeId());
+    wsfResponse.setMessage(pluginResponse.getMessage());
+    wsfResponse.setSignal(pluginResponse.getSignal());
+    wsfResponse.setPageCount(pluginResponse.getPageCount());
+    wsfResponse.setAttachments(pluginResponse.getAttachments());
+    if (pluginResponse.getPageCount() > 0)
+      wsfResponse.setResult(pluginResponse.getPage(0));
+    return wsfResponse;
   }
 
   private void validateColumns(Plugin plugin, String[] orderedColumns)
-      throws WsfServiceException {
+      throws WsfPluginException {
     String[] reqColumns = plugin.getColumns();
 
     Set<String> colSet = new HashSet<String>();
@@ -272,7 +255,7 @@ public class WsfService {
     }
     for (String col : reqColumns) {
       if (!colSet.contains(col)) {
-        throw new WsfServiceException("The required column is missing: " + col);
+        throw new WsfPluginException("The required column is missing: " + col);
       }
     }
     // cross check
@@ -288,4 +271,59 @@ public class WsfService {
     // }
   }
 
+  private synchronized int newInvokeId() throws IOException,
+      WsfServiceException {
+    int invokeId = 0;
+    int count = 0;
+    while (count < ID_RETRY) {
+      // generate a random id, and make sure the id is not being used.
+      invokeId = random.nextInt(Integer.MAX_VALUE);
+      File file = new File(storageDir, Integer.toString(invokeId));
+      if (!file.exists()) {
+        if (file.mkdirs())
+          break;
+      }
+      count++;
+    }
+    if (count >= ID_RETRY)
+      throw new WsfServiceException("Cannot create invoke id");
+    logger.debug("Generated invoke id: " + invokeId);
+    return invokeId;
+  }
+
+  private void validateRequiredParameters(Plugin plugin, PluginRequest request)
+      throws WsfPluginException {
+    String[] reqParams = plugin.getRequiredParameterNames();
+
+    // validate parameters
+    Map<String, String> params = request.getParams();
+    for (String param : reqParams) {
+      if (!params.containsKey(param)) {
+        throw new WsfPluginException("The required parameter is missing: "
+            + param);
+      }
+    }
+  }
+
+  private void cleanup() throws IOException {
+    long now = System.currentTimeMillis() / 1000;
+    long elapsed = now - lastCleanup;
+    if (elapsed < CLEANUP_INTERVAL)
+      return; // to short, no need to clean up
+
+    // start cleanup procedure.
+    lastCleanup = now;
+    File[] children = storageDir.listFiles();
+    for (File child : children) {
+      // check if child is old enough
+      long time = Files.getLastModifiedTime(child.toPath()).toMillis();
+      if ((now - time / 1000) < MAX_CACHE_AGE)
+        continue;
+
+      if (!child.isDirectory())
+        child.delete();
+      else
+        PluginResponse.deleteFolder(child);
+    }
+  }
 }

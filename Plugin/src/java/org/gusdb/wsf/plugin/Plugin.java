@@ -15,13 +15,15 @@ public interface Plugin {
   public static final String CTX_CONFIG_PATH = "wsfConfigDir_param";
 
   /**
-   * @param params
-   * @param cols
-   *          specify the columns of the result, and the order of them
-   * @return
-   * @throws WsfServiceException
+   * Invoke a plugin, using the parameters in the request, and save the result
+   * into response.
+   * 
+   * @param request
+   * @param response
+   * @throws WsfPluginException
    */
-  public WsfResponse execute(WsfRequest request) throws WsfServiceException;
+  public void invoke(PluginRequest request, PluginResponse response)
+      throws WsfPluginException;
 
   /**
    * The Plugin needs to provide a list of required parameter names; the base
@@ -52,11 +54,11 @@ public interface Plugin {
    * @param context
    *          a map of the objects fetched from servlet context, using the
    *          context keys.
-   * @throws WsfServiceException
+   * @throws WsfPluginException
    */
   public void initialize(Map<String, Object> context)
-      throws WsfServiceException;
+      throws WsfPluginException;
 
-  public void validateParameters(WsfRequest request) throws WsfServiceException;
+  public void validateParameters(PluginRequest request) throws WsfPluginException;
 
 }

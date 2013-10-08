@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.gusdb.wsf.util.Formatter;
 
 /**
  * The WsfPlugin provides the common routines a plugin needs to simplify the
@@ -33,6 +34,9 @@ public abstract class AbstractPlugin implements Plugin {
    *         implementation.
    */
   protected abstract String[] defineContextKeys();
+
+  protected abstract void execute(PluginRequest request, PluginResponse response)
+      throws WsfPluginException;
 
   /**
    * The logger for this plugin. It is a recommended way to record standard
@@ -74,9 +78,12 @@ public abstract class AbstractPlugin implements Plugin {
     this.propertyFile = propertyFile;
   }
 
+  /* (non-Javadoc)
+   * @see org.gusdb.wsf.plugin.Plugin#initialize(java.util.Map)
+   */
   @Override
   public void initialize(Map<String, Object> context)
-      throws WsfServiceException {
+      throws WsfPluginException {
     this.context = new HashMap<String, Object>(context);
     // load the properties
     if (propertyFile != null) {
@@ -84,7 +91,7 @@ public abstract class AbstractPlugin implements Plugin {
         loadConfiguration();
       } catch (IOException ex) {
         logger.error(ex);
-        throw new WsfServiceException(ex);
+        throw new WsfPluginException(ex);
       }
     }
   }
@@ -100,33 +107,42 @@ public abstract class AbstractPlugin implements Plugin {
     return (keys == null) ? new String[0] : keys;
   }
 
+  @Override
+  public void invoke(PluginRequest request, PluginResponse response)
+      throws WsfPluginException {
+    try {
+      execute(request, response);
+    } catch (WsfPluginException ex) {
+      response.cleanup();
+      throw ex;
+    }
+  }
+
   private void loadConfiguration() throws InvalidPropertiesFormatException,
-      IOException, WsfServiceException {
+      IOException, WsfPluginException {
     String configDir = (String) context.get(CTX_CONFIG_PATH);
     String filePath = null;
 
     // if configDir is null, try resolving it in gus home
     if (configDir == null) {
       String gusHome = System.getProperty("GUS_HOME");
-      if (gusHome != null)
-        configDir = gusHome + "/config/";
+      if (gusHome != null) configDir = gusHome + "/config/";
     }
 
     // if config is null, try loading the resource from class path root.
     if (configDir == null) {
       URL url = this.getClass().getResource("/" + propertyFile);
       if (url == null)
-        throw new WsfServiceException("property file cannot be found "
+        throw new WsfPluginException("property file cannot be found "
             + "in the class path: " + propertyFile);
 
       filePath = url.toString();
     } else {
-      if (!configDir.endsWith("/"))
-        configDir += "/";
+      if (!configDir.endsWith("/")) configDir += "/";
       String path = configDir + propertyFile;
       File file = new File(path);
       if (!file.exists() || !file.isFile())
-        throw new WsfServiceException("property file cannot be found "
+        throw new WsfPluginException("property file cannot be found "
             + " in the configuration path: " + path);
 
       filePath = path;
@@ -159,7 +175,7 @@ public abstract class AbstractPlugin implements Plugin {
    */
   protected int invokeCommand(String[] command, StringBuffer result,
       long timeout) throws IOException {
-    logger.debug("WsfPlugin.invokeCommand()");
+    logger.info("WsfPlugin.invokeCommand: " + Formatter.printArray(command));
     // invoke the command
     Process process = Runtime.getRuntime().exec(command);
 
@@ -192,8 +208,7 @@ public abstract class AbstractPlugin implements Plugin {
       } catch (IllegalThreadStateException ex) {
         // if the timeout is set to <= 0, keep waiting till the process
         // is finished
-        if (timeout <= 0)
-          continue;
+        if (timeout <= 0) continue;
 
         // otherwise, check if time's up
         long time = System.currentTimeMillis() - start;
@@ -201,8 +216,7 @@ public abstract class AbstractPlugin implements Plugin {
           // convert string array to string
           StringBuilder buffer = new StringBuilder();
           for (String piece : command) {
-            if (buffer.length() > 0)
-              buffer.append(" ");
+            if (buffer.length() > 0) buffer.append(" ");
             buffer.append(piece);
           }
           logger.warn("Time out, the command is cancelled: " + buffer);
