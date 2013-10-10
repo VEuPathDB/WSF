@@ -22,7 +22,7 @@ public class WsfRequest extends PluginRequest {
 
   private String pluginClass;
 
-  public WsfRequest() {};
+  public WsfRequest() {}
   
   public WsfRequest(PluginRequest pluginRequest) {
     super(pluginRequest);

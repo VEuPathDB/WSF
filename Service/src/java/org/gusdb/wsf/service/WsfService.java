@@ -5,8 +5,6 @@ package org.gusdb.wsf.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
@@ -205,7 +203,7 @@ public class WsfService {
   }
 
   private WsfResponse invokePlugin(Plugin plugin, WsfRequest request)
-      throws WsfPluginException, IOException, WsfServiceException {
+      throws WsfPluginException, WsfServiceException {
     // validate required parameters
     logger.debug("validing required params...");
     validateRequiredParameters(plugin, request);
@@ -271,8 +269,7 @@ public class WsfService {
     // }
   }
 
-  private synchronized int newInvokeId() throws IOException,
-      WsfServiceException {
+  private synchronized int newInvokeId() throws WsfServiceException {
     int invokeId = 0;
     int count = 0;
     while (count < ID_RETRY) {
