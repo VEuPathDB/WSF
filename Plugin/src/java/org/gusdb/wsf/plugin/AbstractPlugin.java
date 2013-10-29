@@ -19,8 +19,9 @@ import org.apache.log4j.Logger;
 import org.gusdb.wsf.util.Formatter;
 
 /**
- * The WsfPlugin provides the common routines a plugin needs to simplify the
- * development of new WSF plugins.
+ *
+ * An abstract super class for all WSF plugins.  This class is a SINGLETON.  Instance variables
+ * apply to all calls of the plugin.
  * 
  * @author Jerric
  * @created Feb 9, 2006
@@ -31,7 +32,7 @@ public abstract class AbstractPlugin implements Plugin {
 
   /**
    * @return the keys for the context objects that are required by the plugin
-   *         implementation.
+   *         implementation.  
    */
   protected abstract String[] defineContextKeys();
 

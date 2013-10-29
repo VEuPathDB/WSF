@@ -3,10 +3,6 @@ package org.gusdb.wsf.plugin;
 import java.util.Map;
 
 /**
- * 
- */
-
-/**
  * @author Jerric
  * @created Feb 10, 2006
  */
@@ -43,14 +39,12 @@ public interface Plugin {
   public String[] getColumns();
 
   /**
-   * @return an array of keys that a used in the servlet context.
+   * @return An array of keys the plugin expects to be provided by the context (eg, the servlet).  Each key will provide an associated object.  An example is a WDK_MODEL_KEY that provides a handle on the wdk model.
    */
   public String[] getContextKeys();
 
   /**
-   * the service will get the objects from the serlvet context using the the
-   * context keys, and send the fetched objects as parameters.
-   * 
+   * Initialize the plugin singleton.
    * @param context
    *          a map of the objects fetched from servlet context, using the
    *          context keys.
@@ -59,6 +53,10 @@ public interface Plugin {
   public void initialize(Map<String, Object> context)
       throws WsfPluginException;
 
+  /**
+   * Validate the parameters passed by the service.  This validation confirms that the service (the wdk model)
+   * has parameter options that agree with this plugin's API.
+   */
   public void validateParameters(PluginRequest request) throws WsfPluginException;
 
 }
