@@ -163,6 +163,12 @@ public abstract class AbstractPlugin implements Plugin {
     return properties.containsKey(propertyName);
   }
 
+  protected int invokeCommand(String[] command, StringBuffer result,
+      long timeout) throws IOException {
+    String[] env = {};
+    return invokeCommand(command, result, timeout, env);
+  }
+
   /**
    * @param command
    *          the command array. If you have param values with spaces in it, put
@@ -171,14 +177,16 @@ public abstract class AbstractPlugin implements Plugin {
    *          the maximum allowed time for the command to run, in seconds
    * @param result
    *          Contains raw output of the command.
+   * @param env
+   *          a string including env variables, as expected by exec.  Useful to pass in a PATH
    * @return the exit code of the invoked command
    * @throws IOException
    */
   protected int invokeCommand(String[] command, StringBuffer result,
-      long timeout) throws IOException {
+			      long timeout, String[] env) throws IOException {
     logger.info("WsfPlugin.invokeCommand: " + Formatter.printArray(command));
     // invoke the command
-    Process process = Runtime.getRuntime().exec(command);
+    Process process = Runtime.getRuntime().exec(command, env);
 
     StringBuffer sbErr = new StringBuffer();
     StringBuffer sbOut = new StringBuffer();
