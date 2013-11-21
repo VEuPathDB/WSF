@@ -52,6 +52,8 @@ public class WsfService {
 
   private static final int ID_RETRY = 100;
 
+  private static long CUMULATIVE_TIME = 0;
+  
   private final Random random;
 
   private final File storageDir;
@@ -152,8 +154,8 @@ public class WsfService {
    */
   public WsfResponse requestResult(int invokeId, int pageId)
       throws WsfServiceException {
-    logger.info("Requesting result: invokeId=" + invokeId + ", pageId="
-        + pageId);
+    long start = System.currentTimeMillis();
+    logger.debug("Requesting result: invokeId=" + invokeId + ", pageId=" + pageId);
     PluginResponse pluginResponse = new PluginResponse(storageDir, invokeId);
     WsfResponse wsfResponse = new WsfResponse();
     wsfResponse.setInvokeId(invokeId);
@@ -161,12 +163,26 @@ public class WsfService {
     try {
       String[][] results = pluginResponse.getPage(pageId);
       wsfResponse.setResult(results);
-      logger.info("invokeId=" + invokeId + ", pageId=" + pageId + ", "
+      logger.info("Returning result: invokeId=" + invokeId + ", pageId=" + pageId + ", "
           + results.length + " results returned.");
     } catch (WsfPluginException ex) {
       throw new WsfServiceException();
     }
+    logAccumulatedTime(start, pageId, pluginResponse);
     return wsfResponse;
+  }
+
+  private void logAccumulatedTime(long start, int pageId, PluginResponse pluginResponse) {
+    CUMULATIVE_TIME += (System.currentTimeMillis() - start);
+    logger.debug("Cumulative processing time in WsfService.requestResult(): " +
+        (0.0 + CUMULATIVE_TIME) / 1000 + " (note: not threadsafe)");
+    try {
+      if (pageId == pluginResponse.getPageCount() - 1)
+        CUMULATIVE_TIME = 0; // last page
+    }
+    catch (WsfPluginException e) {
+      /* do nothing */
+    }
   }
 
   /**
