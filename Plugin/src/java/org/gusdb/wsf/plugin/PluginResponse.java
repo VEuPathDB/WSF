@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.gusdb.wsf.plugin;
 
 import java.io.File;
@@ -20,11 +17,6 @@ import org.json.JSONException;
 
 /**
  * @author jerric
- * 
- */
-/**
- * @author jerric
- * 
  */
 public class PluginResponse {
 
@@ -81,9 +73,6 @@ public class PluginResponse {
   private long size = 0;
   private int pageIndex = 0;
 
-  /**
-   * 
-   */
   public PluginResponse(File storageDir, int invokeId) {
     this.storageDir = storageDir;
     this.invokeId = invokeId;
