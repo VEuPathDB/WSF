@@ -131,7 +131,7 @@ public class WsfService {
       logger.info("Result Message: '" + result.getMessage() + "'");
 
       long end = System.currentTimeMillis();
-      logger.info("WSF finshed in: " + ((end - start) / 1000.0)
+      logger.info("WSF plugin " + pluginClassName + " finished in: " + ((end - start) / 1000.0)
           + " seconds with " + result.getPageCount() + " pages, "
           + result.getResult().length + " results of current page.");
 
