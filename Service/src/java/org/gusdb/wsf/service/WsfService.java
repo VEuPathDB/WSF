@@ -166,7 +166,7 @@ public class WsfService {
       logger.info("Returning result: invokeId=" + invokeId + ", pageId=" + pageId + ", "
           + results.length + " results returned.");
     } catch (WsfPluginException ex) {
-      throw new WsfServiceException();
+      throw new WsfServiceException(ex.getMessage(), ex);
     }
     logAccumulatedTime(start, pageId, pluginResponse);
     return wsfResponse;
