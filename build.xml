@@ -27,7 +27,9 @@
                                            WSF/Plugin-Installation,
                                            WSF/Client-Installation">
 
-    <ant target="defaultProjectInstall"/>
+    <ant target="defaultProjectInstall">
+      <property name="project" value="WSF"/>
+    </ant>
 
   </target>
   
@@ -62,8 +64,8 @@
       </not>
     </condition>
     
-    <delete dir="../WSF/Client" quiet="true" />
-    <mkdir dir="../WSF/Client/src/java"/>
+    <delete dir="${projectsDir}/WSF/Client" quiet="true" />
+    <mkdir dir="${projectsDir}/WSF/Client/src/java"/>
 
     <path id="classpath">
       <pathelement path="${classpath}" />
@@ -89,7 +91,7 @@
         
     <java classname="org.apache.axis.wsdl.WSDL2Java" fork="true">
       <classpath refid="classpath" />
-      <arg line="-o ../WSF/Client/src/java" />
+      <arg line="-o ${projectsDir}/WSF/Client/src/java" />
       <arg line="-d Application" />
       <arg line="-c org.gusdb.wsf.service.WsfService" />
       <arg line="-Nurn:wsf_classes=org.gusdb.wsf.service" />
@@ -97,12 +99,12 @@
       <arg line="${targetDir}/config/WsfService.wsdl" />
     </java>
         
-    <delete file="../WSF/Client/src/java/org/gusdb/wsf/service/WsfService.java" />
-    <delete file="../WSF/Client/src/java/org/gusdb/wsf/plugin/WsfRequest.java" />
+    <delete file="${projectsDir}/WSF/Client/src/java/org/gusdb/wsf/service/WsfService.java" />
+    <delete file="${projectsDir}/WSF/Client/src/java/org/gusdb/wsf/plugin/WsfRequest.java" />
           
-    <move file="../WSF/Client/src/java/org/gusdb/wsf/client/deploy.wsdd" 
+    <move file="${projectsDir}/WSF/Client/src/java/org/gusdb/wsf/client/deploy.wsdd" 
           tofile="${targetDir}/config/wsfService-deploy.wsdd" />
-    <move file="../WSF/Client/src/java/org/gusdb/wsf/client/undeploy.wsdd" 
+    <move file="${projectsDir}/WSF/Client/src/java/org/gusdb/wsf/client/undeploy.wsdd" 
           tofile="${targetDir}/config/wsfService-undeploy.wsdd" />
 
     <replace file="${targetDir}/config/wsfService-deploy.wsdd" 
@@ -297,5 +299,3 @@
   </target>  
 
 </project>
-
-
