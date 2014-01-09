@@ -165,8 +165,7 @@ public abstract class AbstractPlugin implements Plugin {
 
   protected int invokeCommand(String[] command, StringBuffer result,
       long timeout) throws IOException {
-    String[] env = {};
-    return invokeCommand(command, result, timeout, env);
+    return invokeCommand(command, result, timeout, null);
   }
 
   /**
