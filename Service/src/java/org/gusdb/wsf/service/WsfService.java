@@ -75,8 +75,9 @@ public class WsfService {
            Arrays.asList(PosixFilePermission.values()));
       try {
         Files.setPosixFilePermissions(storageDir.toPath(), permissions);
-      } catch (IOException ex) {
-        throw new RuntimeException(ex);
+      } catch (IOException ex) {    
+        // this operation is not supported in windows system. just ignore it.
+        // throw new RuntimeException(ex);
       }
     }
     logger.debug("WsfService initialized");
@@ -195,25 +196,25 @@ public class WsfService {
   private Map<String, Object> loadContext(String[] keys) {
     Map<String, Object> context = new HashMap<String, Object>();
 
-    ServletContext scontext = null;
-    MessageContext msgContext = MessageContext.getCurrentContext();
-    if (msgContext != null) {
-      Servlet servlet = (Servlet) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLET);
-      scontext = servlet.getServletConfig().getServletContext();
-    }
-    if (scontext == null)
-      scontext = SERVLET_CONTEXT;
-    if (scontext != null) {
-      // get the configuration path:
-      String configPath = scontext.getRealPath(scontext.getInitParameter(Plugin.CTX_CONFIG_PATH));
-      context.put(Plugin.CTX_CONFIG_PATH, configPath);
-      for (String key : keys) {
-        String initValue = scontext.getInitParameter(key);
-        context.put(key, initValue);
-        Object value = scontext.getAttribute(key);
-        context.put(key, value);
-      }
-    }
+//    ServletContext scontext = null;
+//    MessageContext msgContext = MessageContext.getCurrentContext();
+//    if (msgContext != null) {
+//      Servlet servlet = (Servlet) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLET);
+//      scontext = servlet.getServletConfig().getServletContext();
+//    }
+//    if (scontext == null)
+//      scontext = SERVLET_CONTEXT;
+//    if (scontext != null) {
+//      // get the configuration path:
+//      String configPath = scontext.getRealPath(scontext.getInitParameter(Plugin.CTX_CONFIG_PATH));
+//      context.put(Plugin.CTX_CONFIG_PATH, configPath);
+//      for (String key : keys) {
+//        String initValue = scontext.getInitParameter(key);
+//        context.put(key, initValue);
+//        Object value = scontext.getAttribute(key);
+//        context.put(key, value);
+//      }
+//    }
 
     return context;
   }
