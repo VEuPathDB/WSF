@@ -19,9 +19,9 @@ import org.apache.log4j.Logger;
 import org.gusdb.wsf.util.Formatter;
 
 /**
- *
- * An abstract super class for all WSF plugins.  This class is a SINGLETON.  Instance variables
- * apply to all calls of the plugin.
+ * 
+ * An abstract super class for all WSF plugins. This class is a SINGLETON. Instance variables apply to all
+ * calls of the plugin.
  * 
  * @author Jerric
  * @created Feb 9, 2006
@@ -31,17 +31,14 @@ public abstract class AbstractPlugin implements Plugin {
   public static final String newline = System.getProperty("line.separator");
 
   /**
-   * @return the keys for the context objects that are required by the plugin
-   *         implementation.  
+   * @return the keys for the context objects that are required by the plugin implementation.
    */
   protected abstract String[] defineContextKeys();
 
-  protected abstract void execute(PluginRequest request, PluginResponse response)
-      throws WsfPluginException;
+  protected abstract void execute(PluginRequest request, PluginResponse response) throws WsfPluginException;
 
   /**
-   * The logger for this plugin. It is a recommended way to record standard
-   * output and error messages.
+   * The logger for this plugin. It is a recommended way to record standard output and error messages.
    */
   protected Logger logger;
 
@@ -51,8 +48,8 @@ public abstract class AbstractPlugin implements Plugin {
   protected Map<String, Object> context = new HashMap<String, Object>();
 
   /**
-   * It stores the properties defined in the configuration file. If the plugin
-   * doesn't use a configuration file, this map is empty.
+   * It stores the properties defined in the configuration file. If the plugin doesn't use a configuration
+   * file, this map is empty.
    */
   protected Properties properties;
 
@@ -70,27 +67,28 @@ public abstract class AbstractPlugin implements Plugin {
    * Initialize a plugin and assign a property file to it
    * 
    * @param propertyFile
-   *          the name of the property file. The base class will resolve the
-   *          path to this file, which should be under the WEB-INF of axis'
-   *          webapps.
+   *          the name of the property file. The base class will resolve the path to this file, which should
+   *          be under the WEB-INF of axis' webapps.
    */
   public AbstractPlugin(String propertyFile) {
     this();
     this.propertyFile = propertyFile;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.gusdb.wsf.plugin.Plugin#initialize(java.util.Map)
    */
   @Override
-  public void initialize(Map<String, Object> context)
-      throws WsfPluginException {
+  public void initialize(Map<String, Object> context) throws WsfPluginException {
     this.context = new HashMap<String, Object>(context);
     // load the properties
     if (propertyFile != null) {
       try {
         loadConfiguration();
-      } catch (IOException ex) {
+      }
+      catch (IOException ex) {
         logger.error(ex);
         throw new WsfPluginException(ex);
       }
@@ -109,42 +107,42 @@ public abstract class AbstractPlugin implements Plugin {
   }
 
   @Override
-  public void invoke(PluginRequest request, PluginResponse response)
-      throws WsfPluginException {
+  public void invoke(PluginRequest request, PluginResponse response) throws WsfPluginException {
     try {
       execute(request, response);
-    } catch (WsfPluginException ex) {
+    }
+    catch (WsfPluginException ex) {
       response.cleanup();
       throw ex;
     }
   }
 
-  private void loadConfiguration() throws InvalidPropertiesFormatException,
-      IOException, WsfPluginException {
+  private void loadConfiguration() throws InvalidPropertiesFormatException, IOException, WsfPluginException {
     String configDir = (String) context.get(CTX_CONFIG_PATH);
     String filePath = null;
 
     // if configDir is null, try resolving it in gus home
     if (configDir == null) {
       String gusHome = System.getProperty("GUS_HOME");
-      if (gusHome != null) configDir = gusHome + "/config/";
+      if (gusHome != null)
+        configDir = gusHome + "/config/";
     }
 
     // if config is null, try loading the resource from class path root.
     if (configDir == null) {
       URL url = this.getClass().getResource("/" + propertyFile);
       if (url == null)
-        throw new WsfPluginException("property file cannot be found "
-            + "in the class path: " + propertyFile);
+        throw new WsfPluginException("property file cannot be found " + "in the class path: " + propertyFile);
 
       filePath = url.toString();
-    } else {
-      if (!configDir.endsWith("/")) configDir += "/";
+    }
+    else {
+      if (!configDir.endsWith("/"))
+        configDir += "/";
       String path = configDir + propertyFile;
       File file = new File(path);
       if (!file.exists() || !file.isFile())
-        throw new WsfPluginException("property file cannot be found "
-            + " in the configuration path: " + path);
+        throw new WsfPluginException("property file cannot be found " + " in the configuration path: " + path);
 
       filePath = path;
     }
@@ -163,26 +161,27 @@ public abstract class AbstractPlugin implements Plugin {
     return properties.containsKey(propertyName);
   }
 
-  protected int invokeCommand(String[] command, StringBuffer result,
-      long timeout) throws IOException {
+  protected int invokeCommand(String[] command, StringBuffer result, long timeout) throws IOException,
+      WsfPluginException {
     return invokeCommand(command, result, timeout, null);
   }
 
   /**
    * @param command
-   *          the command array. If you have param values with spaces in it, put
-   *          the value into one cell to avoid the value to be splitted.
+   *          the command array. If you have param values with spaces in it, put the value into one cell to
+   *          avoid the value to be splitted.
    * @param timeout
    *          the maximum allowed time for the command to run, in seconds
    * @param result
    *          Contains raw output of the command.
    * @param env
-   *          a string including env variables, as expected by exec.  Useful to pass in a PATH
+   *          a string including env variables, as expected by exec. Useful to pass in a PATH
    * @return the exit code of the invoked command
    * @throws IOException
+   * @throws WsfPluginException
    */
-  protected int invokeCommand(String[] command, StringBuffer result,
-			      long timeout, String[] env) throws IOException {
+  protected int invokeCommand(String[] command, StringBuffer result, long timeout, String[] env)
+      throws IOException, WsfPluginException {
     logger.info("WsfPlugin.invokeCommand: " + Formatter.printArray(command));
     // invoke the command
     Process process = Runtime.getRuntime().exec(command, env);
@@ -191,11 +190,9 @@ public abstract class AbstractPlugin implements Plugin {
     StringBuffer sbOut = new StringBuffer();
 
     // any error message?
-    StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(),
-        "ERROR", sbErr);
+    StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR", sbErr);
     // any output?
-    StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(),
-        "OUTPUT", sbOut);
+    StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT", sbOut);
     logger.info("kicking off the stderr and stdout stream gobbling threads...");
     errorGobbler.start();
     outputGobbler.start();
@@ -206,17 +203,26 @@ public abstract class AbstractPlugin implements Plugin {
     // finished yet, an IllegalThreadStateException is thrown out
     int signal = -1;
     while (true) {
+      logger.debug("waiting for 1 second ...");
       try {
-        logger.debug("waiting for 1 second ...");
         Thread.sleep(1000);
+      }
+      catch (InterruptedException ex) {
+        // do nothing, keep looping
+      }
 
-        signal = process.exitValue();
+      try {
+        signal = process.exitValue(); // throws IllegalThreadStateException if the process is still running.
+
+        // process is stopped.
         result.append((signal == 0) ? sbOut : sbErr);
         break;
-      } catch (IllegalThreadStateException ex) {
+      }
+      catch (IllegalThreadStateException ex) {
         // if the timeout is set to <= 0, keep waiting till the process
         // is finished
-        if (timeout <= 0) continue;
+        if (timeout <= 0)
+          continue;
 
         // otherwise, check if time's up
         long time = System.currentTimeMillis() - start;
@@ -224,19 +230,16 @@ public abstract class AbstractPlugin implements Plugin {
           // convert string array to string
           StringBuilder buffer = new StringBuilder();
           for (String piece : command) {
-            if (buffer.length() > 0) buffer.append(" ");
+            if (buffer.length() > 0)
+              buffer.append(" ");
             buffer.append(piece);
           }
           logger.warn("Time out, the command is cancelled: " + buffer);
           outputGobbler.close();
           errorGobbler.close();
           process.destroy();
-          result.append("Time out, the command is cancelled.");
-          break;
+          throw new WsfPluginException("Time out, the command is cancelled.");
         }
-      } catch (InterruptedException ex) {
-        // do nothing, keep looping
-        continue;
       }
     }
     return signal;
@@ -263,12 +266,15 @@ public abstract class AbstractPlugin implements Plugin {
           // sb.append(type + ">" + line);
           sb.append(line + newline);
         }
-      } catch (IOException ex) {
+      }
+      catch (IOException ex) {
         ex.printStackTrace();
-      } finally {
+      }
+      finally {
         try {
           is.close();
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
           ex.printStackTrace();
         }
       }
@@ -277,7 +283,8 @@ public abstract class AbstractPlugin implements Plugin {
     public void close() {
       try {
         is.close();
-      } catch (IOException ex) {
+      }
+      catch (IOException ex) {
         ex.printStackTrace();
       }
     }
