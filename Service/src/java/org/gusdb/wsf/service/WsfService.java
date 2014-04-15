@@ -36,14 +36,20 @@ import org.json.JSONException;
 public class WsfService {
 
   /**
-   * If the WSF is deployed together with WDK, then WDK will set this variable,
-   * so that we can use the "local" mode to invoke plugins.
+   * If the WSF is deployed together with WDK, then WDK will set this variable, so that we can use the "local"
+   * mode to invoke plugins.
    */
   public static ServletContext SERVLET_CONTEXT;
 
+  public static void putStaticContext(String key, Object value) {
+    STATIC_CONTEXT.put(key, value);
+  }
+
+  private static final Map<String, Object> STATIC_CONTEXT = new LinkedHashMap<>();
+
   private static final Logger logger = Logger.getLogger(WsfService.class);
 
-  private static final Map<String, Plugin> plugins = new LinkedHashMap<String, Plugin>();
+  private static final Map<String, Plugin> plugins = new LinkedHashMap<>();
 
   private static final String STORAGE_DIR = "/wsf-storage/";
 
@@ -53,7 +59,7 @@ public class WsfService {
   private static final int ID_RETRY = 100;
 
   private static long CUMULATIVE_TIME = 0;
-  
+
   private final Random random;
 
   private final File storageDir;
@@ -62,22 +68,34 @@ public class WsfService {
 
   public WsfService() {
     random = new Random();
+
+    // set up the config dir
+    String gusHome = System.getProperty("GUS_HOME");
+    if (gusHome != null) {
+      String configPath = gusHome + "/config/";
+      STATIC_CONTEXT.put(Plugin.CTX_CONFIG_PATH, configPath);
+    }
+
+    // set up the temp storage dir
     String temp = System.getProperty("java.io.tmpdir", "/tmp");
     storageDir = new File(temp + STORAGE_DIR);
     logger.debug("WSF storage: " + storageDir.getAbsolutePath());
     if (!storageDir.exists() || !storageDir.isDirectory()) {
       if (!storageDir.mkdirs())
-        throw new RuntimeException("Cannot create storage directory: "
-            + storageDir.getAbsolutePath());
+        throw new RuntimeException("Cannot create storage directory: " + storageDir.getAbsolutePath());
 
       // assign full permissions to the dir
-       Set<PosixFilePermission> permissions = new HashSet<>(
-           Arrays.asList(PosixFilePermission.values()));
+      Set<PosixFilePermission> permissions = new HashSet<>(Arrays.asList(PosixFilePermission.values()));
       try {
         Files.setPosixFilePermissions(storageDir.toPath(), permissions);
-      } catch (IOException ex) {    
+      }
+      catch (UnsupportedOperationException ex) {
         // this operation is not supported in windows system. just ignore it.
         // throw new RuntimeException(ex);
+        logger.info("cannot set permissions to " + storageDir.toPath());
+      }
+      catch (IOException ex) {
+        throw new RuntimeException(ex);
       }
     }
     logger.debug("WsfService initialized");
@@ -87,9 +105,8 @@ public class WsfService {
    * Invoke a plugin, and send back the result.
    * 
    * @param jsonRequest
-   * @return if the result size is bigger than PACKET_SIZE constant, it will be
-   *         split into multiple packets, and only the first packet is returned.
-   *         Then the clients will need to call requestResult() to get
+   * @return if the result size is bigger than PACKET_SIZE constant, it will be split into multiple packets,
+   *         and only the first packet is returned. Then the clients will need to call requestResult() to get
    *         additional packets.
    * @throws WsfServiceException
    * 
@@ -104,8 +121,7 @@ public class WsfService {
       WsfRequest request = new WsfRequest(jsonRequest);
       String pluginClassName = request.getPluginClass();
 
-      logger.info("Invoking: " + pluginClassName + ", projectId: "
-          + request.getProjectId());
+      logger.info("Invoking: " + pluginClassName + ", projectId: " + request.getProjectId());
       logger.debug("request: " + jsonRequest);
 
       // use reflection to load the plugin object
@@ -115,7 +131,8 @@ public class WsfService {
       Plugin plugin;
       if (plugins.containsKey(pluginClassName)) {
         plugin = plugins.get(pluginClassName);
-      } else {
+      }
+      else {
         logger.info("Creating plugin " + pluginClassName);
         Class<?> pluginClass = Class.forName(pluginClassName);
         plugin = (Plugin) pluginClass.newInstance();
@@ -132,14 +149,14 @@ public class WsfService {
       logger.info("Result Message: '" + result.getMessage() + "'");
 
       long end = System.currentTimeMillis();
-      logger.info("WSF plugin " + pluginClassName + " finished in: " + ((end - start) / 1000.0)
-          + " seconds with " + result.getPageCount() + " pages, "
-          + result.getResult().length + " results of current page.");
+      logger.info("WSF plugin " + pluginClassName + " finished in: " + ((end - start) / 1000.0) +
+          " seconds with " + result.getPageCount() + " pages, " + result.getResult().length +
+          " results of current page.");
 
       return result;
-    } catch (WsfPluginException | IOException | ClassNotFoundException
-        | InstantiationException | IllegalAccessException | JSONException 
-        | WsfServiceException ex) {
+    }
+    catch (WsfPluginException | IOException | ClassNotFoundException | InstantiationException
+        | IllegalAccessException | JSONException | WsfServiceException ex) {
       logger.error("WSF Service failed.", ex);
       throw new WsfServiceException(ex.getMessage(), ex);
     }
@@ -153,8 +170,7 @@ public class WsfService {
    * @return a string representation of the result for the requested packet.
    * @throws WsfServiceException
    */
-  public WsfResponse requestResult(int invokeId, int pageId)
-      throws WsfServiceException {
+  public WsfResponse requestResult(int invokeId, int pageId) throws WsfServiceException {
     long start = System.currentTimeMillis();
     logger.debug("Requesting result: invokeId=" + invokeId + ", pageId=" + pageId);
     PluginResponse pluginResponse = new PluginResponse(storageDir, invokeId);
@@ -164,9 +180,10 @@ public class WsfService {
     try {
       String[][] results = pluginResponse.getPage(pageId);
       wsfResponse.setResult(results);
-      logger.info("Returning result: invokeId=" + invokeId + ", pageId=" + pageId + ", "
-          + results.length + " results returned.");
-    } catch (WsfPluginException ex) {
+      logger.info("Returning result: invokeId=" + invokeId + ", pageId=" + pageId + ", " + results.length +
+          " results returned.");
+    }
+    catch (WsfPluginException ex) {
       throw new WsfServiceException(ex.getMessage(), ex);
     }
     logAccumulatedTime(start, pageId, pluginResponse);
@@ -175,8 +192,8 @@ public class WsfService {
 
   private void logAccumulatedTime(long start, int pageId, PluginResponse pluginResponse) {
     CUMULATIVE_TIME += (System.currentTimeMillis() - start);
-    logger.debug("Cumulative processing time in WsfService.requestResult(): " +
-        (0.0 + CUMULATIVE_TIME) / 1000 + " (note: not threadsafe)");
+    logger.debug("Cumulative processing time in WsfService.requestResult(): " + (0.0 + CUMULATIVE_TIME) /
+        1000 + " (note: not threadsafe)");
     try {
       if (pageId == pluginResponse.getPageCount() - 1)
         CUMULATIVE_TIME = 0; // last page
@@ -204,14 +221,26 @@ public class WsfService {
     }
     if (scontext == null)
       scontext = SERVLET_CONTEXT;
-    if (scontext != null) {
-      // get the configuration path:
+    if (scontext != null) { // get the configuration path:
       String configPath = scontext.getRealPath(scontext.getInitParameter(Plugin.CTX_CONFIG_PATH));
       context.put(Plugin.CTX_CONFIG_PATH, configPath);
       for (String key : keys) {
-        String initValue = scontext.getInitParameter(key);
-        context.put(key, initValue);
         Object value = scontext.getAttribute(key);
+        if (value != null) {
+          context.put(key, value);
+        }
+        else {
+          String initValue = scontext.getInitParameter(key);
+          if (initValue != null)
+            context.put(key, initValue);
+        }
+      }
+    }
+    else { // servlet context not available, use the static context
+      String configPath = (String) STATIC_CONTEXT.get(Plugin.CTX_CONFIG_PATH);
+      context.put(Plugin.CTX_CONFIG_PATH, configPath);
+      for (String key : keys) {
+        Object value = STATIC_CONTEXT.get(key);
         context.put(key, value);
       }
     }
@@ -219,8 +248,8 @@ public class WsfService {
     return context;
   }
 
-  private WsfResponse invokePlugin(Plugin plugin, WsfRequest request)
-      throws WsfPluginException, WsfServiceException {
+  private WsfResponse invokePlugin(Plugin plugin, WsfRequest request) throws WsfPluginException,
+      WsfServiceException {
     // validate required parameters
     logger.debug("validing required params...");
     validateRequiredParameters(plugin, request);
@@ -243,7 +272,8 @@ public class WsfService {
       // make sure the results are flushed into storage
       logger.debug("flush plugin response...");
       pluginResponse.flush();
-    } catch (WsfPluginException ex) {
+    }
+    catch (WsfPluginException ex) {
       pluginResponse.cleanup();
       throw ex;
     }
@@ -260,8 +290,7 @@ public class WsfService {
     return wsfResponse;
   }
 
-  private void validateColumns(Plugin plugin, String[] orderedColumns)
-      throws WsfPluginException {
+  private void validateColumns(Plugin plugin, String[] orderedColumns) throws WsfPluginException {
     String[] reqColumns = plugin.getColumns();
 
     Set<String> colSet = new HashSet<String>();
@@ -305,16 +334,14 @@ public class WsfService {
     return invokeId;
   }
 
-  private void validateRequiredParameters(Plugin plugin, PluginRequest request)
-      throws WsfPluginException {
+  private void validateRequiredParameters(Plugin plugin, PluginRequest request) throws WsfPluginException {
     String[] reqParams = plugin.getRequiredParameterNames();
 
     // validate parameters
     Map<String, String> params = request.getParams();
     for (String param : reqParams) {
       if (!params.containsKey(param)) {
-        throw new WsfPluginException("The required parameter is missing: "
-            + param);
+        throw new WsfPluginException("The required parameter is missing: " + param);
       }
     }
   }
