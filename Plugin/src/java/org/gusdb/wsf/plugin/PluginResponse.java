@@ -21,7 +21,7 @@ import org.json.JSONException;
 public class PluginResponse {
 
   private static final String FILE_PREFIX = "cache.";
-  private static final long PAGE_SIZE = 1 * 1024 * 1024;
+  private static final long PAGE_SIZE = 5 * 1024 * 1024;
 
   private static final Logger logger = Logger.getLogger(PluginResponse.class);
 
