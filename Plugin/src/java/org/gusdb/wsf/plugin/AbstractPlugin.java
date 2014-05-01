@@ -40,7 +40,7 @@ public abstract class AbstractPlugin implements Plugin {
   /**
    * The logger for this plugin. It is a recommended way to record standard output and error messages.
    */
-  protected Logger logger;
+  private static final Logger logger = Logger.getLogger(AbstractPlugin.class);
 
   /**
    * Stores the context objects given by the initialize() method.
@@ -59,7 +59,6 @@ public abstract class AbstractPlugin implements Plugin {
    * Initialize a plugin with empty properties
    */
   public AbstractPlugin() {
-    this.logger = Logger.getLogger(AbstractPlugin.class); // use default
     properties = new Properties();
   }
 
