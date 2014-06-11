@@ -4,10 +4,22 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/WSF Plugin"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/WSF Service"/>
-	<classpathentry kind="lib" path="/WSF Service/lib/java/jaxrpc-1.4.jar"/>
 	<classpathentry kind="lib" path="/WSF Plugin/lib/java/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="/WSF Plugin/lib/java/junit-4.10.jar"/>
-	<classpathentry kind="lib" path="/WSF Service/lib/java/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="/WSF Service/lib/java/commons-discovery-0.2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/WSF Client"/>
+	<classpathentry kind="lib" path="/WSF Service/lib/java/javax.ws.rs-api-2.0.jar"/>
+	<classpathentry kind="lib" path="/WSF Service/lib/java/jersey-common.jar"/>
+	<classpathentry kind="lib" path="/WSF Service/lib/java/jersey-container-servlet-core.jar"/>
+	<classpathentry kind="lib" path="/WSF Service/lib/java/jersey-server.jar"/>
+	<classpathentry kind="lib" path="/WSF Service/lib/java/hk2-api-2.2.0.jar"/>
+	<classpathentry kind="lib" path="/WSF Service/lib/java/hk2-locator-2.2.0.jar"/>
+	<classpathentry kind="lib" path="/WSF Service/lib/java/hk2-utils-2.2.0.jar"/>
+	<classpathentry kind="lib" path="/WSF Service/lib/java/javassist-3.18.1-GA.jar"/>
+	<classpathentry kind="lib" path="/WSF Service/lib/java/javax.annotation-api-1.2.jar"/>
+	<classpathentry kind="lib" path="/WSF Service/lib/java/javax.inject-2.2.0.jar"/>
+	<classpathentry kind="lib" path="/WSF Service/lib/java/jaxb-api-2.2.7.jar"/>
+	<classpathentry kind="lib" path="/WSF Service/lib/java/jersey-guava-2.8.jar"/>
+	<classpathentry kind="lib" path="lib/java/jersey-container-jdk-http-2.9.jar"/>
+	<classpathentry kind="lib" path="/WSF Service/lib/java/validation-api-1.1.0.Final.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

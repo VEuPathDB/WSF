@@ -9,7 +9,7 @@ package org.gusdb.wsf.plugin;
  * @author Jerric
  * @created Nov 2, 2005
  */
-public class WsfPluginException extends Exception {
+public class WsfPluginException extends WsfException {
 
     /**
    * 

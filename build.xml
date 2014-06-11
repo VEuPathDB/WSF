@@ -57,59 +57,6 @@
   <target name="WSF/Client-Installation" depends="WSF/Plugin-Installation,
                                                   WSF/Service-Installation">
 
-    <!-- use a default webServiceBaseUrl, if not specified -->
-    <condition property="webServiceBaseUrl" value="http://localhost:8080/axis">
-      <not>
-        <isset property="webServiceBaseUrl" />
-      </not>
-    </condition>
-    
-    <delete dir="${projectsDir}/WSF/Client" quiet="true" />
-    <mkdir dir="${projectsDir}/WSF/Client/src/java"/>
-
-    <path id="classpath">
-      <pathelement path="${classpath}" />
-      <fileset dir="${targetDir}/lib/java">
-        <include name="**/*.jar"/>
-      </fileset>
-    </path>
-	
-    <echo>Creating WSDL file.</echo>
-        
-    <java classname="org.apache.axis.wsdl.Java2WSDL" fork="true">
-      <classpath refid="classpath" />
-      <arg line="-o ${targetDir}/config/WsfService.wsdl" />
-      <arg line="-l${webServiceBaseUrl}/services/WsfService" />
-      <arg line="-n .client.wsf.gusdb.org" />
-      <!--arg line="-y WRAPPED" /-->
-      <!--arg line="-u LITERAL" /-->
-      <arg line="-porg.gusdb.wsf.service=urn:wsf_classes" />
-      <arg line="org.gusdb.wsf.service.WsfService" />
-    </java>
-          
-    <echo>Generating client stub and deployment files from WSDL.</echo>
-        
-    <java classname="org.apache.axis.wsdl.WSDL2Java" fork="true">
-      <classpath refid="classpath" />
-      <arg line="-o ${projectsDir}/WSF/Client/src/java" />
-      <arg line="-d Application" />
-      <arg line="-c org.gusdb.wsf.service.WsfService" />
-      <arg line="-Nurn:wsf_classes=org.gusdb.wsf.service" />
-      <arg line="-s" />
-      <arg line="${targetDir}/config/WsfService.wsdl" />
-    </java>
-        
-    <delete file="${projectsDir}/WSF/Client/src/java/org/gusdb/wsf/service/WsfService.java" />
-    <delete file="${projectsDir}/WSF/Client/src/java/org/gusdb/wsf/plugin/WsfRequest.java" />
-          
-    <move file="${projectsDir}/WSF/Client/src/java/org/gusdb/wsf/client/deploy.wsdd" 
-          tofile="${targetDir}/config/wsfService-deploy.wsdd" />
-    <move file="${projectsDir}/WSF/Client/src/java/org/gusdb/wsf/client/undeploy.wsdd" 
-          tofile="${targetDir}/config/wsfService-undeploy.wsdd" />
-
-    <replace file="${targetDir}/config/wsfService-deploy.wsdd" 
-             token="org.gusdb.wsf.client." value="org.gusdb.wsf.service."/>
-
     <!-- install WSF-Client.jar -->
     <ant target="defaultComponentInstall">
       <property name="project" value="WSF"/>
@@ -127,7 +74,6 @@
                                               WSF-Installation,
                                               WSF/Service-WebInstallation">
 
-    <available file="${targetDir}/config/wsfService-undeploy.wsdd" property="undeploy.exist" />
     <available file="${webappTargetDir}/WEB-INF/wsf-config" type="dir" property="wsf-config.exist" />
     <available file="${webappTargetDir}/WEB-INF/lib" type="dir" property="lib.exist" />
     <available file="${webappTargetDir}/WEB-INF/web.xml" property="web.xml.exist" />
@@ -175,53 +121,6 @@
     
     </target>
 
-
-  <target name="deployService">
-  
-    <!-- Extract class files to workaround requirement to build/reload/build  
-         because AdminClient won't find classes in jar files until the jars
-         are loaded. We remove these extracted class files after deploymnet. -->
-    <unzip src="${webappTargetDir}/WEB-INF/lib/WSF-Service.jar"
-           dest="${webappTargetDir}/WEB-INF/classes">
-      <patternset>
-        <include name="org/gusdb/wsf/service/WsfResponse.class"/>
-        <include name="org/gusdb/wsf/service/WsfService.class"/>
-      </patternset>
-    </unzip>
-    
-    <!-- temporary write permissions for server-config.wsdd -->
-    <chmod dir="${webappTargetDir}/WEB-INF" perm="777"/>
-
-    <path id="classpath">
-      <pathelement path="${classpath}" />
-      <fileset dir="${targetDir}/lib/java">
-        <include name="**/*.jar"/>
-      </fileset>
-    </path>
-
-    <java classname="org.apache.axis.client.AdminClient" 
-          fork="true">
-      <classpath refid="classpath" />
-      <arg line="-l${webServiceBaseUrl}/servlet/AxisServlet" />
-      <arg line="${targetDir}/config/wsfService-deploy.wsdd" />
-    </java>
-
-    <!-- must either reload axis or GET the AxisServlet page before deleting
-         the extracted temp Wsf*.class files. -->
-    <get src="${webServiceBaseUrl}/servlet/AxisServlet" dest="${targetDir}/temp.html"/>
-    <delete file="${targetDir}/temp.html" quiet="yes" />
-    
-    <chmod dir="${webappTargetDir}/WEB-INF" perm="755"/>
-
-    <delete includeEmptyDirs="true" quiet="true">
-      <fileset dir="${webappTargetDir}/WEB-INF/classes/org/gusdb/wsf/service/">
-        <include name="WsfResponse.class"/>
-        <include name="WsfService.class"/>
-      </fileset>
-    </delete>
-  
-  </target>
-
    
   <target name="createLibLink" unless="lib.exist">
     <symlink link="${webappTargetDir}/WEB-INF/lib" resource="${targetDir}/lib/java"/>
@@ -251,31 +150,6 @@
   </target>
 
   
-  <!-- ooooooooooooooooooooo  Install web components  ooooooooooooooooooooo -->
-  
-  <target name="WSF-WebUninstallation" if="undeploy.exist">
-  
-    <echo>Unregistering web service from Axis. Tomcat/Axis must be up and running.</echo>
-
-    <!-- temporary write permissions for server-config.wsdd -->
-    <chmod dir="${webappTargetDir}/WEB-INF" perm="777"/>
-
-    <path id="classpath">
-      <pathelement path="${classpath}" />
-      <fileset dir="${targetDir}/lib/java">
-        <include name="**/*.jar"/>
-      </fileset>
-    </path>
-
-    <java classname="org.apache.axis.client.AdminClient" fork="true">
-      <classpath refid="classpath" />
-      <arg line="-l${webServiceBaseUrl}/servlet/AxisServlet" />
-      <arg line="${targetDir}/config/wsfService-undeploy.wsdd" />
-    </java>
-
-    <chmod dir="${webappTargetDir}/WEB-INF" perm="755"/>
-  
-  </target>
   
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
