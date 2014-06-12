@@ -98,7 +98,8 @@ public class WsfRequest extends PluginRequest {
 
   private void parseJSON(String jsonString) throws JSONException {
     JSONObject jsRequest = new JSONObject(jsonString);
-    setProjectId(jsRequest.getString("project"));
+    if (jsRequest.has("project"))
+      setProjectId(jsRequest.getString("project"));
     this.pluginClass = jsRequest.getString("plugin");
 
     JSONArray jsColumns = jsRequest.getJSONArray("ordered-columns");
