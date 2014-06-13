@@ -14,6 +14,7 @@ import java.util.InvalidPropertiesFormatException;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.gusdb.fgputil.runtime.GusHome;
 import org.gusdb.wsf.util.Formatter;
 
 /**
@@ -95,7 +96,7 @@ public abstract class AbstractPlugin implements Plugin {
     String configDir = null;
     String filePath = null;
 
-    String gusHome = System.getProperty("GUS_HOME");
+    String gusHome = GusHome.getGusHome();
     if (gusHome != null)
       configDir = gusHome + "/config/";
 

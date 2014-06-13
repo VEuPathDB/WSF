@@ -9,21 +9,39 @@
   <!-- oooooooooooooooooooooooooo  Dependencies  oooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
 
+    <import file="${projectsDir}/FgpUtil/build.xml" />
+
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooo    Checkout    oooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-  <target name="WSF-ChildCheckout" />
+  <target name="WSF-ChildCheckout">
+    <available file="${projectsDir}/FgpUtil" type="dir"  property="FgpUtil.present" />
+    <antcall target="FgpUtil-Checkout"/>
+  </target>
+
+  <target name="FgpUtil-Checkout" unless="FgpUtil.present">
+    <ant target="defaultProjectCheckout" inheritAll="false">
+      <property name="svnurl" value="https://www.cbil.upenn.edu/svn/gus/FgpUtil"/>
+      <property name="project" value="FgpUtil"/>
+      <property name="version" value="WDK_version_1-28"/>
+    </ant>
+  </target>
   
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooo    Update    oooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-  <target name="WSF-ChildUpdate" />
+  <target name="WSF-ChildUpdate">
+    <ant target="defaultProjectUpdate">
+      <property name="project" value="FgpUtil"/>
+    </ant>
+  </target>
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooo  Installation  oooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
 
-  <target name="WSF-Installation" depends="WSF/Service-Installation,
+  <target name="WSF-Installation" depends="FgpUtil-Installation,
+                                           WSF/Service-Installation,
                                            WSF/Plugin-Installation,
                                            WSF/Client-Installation">
 
@@ -116,7 +134,6 @@
 
     <target name="verifyWebPropFile">
     
-        <fail unless="webServiceBaseUrl">The 'webServiceBaseUrl' is missing from the web property file. Example: http://localhost:8080/axis</fail>
         <fail unless="webappTargetDir">The 'webappTargetDir' is missing from the web property file. Example: /usr/local/tomcat/webapps/axis</fail>
     
     </target>
