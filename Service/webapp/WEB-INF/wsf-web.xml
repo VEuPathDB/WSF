@@ -18,7 +18,7 @@ Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
  
   <servlet-mapping>
 	<servlet-name>WSF</servlet-name>
-	<url-pattern>/wsf/*</url-pattern>
+	<url-pattern>/*</url-pattern>
   </servlet-mapping>
   <!-- End of WSF Restful service servlet -->
   
