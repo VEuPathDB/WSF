@@ -53,6 +53,10 @@ public class WsfRemoteClient implements WsfClient {
     // invoke service
     Response response = target.request(MediaType.APPLICATION_OCTET_STREAM_TYPE).post(
         Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+    int status = response.getStatus();
+    if (status != 200)
+      throw new WsfClientException("Request failed with status code: " + status);
+
     InputStream inStream = null;
     int signal = 0;
     try {
