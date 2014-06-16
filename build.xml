@@ -96,8 +96,6 @@
     <available file="${webappTargetDir}/WEB-INF/lib" type="dir" property="lib.exist" />
     <available file="${webappTargetDir}/WEB-INF/web.xml" property="web.xml.exist" />
         
-    <antcall target="WSF-WebUninstallation" />
-
     <!-- create necessary directory structure -->
     <mkdir dir="${webappTargetDir}/WEB-INF/"/>
     
@@ -108,7 +106,6 @@
     <antcall target="deployService" />
 
     <!-- copy the log4j.properties to webapp's classes, if necessary -->
-    <available file="${webappTargetDir}/WEB-INF/classes/log4j.properties" property="log4j.webconfig.exist" />
     <available file="${webappTargetDir}/WEB-INF/classes/log4j.xml" property="log4j.webconfig.exist" />
     <antcall target="copyLog4jWebconfig" />
 
@@ -155,7 +152,7 @@
  
  
   <target name="copyLog4jWebconfig" unless="log4j.webconfig.exist">
-    <copy file="${targetDir}/config/log4j.properties" toDir="${webappTargetDir}/WEB-INF/classes"/>
+    <copy file="${targetDir}/config/log4j.xml" toDir="${webappTargetDir}/WEB-INF/classes"/>
   </target>
  
   <target name="copyContextXml" unless="context.xml.exist">

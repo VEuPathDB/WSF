@@ -13,6 +13,7 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.Logger;
 import org.gusdb.wsf.plugin.WsfException;
 import org.gusdb.wsf.service.ResponseAttachment;
 import org.gusdb.wsf.service.ResponseMessage;
@@ -22,6 +23,8 @@ import org.gusdb.wsf.service.WsfRequest;
 import org.gusdb.wsf.service.WsfService;
 
 public class WsfRemoteClient implements WsfClient {
+
+  private static final Logger LOG = Logger.getLogger(WsfRemoteClient.class);
 
   private final URI serviceURI;
 
@@ -40,6 +43,8 @@ public class WsfRemoteClient implements WsfClient {
   public int invoke(WsfRequest request) throws WsfException {
     Client client = ClientBuilder.newClient();
     WebTarget target = client.target(serviceURI);
+
+    LOG.debug("WSF Remote: " + serviceURI + "\n" + request);
 
     // prepare the form
     Form form = new Form();
