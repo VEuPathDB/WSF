@@ -78,6 +78,7 @@ public class WsfRemoteClient implements WsfClient {
           response.close();
         }
       }
+      LOG.debug("WSF Remote finished with status " + status + ", at " + serviceURI);
     }
     return signal;
   }
