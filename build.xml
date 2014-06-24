@@ -101,7 +101,9 @@
     
     <antcall target="createLibLink" />
     <antcall target="createConfigLink" />
+<!--
     <antcall target="copyWebXml" />
+-->
 
     <!-- copy the log4j.properties to webapp's classes, if necessary -->
     <available file="${webappTargetDir}/WEB-INF/classes/log4j.xml" property="log4j.webconfig.exist" />
