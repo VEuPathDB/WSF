@@ -107,7 +107,9 @@
 
     <!-- copy the log4j.properties to webapp's classes, if necessary -->
     <available file="${webappTargetDir}/WEB-INF/classes/log4j.xml" property="log4j.webconfig.exist" />
+<!--
     <antcall target="copyLog4jWebconfig" />
+-->
 
     <!-- use default context.xml, if it does not exist -->
     <available file="${targetDir}/config/context.xml" property="context.xml.exist" />
