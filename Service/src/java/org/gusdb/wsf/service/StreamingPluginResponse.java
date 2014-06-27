@@ -9,8 +9,19 @@ public class StreamingPluginResponse implements PluginResponse {
 
   private final ObjectOutputStream outStream;
 
+  private int rowCount = 0;
+  private int attachmentCount = 0;
+
   public StreamingPluginResponse(ObjectOutputStream outStream) {
-      this.outStream = outStream;
+    this.outStream = outStream;
+  }
+
+  public int getRowCount() {
+    return rowCount;
+  }
+
+  public int getAttachmentCount() {
+    return attachmentCount;
   }
 
   @Override
@@ -18,6 +29,7 @@ public class StreamingPluginResponse implements PluginResponse {
     ResponseRow responseRow = new ResponseRow(row);
     try {
       outStream.writeObject(responseRow);
+      rowCount++;
     }
     catch (IOException ex) {
       throw new WsfServiceException(ex);
@@ -29,6 +41,7 @@ public class StreamingPluginResponse implements PluginResponse {
     ResponseAttachment attachment = new ResponseAttachment(key, content);
     try {
       outStream.writeObject(attachment);
+      attachmentCount++;
     }
     catch (IOException ex) {
       throw new WsfServiceException(ex);

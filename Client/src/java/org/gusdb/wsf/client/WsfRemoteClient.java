@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -43,8 +45,8 @@ public class WsfRemoteClient implements WsfClient {
   public int invoke(WsfRequest request) throws WsfException {
     Client client = ClientBuilder.newClient();
     WebTarget target = client.target(serviceURI);
-
-    LOG.debug("WSF Remote: " + serviceURI + "\n" + request);
+    int checksum = request.getChecksum();
+    LOG.debug("WSF Remote: checksum=" + checksum + ", url=" + serviceURI + "\n" + request);
 
     // prepare the form
     Form form = new Form();
@@ -59,9 +61,12 @@ public class WsfRemoteClient implements WsfClient {
 
     InputStream inStream = null;
     int signal = 0;
+    Map<String, Integer> stats = new HashMap<String, Integer>();
+    stats.put("rows", 0);
+    stats.put("attachments", 0);
     try {
       inStream = response.readEntity(InputStream.class);
-      signal = readStream(inStream);
+      signal = readStream(inStream, stats);
     }
     catch (ClassNotFoundException | IOException ex) {
       new WsfClientException(ex);
@@ -78,12 +83,14 @@ public class WsfRemoteClient implements WsfClient {
           response.close();
         }
       }
-      LOG.debug("WSF Remote finished with status " + status + ", at " + serviceURI);
+      LOG.debug("WSF Remote finished: checksum=" + checksum + ", status " + status + ", #rows=" +
+          stats.get("rows") + ", #attch=" + stats.get("attachments") + ", url=" + serviceURI);
     }
     return signal;
   }
 
-  private int readStream(InputStream inStream) throws IOException, ClassNotFoundException, WsfException {
+  private int readStream(InputStream inStream, Map<String, Integer> stats) throws IOException,
+      ClassNotFoundException, WsfException {
     ObjectInputStream objectStream = new ObjectInputStream(inStream);
     while (true) {
       Object object = objectStream.readObject();
@@ -102,10 +109,12 @@ public class WsfRemoteClient implements WsfClient {
       else if (object instanceof ResponseRow) { // received a new row from the service
         ResponseRow row = (ResponseRow) object;
         listener.onRowReceived(row.getRow());
+        stats.put("rows", stats.get("rows") + 1);
       }
       else if (object instanceof ResponseAttachment) { // received a new attachment
         ResponseAttachment attachment = (ResponseAttachment) object;
         listener.onAttachmentReceived(attachment.getKey(), attachment.getContent());
+        stats.put("rows", stats.get("attachments") + 1);
       }
       else if (object instanceof ResponseMessage) { // received message
         ResponseMessage message = (ResponseMessage) object;

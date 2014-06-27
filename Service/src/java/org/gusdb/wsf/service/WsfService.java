@@ -19,7 +19,6 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.log4j.Logger;
 import org.gusdb.wsf.plugin.PluginExecutor;
-import org.gusdb.wsf.plugin.PluginResponse;
 import org.gusdb.wsf.plugin.WsfException;
 
 /**
@@ -30,7 +29,7 @@ import org.gusdb.wsf.plugin.WsfException;
  */
 @Path("/")
 public class WsfService {
-  
+
   public static final String VERSION = "3.0.0";
 
   public static final String CONFIG_FILE = "wsf-config.xml";
@@ -54,8 +53,6 @@ public class WsfService {
   public Response invoke(@FormParam(PARAM_REQUEST) final String jsonRequest) {
     long start = System.currentTimeMillis();
 
-    LOG.debug("Invoking " + jsonRequest);
-
     // open a StreamingOutput
     StreamingOutput output = new StreamingOutput() {
 
@@ -64,12 +61,15 @@ public class WsfService {
         // prepare to run the plugin
         PluginExecutor executor = new PluginExecutor();
         ResponseStatus status = new ResponseStatus();
+
+        // prepare response
         ObjectOutputStream objectStream = new ObjectOutputStream(outStream);
+        StreamingPluginResponse pluginResponse = new StreamingPluginResponse(objectStream);
+        int checksum = 0;
         try {
           WsfRequest request = new WsfRequest(jsonRequest);
-
-          // prepare response
-          PluginResponse pluginResponse = new StreamingPluginResponse(objectStream);
+          checksum = request.getChecksum();
+          LOG.debug("Invoking WSF: checksum=" + checksum + "\n" + jsonRequest);
 
           // invoke plugin
           int signal = executor.execute(request.getPluginClass(), request, pluginResponse);
@@ -85,7 +85,8 @@ public class WsfService {
           objectStream.flush();
           objectStream.close();
 
-          LOG.debug("Status returned: " + status);
+          LOG.debug("WSF Service finished: checksum=" + checksum + ", status=" + status + ", #rows=" +
+              pluginResponse.getRowCount() + ", #attch=" + pluginResponse.getAttachmentCount());
         }
       }
     };
@@ -96,7 +97,7 @@ public class WsfService {
     LOG.info("WsfService call finished in " + ((end - start) / 1000D) + " seconds");
     return response;
   }
-  
+
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getInfo() {

@@ -54,6 +54,15 @@ public class WsfRequest extends PluginRequest {
   public void setPluginClass(String pluginClass) {
     this.pluginClass = pluginClass;
   }
+  
+  public int getChecksum() {
+    String content = toString();
+    int checksum = 0;
+    for (int i = 0; i < content.length(); i++) {
+      checksum ^= content.charAt(i);
+    }
+    return checksum;
+  }
 
   /*
    * (non-Javadoc)
