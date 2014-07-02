@@ -10,7 +10,6 @@ import java.util.Map;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -53,7 +52,7 @@ public class WsfRemoteClient implements WsfClient {
     form.param(WsfService.PARAM_REQUEST, request.toString());
 
     // invoke service
-    Response response = client.property(ClientProperties.FOLLOW_REDIRECTS, Boolean.TRUE).target(serviceURI).request(
+    Response response = client.target(serviceURI).property(ClientProperties.FOLLOW_REDIRECTS, Boolean.TRUE).request(
         MediaType.APPLICATION_OCTET_STREAM_TYPE).post(
         Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
     int status = response.getStatus();
