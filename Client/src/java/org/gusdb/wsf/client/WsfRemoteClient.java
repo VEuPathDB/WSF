@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
+import org.glassfish.jersey.client.ClientProperties;
 import org.gusdb.wsf.plugin.WsfException;
 import org.gusdb.wsf.service.ResponseAttachment;
 import org.gusdb.wsf.service.ResponseMessage;
@@ -44,7 +45,6 @@ public class WsfRemoteClient implements WsfClient {
   @Override
   public int invoke(WsfRequest request) throws WsfException {
     Client client = ClientBuilder.newClient();
-    WebTarget target = client.target(serviceURI);
     int checksum = request.getChecksum();
     LOG.debug("WSF Remote: checksum=" + checksum + ", url=" + serviceURI + "\n" + request);
 
@@ -53,7 +53,8 @@ public class WsfRemoteClient implements WsfClient {
     form.param(WsfService.PARAM_REQUEST, request.toString());
 
     // invoke service
-    Response response = target.request(MediaType.APPLICATION_OCTET_STREAM_TYPE).post(
+    Response response = client.property(ClientProperties.FOLLOW_REDIRECTS, Boolean.TRUE).target(serviceURI).request(
+        MediaType.APPLICATION_OCTET_STREAM_TYPE).post(
         Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
     int status = response.getStatus();
     if (status >= 400)
