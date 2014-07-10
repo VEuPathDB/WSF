@@ -54,7 +54,7 @@ public class PluginRequest {
   public void setParams(Map<String, String> params) {
     this.params = new HashMap<String, String>(params);
   }
-  
+
   public void putParam(String name, String value) {
     this.params.put(name, value);
   }
@@ -69,6 +69,18 @@ public class PluginRequest {
   }
 
   /**
+   * @return a map of ordered columns, where the key is the column name, and the value is the zero-based order
+   *         of that column.
+   */
+  public Map<String, Integer> getColumnMap() {
+    Map<String, Integer> map = new HashMap<>();
+    for (int i = 0; i < orderedColumns.size(); i++) {
+      map.put(orderedColumns.get(i), i);
+    }
+    return map;
+  }
+
+  /**
    * @param orderedColumns
    *          the orderedColumns to set
    */
@@ -80,8 +92,8 @@ public class PluginRequest {
   }
 
   /**
-   * The context can be used to hold additional information, such as user id,
-   * calling query name, etc, which can be used by plugins.
+   * The context can be used to hold additional information, such as user id, calling query name, etc, which
+   * can be used by plugins.
    * 
    * @return the context
    */

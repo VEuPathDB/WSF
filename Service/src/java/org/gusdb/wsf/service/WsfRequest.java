@@ -23,18 +23,24 @@ public class WsfRequest extends PluginRequest {
   private String pluginClass;
 
   public WsfRequest() {}
-  
+
   public WsfRequest(PluginRequest pluginRequest) {
     super(pluginRequest);
   }
 
-  public WsfRequest(String jsonString) throws JSONException {
-    parseJSON(jsonString);
+  public WsfRequest(String jsonString) throws WsfServiceException {
+    try {
+      parseJSON(jsonString);
+    }
+    catch (JSONException ex) {
+      throw new WsfServiceException(ex);
+    }
   }
 
   /**
-   * the full class name of the WSF plugin. The service will instantiate a
-   * plugin instance from this class name, and invoke it.
+   * the full class name of the WSF plugin. The service will instantiate a plugin instance from this class
+   * name, and invoke it.
+   * 
    * @return the pluginClass
    */
   public String getPluginClass() {
@@ -47,6 +53,15 @@ public class WsfRequest extends PluginRequest {
    */
   public void setPluginClass(String pluginClass) {
     this.pluginClass = pluginClass;
+  }
+  
+  public int getChecksum() {
+    String content = toString();
+    int checksum = 0;
+    for (int i = 0; i < content.length(); i++) {
+      checksum ^= content.charAt(i);
+    }
+    return checksum;
   }
 
   /*
@@ -83,7 +98,8 @@ public class WsfRequest extends PluginRequest {
         jsContext.put(contextKey, context.get(contextKey));
       }
       jsRequest.put("context", jsContext);
-    } catch (JSONException ex) {
+    }
+    catch (JSONException ex) {
       throw new RuntimeException(ex);
     }
     return jsRequest.toString();
@@ -91,7 +107,8 @@ public class WsfRequest extends PluginRequest {
 
   private void parseJSON(String jsonString) throws JSONException {
     JSONObject jsRequest = new JSONObject(jsonString);
-    setProjectId(jsRequest.getString("project"));
+    if (jsRequest.has("project"))
+      setProjectId(jsRequest.getString("project"));
     this.pluginClass = jsRequest.getString("plugin");
 
     JSONArray jsColumns = jsRequest.getJSONArray("ordered-columns");
@@ -110,8 +127,7 @@ public class WsfRequest extends PluginRequest {
     setContext(context);
   }
 
-  private static void addToMap(Map<String, String> map, JSONObject newValues)
-      throws JSONException {
+  private static void addToMap(Map<String, String> map, JSONObject newValues) throws JSONException {
     @SuppressWarnings("unchecked")
     Iterator<String> keys = newValues.keys();
     while (keys.hasNext()) {
