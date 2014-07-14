@@ -153,7 +153,7 @@ public abstract class AbstractPlugin implements Plugin {
    */
   protected int invokeCommand(String[] command, StringBuffer result, long timeout, String[] env)
       throws IOException, WsfPluginException {
-    LOG.info("WsfPlugin.invokeCommand: " + FormatUtil .printArray(command));
+    LOG.info("WsfPlugin.invokeCommand: " + FormatUtil.printArray(command));
     // invoke the command
     Process process = Runtime.getRuntime().exec(command, env);
 
