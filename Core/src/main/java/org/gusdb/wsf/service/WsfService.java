@@ -19,7 +19,8 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.log4j.Logger;
 import org.gusdb.wsf.plugin.PluginExecutor;
-import org.gusdb.wsf.plugin.WsfException;
+import org.gusdb.wsf.common.WsfException;
+import org.gusdb.wsf.common.WsfRequest;
 
 /**
  * The WSF Web service entry point.

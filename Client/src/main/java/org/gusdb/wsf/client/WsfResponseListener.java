@@ -1,6 +1,6 @@
 package org.gusdb.wsf.client;
 
-import org.gusdb.wsf.plugin.WsfException;
+import org.gusdb.wsf.common.WsfException;
 
 
 public interface WsfResponseListener {

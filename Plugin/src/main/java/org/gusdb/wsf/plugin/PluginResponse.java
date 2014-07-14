@@ -1,5 +1,6 @@
 package org.gusdb.wsf.plugin;
 
+import org.gusdb.wsf.common.WsfException;
 
 public interface PluginResponse {
 

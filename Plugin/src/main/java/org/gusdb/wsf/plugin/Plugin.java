@@ -1,5 +1,9 @@
 package org.gusdb.wsf.plugin;
 
+import org.gusdb.wsf.common.WsfException;
+import org.gusdb.wsf.common.PluginRequest;
+import org.gusdb.wsf.common.WsfUserException;
+
 
 /**
  * @author Jerric

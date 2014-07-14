@@ -2,7 +2,7 @@ package org.gusdb.wsf.service;
 
 import java.io.Serializable;
 
-import org.gusdb.wsf.plugin.WsfException;
+import org.gusdb.wsf.common.WsfException;
 
 public class ResponseStatus implements Serializable {
 

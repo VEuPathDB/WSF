@@ -1,6 +1,6 @@
 package org.gusdb.wsf.service;
 
-import org.gusdb.wsf.plugin.WsfException;
+import org.gusdb.wsf.common.WsfException;
 
 public class WsfServiceException extends WsfException {
 

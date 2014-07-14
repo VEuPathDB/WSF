@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.gusdb.wsf.plugin;
 
 import java.io.BufferedReader;
@@ -14,8 +11,10 @@ import java.util.InvalidPropertiesFormatException;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.gusdb.fgputil.FormatUtil;
 import org.gusdb.fgputil.runtime.GusHome;
-import org.gusdb.wsf.util.Formatter;
+import org.gusdb.wsf.common.PluginRequest;
+import org.gusdb.wsf.common.WsfException;
 
 /**
  * 
@@ -154,7 +153,7 @@ public abstract class AbstractPlugin implements Plugin {
    */
   protected int invokeCommand(String[] command, StringBuffer result, long timeout, String[] env)
       throws IOException, WsfPluginException {
-    LOG.info("WsfPlugin.invokeCommand: " + Formatter.printArray(command));
+    LOG.info("WsfPlugin.invokeCommand: " + FormatUtil .printArray(command));
     // invoke the command
     Process process = Runtime.getRuntime().exec(command, env);
 

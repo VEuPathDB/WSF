@@ -1,39 +1,38 @@
 /**
  * 
  */
-package org.gusdb.wsf.client;
+package org.gusdb.wsf.common;
 
-import org.gusdb.wsf.common.WsfException;
+
 
 /**
  * @author Jerric
  *
  */
-public class WsfClientException extends WsfException {
+public class WsfUserException extends WsfException {
 
   /**
    * 
    */
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -1678301995177067480L;
 
   /**
    * 
    */
-  public WsfClientException() {
-    super();
+  public WsfUserException() {
   }
 
   /**
    * @param message
    */
-  public WsfClientException(String message) {
+  public WsfUserException(String message) {
     super(message);
   }
 
   /**
    * @param cause
    */
-  public WsfClientException(Throwable cause) {
+  public WsfUserException(Throwable cause) {
     super(cause);
   }
 
@@ -41,7 +40,7 @@ public class WsfClientException extends WsfException {
    * @param message
    * @param cause
    */
-  public WsfClientException(String message, Throwable cause) {
+  public WsfUserException(String message, Throwable cause) {
     super(message, cause);
   }
 
@@ -51,8 +50,9 @@ public class WsfClientException extends WsfException {
    * @param enableSuppression
    * @param writableStackTrace
    */
-  public WsfClientException(String message, Throwable cause, boolean enableSuppression,
+  public WsfUserException(String message, Throwable cause, boolean enableSuppression,
       boolean writableStackTrace) {
     super(message, cause, enableSuppression, writableStackTrace);
   }
+
 }

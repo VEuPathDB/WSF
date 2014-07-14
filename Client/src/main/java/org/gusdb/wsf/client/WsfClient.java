@@ -1,7 +1,7 @@
 package org.gusdb.wsf.client;
 
-import org.gusdb.wsf.plugin.WsfException;
-import org.gusdb.wsf.service.WsfRequest;
+import org.gusdb.wsf.common.WsfException;
+import org.gusdb.wsf.common.WsfRequest;
 
 public interface WsfClient {
   
