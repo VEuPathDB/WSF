@@ -1,6 +1,7 @@
 package org.gusdb.wsf.common;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -30,11 +31,11 @@ public class WsfRequest implements PluginRequest {
     this.context = new HashMap<String, String>();
   }
 
-  public WsfRequest(WsfRequest request) {
-    this.projectId = request.projectId;
-    this.params = new HashMap<>(request.params);
-    this.orderedColumns = new ArrayList<>(request.orderedColumns);
-    this.context = new HashMap<>(request.context);
+  public WsfRequest(PluginRequest request) {
+    this.projectId = request.getProjectId();
+    this.params = new HashMap<>(request.getParams());
+    this.orderedColumns = new ArrayList<>(Arrays.asList(request.getOrderedColumns()));
+    this.context = new HashMap<>(request.getContext());
   }
 
   public WsfRequest(String jsonString) throws WsfClientException {
