@@ -41,6 +41,7 @@
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
 
   <target name="WSF-Installation" depends="FgpUtil-Installation,
+                                           WSF-MavenInstallation,
                                            WSF/Client-Installation,
                                            WSF/Plugin-Installation,
                                            WSF/Core-Installation">
@@ -53,6 +54,24 @@
   
 
  <!-- ooooooooooooooooooooooo  Install Components  ooooooooooooooooooooooo -->
+
+  <target name="WSF-MavenInstallation">
+    <ant target="mavenCleanInstall">
+      <property name="project" value="WSF"/>
+    </ant>
+    <ant target="deployMavenArtifacts">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Client"/>
+    </ant>
+    <ant target="deployMavenArtifacts">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Plugin"/>
+    </ant>
+    <ant target="deployMavenArtifacts">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Core"/>
+    </ant>
+  </target>
 
   <target name="WSF/Plugin-Installation" depends="WSF/Client-Installation">
 
