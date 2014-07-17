@@ -13,8 +13,6 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.gusdb.fgputil.FormatUtil;
 import org.gusdb.fgputil.runtime.GusHome;
-import org.gusdb.wsf.common.PluginRequest;
-import org.gusdb.wsf.common.WsfException;
 
 /**
  * 
@@ -28,7 +26,8 @@ public abstract class AbstractPlugin implements Plugin {
 
   public static final String newline = System.getProperty("line.separator");
 
-  protected abstract int execute(PluginRequest request, PluginResponse response) throws WsfException;
+  protected abstract int execute(PluginRequest request, PluginResponse response) throws PluginModelException,
+      PluginUserException;
 
   /**
    * The logger for this plugin. It is a recommended way to record standard output and error messages.
@@ -68,7 +67,7 @@ public abstract class AbstractPlugin implements Plugin {
    * @see org.gusdb.wsf.plugin.Plugin#initialize(java.util.Map)
    */
   @Override
-  public void initialize() throws WsfPluginException {
+  public void initialize() throws PluginModelException {
     // load the properties
     if (propertyFile != null) {
       try {
@@ -76,22 +75,23 @@ public abstract class AbstractPlugin implements Plugin {
       }
       catch (IOException ex) {
         LOG.error(ex);
-        throw new WsfPluginException(ex);
+        throw new PluginModelException(ex);
       }
     }
   }
 
   @Override
-  public int invoke(PluginRequest request, PluginResponse response) throws WsfException {
+  public int invoke(PluginRequest request, PluginResponse response) throws PluginModelException,
+      PluginUserException {
     try {
       return execute(request, response);
     }
-    catch (WsfPluginException ex) {
+    catch (PluginModelException ex) {
       throw ex;
     }
   }
 
-  private void loadConfiguration() throws InvalidPropertiesFormatException, IOException, WsfPluginException {
+  private void loadConfiguration() throws InvalidPropertiesFormatException, IOException, PluginModelException {
     String configDir = null;
     String filePath = null;
 
@@ -103,7 +103,8 @@ public abstract class AbstractPlugin implements Plugin {
     if (configDir == null) {
       URL url = this.getClass().getResource("/" + propertyFile);
       if (url == null)
-        throw new WsfPluginException("property file cannot be found " + "in the class path: " + propertyFile);
+        throw new PluginModelException("property file cannot be found " + "in the class path: " +
+            propertyFile);
 
       filePath = url.toString();
     }
@@ -113,7 +114,8 @@ public abstract class AbstractPlugin implements Plugin {
       String path = configDir + propertyFile;
       File file = new File(path);
       if (!file.exists() || !file.isFile())
-        throw new WsfPluginException("property file cannot be found " + " in the configuration path: " + path);
+        throw new PluginModelException("property file cannot be found " + " in the configuration path: " +
+            path);
 
       filePath = path;
     }
@@ -132,8 +134,8 @@ public abstract class AbstractPlugin implements Plugin {
     return properties.containsKey(propertyName);
   }
 
-  protected int invokeCommand(String[] command, StringBuffer result, long timeout) throws IOException,
-      WsfPluginException {
+  protected int invokeCommand(String[] command, StringBuffer result, long timeout)
+      throws PluginUserException, PluginModelException {
     return invokeCommand(command, result, timeout, null);
   }
 
@@ -149,13 +151,19 @@ public abstract class AbstractPlugin implements Plugin {
    *          a string including env variables, as expected by exec. Useful to pass in a PATH
    * @return the exit code of the invoked command
    * @throws IOException
-   * @throws WsfPluginException
+   * @throws PluginModelException
    */
   protected int invokeCommand(String[] command, StringBuffer result, long timeout, String[] env)
-      throws IOException, WsfPluginException {
+      throws PluginUserException, PluginModelException {
     LOG.info("WsfPlugin.invokeCommand: " + FormatUtil.printArray(command));
     // invoke the command
-    Process process = Runtime.getRuntime().exec(command, env);
+    Process process;
+    try {
+      process = Runtime.getRuntime().exec(command, env);
+    }
+    catch (IOException ex) {
+      throw new PluginModelException(ex);
+    }
 
     StringBuffer sbErr = new StringBuffer();
     StringBuffer sbOut = new StringBuffer();
@@ -209,7 +217,7 @@ public abstract class AbstractPlugin implements Plugin {
           outputGobbler.close();
           errorGobbler.close();
           process.destroy();
-          throw new WsfPluginException("Time out, the command is cancelled.");
+          throw new PluginModelException("Time out, the command is cancelled.");
         }
       }
     }
