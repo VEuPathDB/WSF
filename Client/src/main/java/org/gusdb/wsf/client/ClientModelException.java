@@ -3,37 +3,36 @@
  */
 package org.gusdb.wsf.client;
 
-import org.gusdb.wsf.common.WsfException;
 
 /**
  * @author Jerric
  *
  */
-public class WsfClientException extends WsfException {
+public class ClientModelException extends Exception {
 
   /**
    * 
    */
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   /**
    * 
    */
-  public WsfClientException() {
+  public ClientModelException() {
     super();
   }
 
   /**
    * @param message
    */
-  public WsfClientException(String message) {
+  public ClientModelException(String message) {
     super(message);
   }
 
   /**
    * @param cause
    */
-  public WsfClientException(Throwable cause) {
+  public ClientModelException(Throwable cause) {
     super(cause);
   }
 
@@ -41,7 +40,7 @@ public class WsfClientException extends WsfException {
    * @param message
    * @param cause
    */
-  public WsfClientException(String message, Throwable cause) {
+  public ClientModelException(String message, Throwable cause) {
     super(message, cause);
   }
 
@@ -51,7 +50,7 @@ public class WsfClientException extends WsfException {
    * @param enableSuppression
    * @param writableStackTrace
    */
-  public WsfClientException(String message, Throwable cause, boolean enableSuppression,
+  public ClientModelException(String message, Throwable cause, boolean enableSuppression,
       boolean writableStackTrace) {
     super(message, cause, enableSuppression, writableStackTrace);
   }
