@@ -42,9 +42,11 @@
 
   <target name="WSF-Installation" depends="FgpUtil-Installation,
                                            WSF-MavenInstallation,
-                                           WSF/Client-Installation,
+                                           WSF/Common-Installation,
                                            WSF/Plugin-Installation,
-                                           WSF/Core-Installation">
+                                           WSF/MockPlugin-Installation,
+                                           WSF/Service-Installation,
+                                           WSF/Client-Installation">
 
     <ant target="defaultProjectInstall">
       <property name="project" value="WSF"/>
@@ -61,7 +63,7 @@
     </ant>
     <ant target="deployMavenArtifacts">
       <property name="project" value="WSF"/>
-      <property name="component" value="Client"/>
+      <property name="component" value="Common"/>
     </ant>
     <ant target="deployMavenArtifacts">
       <property name="project" value="WSF"/>
@@ -69,11 +71,28 @@
     </ant>
     <ant target="deployMavenArtifacts">
       <property name="project" value="WSF"/>
-      <property name="component" value="Core"/>
+      <property name="component" value="MockPlugin"/>
+    </ant>
+    <ant target="deployMavenArtifacts">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Service"/>
+    </ant>
+    <ant target="deployMavenArtifacts">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Client"/>
     </ant>
   </target>
 
-  <target name="WSF/Plugin-Installation" depends="WSF/Client-Installation">
+  <target name="WSF/Common-Installation">
+
+    <ant target="defaultComponentInstall">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Common"/>
+    </ant>
+
+  </target>
+
+  <target name="WSF/Plugin-Installation" depends="WSF/Common-Installation">
 
     <ant target="defaultComponentInstall">
       <property name="project" value="WSF"/>
@@ -82,23 +101,31 @@
 
   </target>
 
-  <target name="WSF/Core-Installation" depends="WSF/Plugin-Installation">
+  <target name="WSF/MockPlugin-Installation" depends="WSF/Plugin-Installation">
 
     <ant target="defaultComponentInstall">
       <property name="project" value="WSF"/>
-      <property name="component" value="Core"/>
+      <property name="component" value="MockPlugin"/>
     </ant>
 
   </target>
 
-  <target name="WSF/Client-Installation">
+  <target name="WSF/Service-Installation" depends="WSF/MockPlugin-Installation">
 
-    <!-- install WSF-Client.jar
+    <ant target="defaultComponentInstall">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Service"/>
+    </ant>
+
+  </target>
+
+  <target name="WSF/Client-Installation" depends="WSF/Service-Installation">
+
     <ant target="defaultComponentInstall">
       <property name="project" value="WSF"/>
       <property name="component" value="Client"/>
     </ant>
-    -->
+
   </target>
  
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
@@ -108,7 +135,7 @@
 
   <target name="WSF-WebInstallation" depends="verifyWebPropFile,
                                               WSF-Installation,
-                                              WSF/Core-WebInstallation">
+                                              WSF/Service-WebInstallation">
 
     <available file="${webappTargetDir}/WEB-INF/wsf-config" type="dir" property="wsf-config.exist" />
     <available file="${webappTargetDir}/WEB-INF/lib" type="dir" property="lib.exist" />
@@ -136,11 +163,11 @@
   </target>
 
 
-  <target name="WSF/Core-WebInstallation" depends="WSF/Core-Installation">
+  <target name="WSF/Service-WebInstallation" depends="WSF/Service-Installation">
 
     <ant target="defaultWebComponentInstall">
       <property name="project" value="WSF"/>
-      <property name="component" value="Core"/>
+      <property name="component" value="Service"/>
     </ant>
 
   </target>

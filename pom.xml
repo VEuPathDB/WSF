@@ -19,13 +19,26 @@
 
       <dependency>
         <groupId>org.gusdb</groupId>
-        <artifactId>wsf-client-api</artifactId>
+        <artifactId>wsf-common</artifactId>
         <version>1.0.0</version>
       </dependency>
 
       <dependency>
         <groupId>org.gusdb</groupId>
-        <artifactId>wsf-plugin-api</artifactId>
+        <artifactId>wsf-plugin</artifactId>
+        <version>1.0.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.gusdb</groupId>
+        <artifactId>wsf-mock-plugin</artifactId>
+        <version>1.0.0</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.gusdb</groupId>
+        <artifactId>wsf-service</artifactId>
         <version>1.0.0</version>
       </dependency>
 
@@ -44,6 +57,12 @@
       <dependency>
         <groupId>org.glassfish.jersey.core</groupId>
         <artifactId>jersey-client</artifactId>
+        <version>2.10.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.glassfish.jersey.containers</groupId>
+        <artifactId>jersey-container-jetty-http</artifactId>
         <version>2.10.1</version>
       </dependency>
 
@@ -75,14 +94,7 @@
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.10</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.glassfish.jersey.containers</groupId>
-        <artifactId>jersey-container-jdk-http</artifactId>
-        <version>2.10</version>
+        <version>4.11</version>
         <scope>test</scope>
       </dependency>
 
@@ -94,7 +106,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>3.1</version>
         <configuration>
           <source>1.7</source>
           <target>1.7</target>
@@ -132,9 +144,11 @@
   </build>
   
   <modules>
-    <module>Client</module>
+    <module>Common</module>
     <module>Plugin</module>
-    <module>Core</module>
+    <module>Service</module>
+    <module>Client</module>
+    <module>MockPlugin</module>
   </modules>
 
   <repositories>
