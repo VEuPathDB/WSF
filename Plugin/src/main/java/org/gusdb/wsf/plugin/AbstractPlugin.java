@@ -150,8 +150,8 @@ public abstract class AbstractPlugin implements Plugin {
    * @param env
    *          a string including env variables, as expected by exec. Useful to pass in a PATH
    * @return the exit code of the invoked command
-   * @throws IOException
-   * @throws PluginModelException
+   * @throws PluginUserException if user input is invalid
+   * @throws PluginModelException if something goes wrong during execution
    */
   protected int invokeCommand(String[] command, StringBuffer result, long timeout, String[] env)
       throws PluginUserException, PluginModelException {
