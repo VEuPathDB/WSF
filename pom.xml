@@ -21,16 +21,19 @@
         <groupId>org.gusdb</groupId>
         <artifactId>wsf-common</artifactId>
         <version>${project.version}</version>
+        <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.gusdb</groupId>
         <artifactId>wsf-plugin</artifactId>
         <version>${project.version}</version>
+        <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.gusdb</groupId>
         <artifactId>wsf-service</artifactId>
         <version>${project.version}</version>
+        <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.gusdb</groupId>
