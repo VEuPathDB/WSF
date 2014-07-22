@@ -1,13 +1,12 @@
 package org.gusdb.wsf.client;
 
-import org.gusdb.wsf.common.WsfException;
 
 
 public interface WsfResponseListener {
 
-  void onRowReceived(String[] row) throws WsfException;
+  void onRowReceived(String[] row) throws ClientModelException, ClientUserException;
   
-  void onAttachmentReceived(String key, String content) throws WsfException;
+  void onAttachmentReceived(String key, String content) throws ClientModelException, ClientUserException;
   
-  void onMessageReceived(String message) throws WsfException;
+  void onMessageReceived(String message) throws ClientModelException, ClientUserException;
 }
