@@ -1,17 +1,10 @@
 package org.gusdb.wsf.plugin;
 
-import org.gusdb.wsf.common.WsfException;
-import org.gusdb.wsf.common.PluginRequest;
-import org.gusdb.wsf.common.WsfUserException;
-
-
 /**
  * @author Jerric
  * @created Feb 10, 2006
  */
 public interface Plugin {
-
-  public static final String CTX_CONFIG_PATH = "wsfConfigDir_param";
 
   /**
    * Invoke a plugin, using the parameters in the request, and save the result into response.
@@ -19,9 +12,11 @@ public interface Plugin {
    * @param request
    * @param response
    * @return the signal set by the plugin
-   * @throws WsfPluginException
+   * @throws PluginModelException
+   * @throws PluginUserException
    */
-  public int invoke(PluginRequest request, PluginResponse response) throws WsfException;
+  public int invoke(PluginRequest request, PluginResponse response) throws PluginModelException,
+      PluginUserException;
 
   /**
    * The Plugin needs to provide a list of required parameter names; the base class will use this template
@@ -44,14 +39,14 @@ public interface Plugin {
    * 
    * @param context
    *          a map of the objects fetched from servlet context, using the context keys.
-   * @throws WsfPluginException
+   * @throws PluginModelException
    */
-  public void initialize() throws WsfPluginException;
+  public void initialize() throws PluginModelException;
 
   /**
    * Validate the parameters passed by the service. This validation confirms that the service (the wdk model)
    * has parameter options that agree with this plugin's API.
    */
-  public void validateParameters(PluginRequest request) throws WsfUserException;
+  public void validateParameters(PluginRequest request) throws PluginModelException, PluginUserException;
 
 }

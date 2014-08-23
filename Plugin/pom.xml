@@ -8,16 +8,12 @@
     <version>1.0.0</version>
   </parent>
   
-  <name>Web Service Framework: Plugin API</name>
-  <artifactId>wsf-plugin-api</artifactId>
+  <name>Web Service Framework: Plugin</name>
+  <artifactId>wsf-plugin</artifactId>
   <packaging>jar</packaging>
 
   <dependencies>
 
-    <dependency>
-      <groupId>org.gusdb</groupId>
-      <artifactId>wsf-client-api</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>org.gusdb</groupId>
@@ -39,6 +35,10 @@
       <artifactId>junit</artifactId>
     </dependency>
 
+    <dependency>
+    	<groupId>org.gusdb</groupId>
+    	<artifactId>wsf-common</artifactId>
+    </dependency>
   </dependencies>
 
   <!-- Final name should not matter except to eclipse

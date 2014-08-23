@@ -1,12 +1,11 @@
 package org.gusdb.wsf.plugin;
 
-import org.gusdb.wsf.common.WsfException;
 
 public interface PluginResponse {
 
-  void addRow(String[] row) throws WsfException;
+  void addRow(String[] row) throws PluginModelException, PluginUserException;
 
-  void addAttachment(String key, String content) throws WsfException;
+  void addAttachment(String key, String content) throws PluginModelException, PluginUserException;
 
-  void setMessage(String message) throws WsfException;
+  void setMessage(String message) throws PluginModelException, PluginUserException;
 }

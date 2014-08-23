@@ -8,8 +8,8 @@
     <version>1.0.0</version>
   </parent>
   
-  <name>Web Service Framework: Client API</name>
-  <artifactId>wsf-client-api</artifactId>
+  <name>Web Service Framework: Client</name>
+  <artifactId>wsf-client</artifactId>
   <packaging>jar</packaging>
 
   <dependencies>
@@ -29,6 +29,35 @@
       <artifactId>junit</artifactId>
     </dependency>
 
+    <dependency>
+    	<groupId>org.gusdb</groupId>
+    	<artifactId>wsf-common</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>org.gusdb</groupId>
+    	<artifactId>wsf-plugin</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>org.gusdb</groupId>
+    	<artifactId>wsf-mock-plugin</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>javax.ws.rs</groupId>
+    	<artifactId>javax.ws.rs-api</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>org.glassfish.jersey.core</groupId>
+    	<artifactId>jersey-client</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>org.gusdb</groupId>
+    	<artifactId>wsf-service</artifactId>
+    	<scope>test</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.glassfish.jersey.containers</groupId>
+    	<artifactId>jersey-container-jetty-http</artifactId>
+    </dependency>
   </dependencies>
 
 </project>
