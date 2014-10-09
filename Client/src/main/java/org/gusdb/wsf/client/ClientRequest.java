@@ -8,9 +8,14 @@ import org.json.JSONObject;
  * @author jerric
  * 
  */
+@SuppressWarnings("hiding")
 public class ClientRequest extends PluginRequest {
   
-  private static final String PLUGIN_KEY = "plugin";
+  public static final String PLUGIN_KEY = "plugin";
+  public static final String PROJECT_KEY = PluginRequest.PROJECT_KEY;
+  public static final String COLUMNS_ARRAY_KEY = PluginRequest.COLUMNS_ARRAY_KEY;
+  public static final String PARAMETER_MAP_KEY = PluginRequest.PARAMETER_MAP_KEY;
+  public static final String CONTEXT_MAP_KEY = PluginRequest.CONTEXT_MAP_KEY;
 
   private String pluginClass;
 

@@ -107,7 +107,6 @@ public class WsfRemoteClient implements WsfClient {
             throw new ClientModelException(exception);
           }
         }
-        ;
 
         // return the signal
         return status.getSignal();

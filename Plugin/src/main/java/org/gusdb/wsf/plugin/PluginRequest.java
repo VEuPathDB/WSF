@@ -19,6 +19,11 @@ import org.json.JSONObject;
  */
 public class PluginRequest implements WsfRequest {
 
+  public static final String PROJECT_KEY = "project";
+  public static final String COLUMNS_ARRAY_KEY = "ordered-columns";
+  public static final String PARAMETER_MAP_KEY = "parameters";
+  public static final String CONTEXT_MAP_KEY = "context";
+
   private String projectId;
   private Map<String, String> params;
   private List<String> orderedColumns;
@@ -57,14 +62,14 @@ public class PluginRequest implements WsfRequest {
 
   protected JSONObject getJSON() throws JSONException {
     JSONObject jsRequest = new JSONObject();
-    jsRequest.put("project", getProjectId());
+    jsRequest.put(PROJECT_KEY, getProjectId());
 
     // output columns
     JSONArray jsColumns = new JSONArray();
     for (String column : getOrderedColumns()) {
       jsColumns.put(column);
     }
-    jsRequest.put("ordered-columns", jsColumns);
+    jsRequest.put(COLUMNS_ARRAY_KEY, jsColumns);
 
     // output params
     JSONObject jsParams = new JSONObject();
@@ -72,7 +77,7 @@ public class PluginRequest implements WsfRequest {
     for (String paramName : params.keySet()) {
       jsParams.put(paramName, params.get(paramName));
     }
-    jsRequest.put("parameters", jsParams);
+    jsRequest.put(PARAMETER_MAP_KEY, jsParams);
 
     // output request context
     JSONObject jsContext = new JSONObject();
@@ -80,7 +85,7 @@ public class PluginRequest implements WsfRequest {
     for (String contextKey : context.keySet()) {
       jsContext.put(contextKey, context.get(contextKey));
     }
-    jsRequest.put("context", jsContext);
+    jsRequest.put(CONTEXT_MAP_KEY, jsContext);
     return jsRequest;
   }
 
@@ -100,10 +105,10 @@ public class PluginRequest implements WsfRequest {
   }
 
   protected void parseJSON(JSONObject jsRequest) throws JSONException {
-    if (jsRequest.has("project"))
-      setProjectId(jsRequest.getString("project"));
+    if (jsRequest.has(PROJECT_KEY))
+      setProjectId(jsRequest.getString(PROJECT_KEY));
 
-    JSONArray jsColumns = jsRequest.getJSONArray("ordered-columns");
+    JSONArray jsColumns = jsRequest.getJSONArray(COLUMNS_ARRAY_KEY);
     List<String> columns = new ArrayList<>();
     for (int i = 0; i < jsColumns.length(); i++) {
       columns.add(jsColumns.getString(i));
@@ -111,11 +116,11 @@ public class PluginRequest implements WsfRequest {
     setOrderedColumns(columns.toArray(new String[0]));
 
     Map<String, String> params = new LinkedHashMap<>();
-    addToMap(params, jsRequest.getJSONObject("parameters"));
+    addToMap(params, jsRequest.getJSONObject(PARAMETER_MAP_KEY));
     setParams(params);
 
     Map<String, String> context = new LinkedHashMap<>();
-    addToMap(context, jsRequest.getJSONObject("context"));
+    addToMap(context, jsRequest.getJSONObject(CONTEXT_MAP_KEY));
     setContext(context);
   }
 
