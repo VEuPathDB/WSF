@@ -1,12 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="org/gusdb/wsf/test/WsfPortalClientTest.java" kind="src" path="src/java"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/WSF Plugin"/>
-	<classpathentry kind="lib" path="lib/java/jaxrpc-1.4.jar"/>
-	<classpathentry kind="lib" path="lib/java/axis-1.4.jar"/>
-	<classpathentry kind="lib" path="lib/java/not-deployed/servlet-api-2.5.jar"/>
-	<classpathentry kind="lib" path="/WSF Plugin/lib/java/log4j-1.2.17.jar"/>
-	<classpathentry kind="lib" path="/WSF Plugin/lib/java/org.json-chargebee-1.0.jar"/>
-	<classpathentry kind="output" path="classes"/>
+	<classpathentry excluding="**/.svn/*" kind="src" output="target/classes" path="src/main/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry excluding="**/.svn/*" kind="src" output="target/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry excluding="**|**/.svn/*" kind="src" output="target/test-classes" path="src/test/resources">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
