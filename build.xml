@@ -9,12 +9,11 @@
   <!-- oooooooooooooooooooooooooo  Dependencies  oooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
 
-  <import file="${projectsDir}/FgpUtil/build.xml" />
+    <import file="${projectsDir}/FgpUtil/build.xml" />
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooo    Checkout    oooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-
   <target name="WSF-ChildCheckout">
     <available file="${projectsDir}/FgpUtil" type="dir"  property="FgpUtil.present" />
     <antcall target="FgpUtil-Checkout"/>
@@ -27,18 +26,15 @@
       <property name="version" value="WDK_version_1-28"/>
     </ant>
   </target>
-
   
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooo    Update    oooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-
   <target name="WSF-ChildUpdate">
     <ant target="defaultProjectUpdate">
       <property name="project" value="FgpUtil"/>
     </ant>
   </target>
-
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooo  Installation  oooooooooooooooooooooooooo -->
@@ -51,55 +47,86 @@
                                            WSF/MockPlugin-Installation,
                                            WSF/Service-Installation,
                                            WSF/Client-Installation">
+
     <ant target="defaultProjectInstall">
       <property name="project" value="WSF"/>
     </ant>
+
   </target>
+  
+
+ <!-- ooooooooooooooooooooooo  Install Components  ooooooooooooooooooooooo -->
 
   <target name="WSF-MavenInstallation">
-    <ant target="mavenBuildProject">
+    <ant target="mavenCleanInstall">
       <property name="project" value="WSF"/>
     </ant>
-    <property name="alreadyBuilt" value="true"/>
-  </target>
-
-  <!-- ooooooooooooooooooooooo  Install Components  ooooooooooooooooooooooo -->
-
-  <target name="WSF/Common-Installation">
-    <ant target="defaultComponentInstall">
+    <ant target="deployMavenArtifacts">
       <property name="project" value="WSF"/>
       <property name="component" value="Common"/>
     </ant>
-  </target>
-
-  <target name="WSF/Plugin-Installation" depends="WSF/Common-Installation">
-    <ant target="defaultComponentInstall">
+    <ant target="deployMavenArtifacts">
       <property name="project" value="WSF"/>
       <property name="component" value="Plugin"/>
     </ant>
-  </target>
-
-  <target name="WSF/MockPlugin-Installation" depends="WSF/Plugin-Installation">
-    <ant target="defaultComponentInstall">
+    <ant target="deployMavenArtifacts">
       <property name="project" value="WSF"/>
       <property name="component" value="MockPlugin"/>
     </ant>
-  </target>
-
-  <target name="WSF/Service-Installation" depends="WSF/MockPlugin-Installation">
-    <ant target="defaultComponentInstall">
+    <ant target="deployMavenArtifacts">
       <property name="project" value="WSF"/>
       <property name="component" value="Service"/>
     </ant>
-  </target>
-
-  <target name="WSF/Client-Installation" depends="WSF/Service-Installation">
-    <ant target="defaultComponentInstall">
+    <ant target="deployMavenArtifacts">
       <property name="project" value="WSF"/>
       <property name="component" value="Client"/>
     </ant>
   </target>
 
+  <target name="WSF/Common-Installation">
+
+    <ant target="defaultComponentInstall">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Common"/>
+    </ant>
+
+  </target>
+
+  <target name="WSF/Plugin-Installation" depends="WSF/Common-Installation">
+
+    <ant target="defaultComponentInstall">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Plugin"/>
+    </ant>
+
+  </target>
+
+  <target name="WSF/MockPlugin-Installation" depends="WSF/Plugin-Installation">
+
+    <ant target="defaultComponentInstall">
+      <property name="project" value="WSF"/>
+      <property name="component" value="MockPlugin"/>
+    </ant>
+
+  </target>
+
+  <target name="WSF/Service-Installation" depends="WSF/MockPlugin-Installation">
+
+    <ant target="defaultComponentInstall">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Service"/>
+    </ant>
+
+  </target>
+
+  <target name="WSF/Client-Installation" depends="WSF/Service-Installation">
+
+    <ant target="defaultComponentInstall">
+      <property name="project" value="WSF"/>
+      <property name="component" value="Client"/>
+    </ant>
+
+  </target>
  
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
