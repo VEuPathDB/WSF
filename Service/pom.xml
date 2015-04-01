@@ -16,7 +16,18 @@
 
     <dependency>
       <groupId>org.gusdb</groupId>
-      <artifactId>fgputil-util</artifactId>
+      <artifactId>wsf-common</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.gusdb</groupId>
+      <artifactId>wsf-plugin</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.gusdb</groupId>
+      <artifactId>wsf-mock-plugin</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -25,38 +36,27 @@
     </dependency>
 
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-    </dependency>
-      
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>javax.ws.rs-api</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>org.glassfish.jersey.containers</groupId>
       <artifactId>jersey-container-servlet</artifactId>
+      <scope>runtime</scope>
     </dependency>
-    
 
     <dependency>
-    	<groupId>org.gusdb</groupId>
-    	<artifactId>wsf-plugin</artifactId>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
     </dependency>
+
     <dependency>
-    	<groupId>org.gusdb</groupId>
-    	<artifactId>wsf-common</artifactId>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
-    <dependency>
-    	<groupId>org.gusdb</groupId>
-    	<artifactId>wsf-mock-plugin</artifactId>
-    </dependency>
+
   </dependencies>
 
 </project>
