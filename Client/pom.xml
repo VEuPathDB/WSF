@@ -15,6 +15,21 @@
   <dependencies>
 
     <dependency>
+      <groupId>org.gusdb</groupId>
+      <artifactId>wsf-common</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.gusdb</groupId>
+      <artifactId>wsf-plugin</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.gusdb</groupId>
+      <artifactId>wsf-mock-plugin</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
     </dependency>
@@ -25,39 +40,33 @@
     </dependency>
 
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>javax.ws.rs-api</artifactId>
     </dependency>
 
     <dependency>
-    	<groupId>org.gusdb</groupId>
-    	<artifactId>wsf-common</artifactId>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-client</artifactId>
     </dependency>
+
     <dependency>
-    	<groupId>org.gusdb</groupId>
-    	<artifactId>wsf-plugin</artifactId>
+      <groupId>org.gusdb</groupId>
+      <artifactId>wsf-service</artifactId>
+      <scope>test</scope>
     </dependency>
+
     <dependency>
-    	<groupId>org.gusdb</groupId>
-    	<artifactId>wsf-mock-plugin</artifactId>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
+
     <dependency>
-    	<groupId>javax.ws.rs</groupId>
-    	<artifactId>javax.ws.rs-api</artifactId>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-jetty-http</artifactId>
+      <scope>test</scope>
     </dependency>
-    <dependency>
-    	<groupId>org.glassfish.jersey.core</groupId>
-    	<artifactId>jersey-client</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>org.gusdb</groupId>
-    	<artifactId>wsf-service</artifactId>
-    	<scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>org.glassfish.jersey.containers</groupId>
-    	<artifactId>jersey-container-jetty-http</artifactId>
-    </dependency>
+
   </dependencies>
 
 </project>
