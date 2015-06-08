@@ -125,7 +125,6 @@ public class PluginRequest implements WsfRequest {
   }
 
   private static void addToMap(Map<String, String> map, JSONObject newValues) throws JSONException {
-    @SuppressWarnings("unchecked")
     Iterator<String> keys = newValues.keys();
     while (keys.hasNext()) {
       String key = keys.next();
