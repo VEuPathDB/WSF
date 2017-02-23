@@ -182,7 +182,7 @@ public abstract class AbstractPlugin implements Plugin {
     // finished yet, an IllegalThreadStateException is thrown out
     int signal = -1;
     while (true) {
-      LOG.debug("waiting for 1 second ...");
+      //LOG.debug("waiting for 1 second ...");
       try {
         Thread.sleep(1000);
       }
@@ -217,7 +217,7 @@ public abstract class AbstractPlugin implements Plugin {
           outputGobbler.close();
           errorGobbler.close();
           process.destroy();
-          throw new PluginModelException("Time out, the command is cancelled.");
+          throw new PluginTimeoutException("Time out, " + timeout/60 + " minutes, the command is cancelled. We suggest you review the input parameters and try again.\n");
         }
       }
     }
