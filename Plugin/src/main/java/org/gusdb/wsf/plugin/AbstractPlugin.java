@@ -24,8 +24,6 @@ import org.gusdb.fgputil.runtime.GusHome;
  */
 public abstract class AbstractPlugin implements Plugin {
 
-  public static final String newline = System.getProperty("line.separator");
-
   protected abstract int execute(PluginRequest request, PluginResponse response) throws PluginModelException,
       PluginUserException;
 
@@ -243,7 +241,7 @@ public abstract class AbstractPlugin implements Plugin {
         String line = null;
         while ((line = br.readLine()) != null) {
           // sb.append(type + ">" + line);
-          sb.append(line + newline);
+          sb.append(line + FormatUtil.NL);
         }
       }
       catch (IOException ex) {

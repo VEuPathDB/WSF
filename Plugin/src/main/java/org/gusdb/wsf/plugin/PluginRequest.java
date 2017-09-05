@@ -15,7 +15,6 @@ import org.json.JSONObject;
 
 /**
  * @author jerric
- * 
  */
 public class PluginRequest implements WsfRequest {
 
@@ -24,22 +23,22 @@ public class PluginRequest implements WsfRequest {
   public static final String PARAMETER_MAP_KEY = "parameters";
   public static final String CONTEXT_MAP_KEY = "context";
 
-  private String projectId;
-  private Map<String, String> params;
-  private List<String> orderedColumns;
-  private Map<String, String> context = new HashMap<String, String>();
+  private String _projectId;
+  private Map<String, String> _params;
+  private List<String> _orderedColumns;
+  private Map<String, String> _context = new HashMap<String, String>();
 
   public PluginRequest() {
-    this.params = new HashMap<String, String>();
-    this.orderedColumns = new ArrayList<String>();
-    this.context = new HashMap<String, String>();
+    this._params = new HashMap<String, String>();
+    this._orderedColumns = new ArrayList<String>();
+    this._context = new HashMap<String, String>();
   }
 
   public PluginRequest(PluginRequest request) {
-    this.projectId = request.getProjectId();
-    this.params = new HashMap<>(request.getParams());
-    this.orderedColumns = new ArrayList<>(Arrays.asList(request.getOrderedColumns()));
-    this.context = new HashMap<>(request.getContext());
+    this._projectId = request.getProjectId();
+    this._params = new HashMap<>(request.getParams());
+    this._orderedColumns = new ArrayList<>(Arrays.asList(request.getOrderedColumns()));
+    this._context = new HashMap<>(request.getContext());
   }
 
   public PluginRequest(String jsonString) throws PluginModelException {
@@ -137,7 +136,7 @@ public class PluginRequest implements WsfRequest {
    */
   @Override
   public String getProjectId() {
-    return projectId;
+    return _projectId;
   }
 
   /**
@@ -145,7 +144,7 @@ public class PluginRequest implements WsfRequest {
    *          the projectId to set
    */
   public void setProjectId(String projectId) {
-    this.projectId = projectId;
+    this._projectId = projectId;
   }
 
   /**
@@ -153,7 +152,7 @@ public class PluginRequest implements WsfRequest {
    */
   @Override
   public Map<String, String> getParams() {
-    return new HashMap<String, String>(params);
+    return new HashMap<String, String>(_params);
   }
 
   /**
@@ -161,11 +160,11 @@ public class PluginRequest implements WsfRequest {
    *          the params to set
    */
   public void setParams(Map<String, String> params) {
-    this.params = new HashMap<String, String>(params);
+    this._params = new HashMap<String, String>(params);
   }
 
   public void putParam(String name, String value) {
-    this.params.put(name, value);
+    this._params.put(name, value);
   }
 
   /**
@@ -173,8 +172,8 @@ public class PluginRequest implements WsfRequest {
    */
   @Override
   public String[] getOrderedColumns() {
-    String[] array = new String[orderedColumns.size()];
-    orderedColumns.toArray(array);
+    String[] array = new String[_orderedColumns.size()];
+    _orderedColumns.toArray(array);
     return array;
   }
 
@@ -185,8 +184,8 @@ public class PluginRequest implements WsfRequest {
   @Override
   public Map<String, Integer> getColumnMap() {
     Map<String, Integer> map = new HashMap<>();
-    for (int i = 0; i < orderedColumns.size(); i++) {
-      map.put(orderedColumns.get(i), i);
+    for (int i = 0; i < _orderedColumns.size(); i++) {
+      map.put(_orderedColumns.get(i), i);
     }
     return map;
   }
@@ -196,9 +195,9 @@ public class PluginRequest implements WsfRequest {
    *          the orderedColumns to set
    */
   public void setOrderedColumns(String[] orderedColumns) {
-    this.orderedColumns = new ArrayList<String>(orderedColumns.length);
+    this._orderedColumns = new ArrayList<String>(orderedColumns.length);
     for (String column : orderedColumns) {
-      this.orderedColumns.add(column);
+      this._orderedColumns.add(column);
     }
   }
 
@@ -210,7 +209,7 @@ public class PluginRequest implements WsfRequest {
    */
   @Override
   public Map<String, String> getContext() {
-    return new HashMap<String, String>(context);
+    return new HashMap<String, String>(_context);
   }
 
   /**
@@ -218,7 +217,7 @@ public class PluginRequest implements WsfRequest {
    *          the context to set
    */
   public void setContext(Map<String, String> context) {
-    this.context = new HashMap<String, String>(context);
+    this._context = new HashMap<String, String>(context);
   }
 
 }
