@@ -3,11 +3,11 @@ package org.gusdb.wsf.plugin;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.wsf.common.WsfRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -124,9 +124,7 @@ public class PluginRequest implements WsfRequest {
   }
 
   private static void addToMap(Map<String, String> map, JSONObject newValues) throws JSONException {
-    Iterator<String> keys = newValues.keys();
-    while (keys.hasNext()) {
-      String key = keys.next();
+    for (String key : JsonUtil.getKeys(newValues)) {
       map.put(key, newValues.getString(key));
     }
   }
