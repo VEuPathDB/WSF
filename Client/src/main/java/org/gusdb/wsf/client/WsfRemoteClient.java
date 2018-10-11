@@ -68,7 +68,7 @@ public class WsfRemoteClient implements WsfClient {
       signal = readStream(inStream, stats);
     }
     catch (ClassNotFoundException | IOException ex) {
-      new ClientModelException(ex);
+      throw new ClientModelException(ex);
     }
     finally {
       if (inStream != null) {
