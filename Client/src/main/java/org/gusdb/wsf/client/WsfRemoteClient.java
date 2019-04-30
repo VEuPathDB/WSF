@@ -92,7 +92,7 @@ public class WsfRemoteClient implements WsfClient {
       ClientModelException, IOException, ClassNotFoundException {
     ObjectInputStream objectStream = new ObjectInputStream(inStream);
     while (true) {
-      Object object = objectStream.readObject();
+      Object object = objectStream.readUnshared();
       if (object instanceof ResponseStatus) {
         // received a status object, which should be the last object to receive
         ResponseStatus status = (ResponseStatus) object;
