@@ -1,5 +1,6 @@
 package org.gusdb.wsf.plugin;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +23,7 @@ public class PluginExecutor {
 
     try {
       Class<? extends Plugin> pluginClass = Class.forName(pluginClassName).asSubclass(Plugin.class);
-      Plugin plugin = pluginClass.newInstance();
+      Plugin plugin = pluginClass.getDeclaredConstructor().newInstance();
 
       // initialize plugin
       plugin.initialize();
@@ -31,7 +32,9 @@ public class PluginExecutor {
       LOG.debug("Invoking Plugin " + pluginClassName);
       return invokePlugin(plugin, request, response);
     }
-    catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+    catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+        IllegalArgumentException | InvocationTargetException |
+        NoSuchMethodException | SecurityException ex) {
       throw new PluginModelException(ex);
     }
   }
