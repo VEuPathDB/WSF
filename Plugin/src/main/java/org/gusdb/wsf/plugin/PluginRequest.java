@@ -26,12 +26,12 @@ public class PluginRequest implements WsfRequest {
   private String _projectId;
   private Map<String, String> _params;
   private List<String> _orderedColumns;
-  private Map<String, String> _context = new HashMap<String, String>();
+  private Map<String, String> _context = new HashMap<>();
 
   public PluginRequest() {
-    this._params = new HashMap<String, String>();
-    this._orderedColumns = new ArrayList<String>();
-    this._context = new HashMap<String, String>();
+    this._params = new HashMap<>();
+    this._orderedColumns = new ArrayList<>();
+    this._context = new HashMap<>();
   }
 
   public PluginRequest(PluginRequest request) {
@@ -88,11 +88,6 @@ public class PluginRequest implements WsfRequest {
     return jsRequest;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see java.lang.Object#toString()
-   */
   @Override
   public String toString() {
     try {
@@ -150,15 +145,15 @@ public class PluginRequest implements WsfRequest {
    */
   @Override
   public Map<String, String> getParams() {
-    return new HashMap<String, String>(_params);
+    return new HashMap<>(_params);
   }
 
   /**
    * @param params
-   *          the params to set
+   *   the params to set
    */
   public void setParams(Map<String, String> params) {
-    this._params = new HashMap<String, String>(params);
+    this._params = new HashMap<>(params);
   }
 
   public void putParam(String name, String value) {
@@ -176,8 +171,8 @@ public class PluginRequest implements WsfRequest {
   }
 
   /**
-   * @return a map of ordered columns, where the key is the column name, and the value is the zero-based order
-   *         of that column.
+   * @return a map of ordered columns, where the key is the column name, and the
+   *   value is the zero-based order of that column.
    */
   @Override
   public Map<String, Integer> getColumnMap() {
@@ -190,32 +185,32 @@ public class PluginRequest implements WsfRequest {
 
   /**
    * @param orderedColumns
-   *          the orderedColumns to set
+   *   the orderedColumns to set
    */
   public void setOrderedColumns(String[] orderedColumns) {
-    this._orderedColumns = new ArrayList<String>(orderedColumns.length);
+    this._orderedColumns = new ArrayList<>(orderedColumns.length);
     for (String column : orderedColumns) {
       this._orderedColumns.add(column);
     }
   }
 
   /**
-   * The context can be used to hold additional information, such as user id, calling query name, etc, which
-   * can be used by plugins.
-   * 
+   * The context can be used to hold additional information, such as user id,
+   * calling query name, etc, which can be used by plugins.
+   *
    * @return the context
    */
   @Override
   public Map<String, String> getContext() {
-    return new HashMap<String, String>(_context);
+    return new HashMap<>(_context);
   }
 
   /**
    * @param context
-   *          the context to set
+   *   the context to set
    */
   public void setContext(Map<String, String> context) {
-    this._context = new HashMap<String, String>(context);
+    this._context = new HashMap<>(context);
   }
 
 }

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.gusdb.wsf.client;
 
 import org.gusdb.wsf.plugin.PluginExecutor;
@@ -10,7 +7,6 @@ import org.gusdb.wsf.plugin.PluginUserException;
 
 /**
  * @author Jerric
- *
  */
 public class WsfLocalClient implements WsfClient, PluginResponse {
 

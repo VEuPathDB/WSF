@@ -59,8 +59,8 @@ public class WsfRemoteClient implements WsfClient {
       throw new ClientModelException("Request failed with status code: " + status);
 
     InputStream inStream = null;
-    int signal = 0;
-    Map<String, Integer> stats = new HashMap<String, Integer>();
+    int signal;
+    Map<String, Integer> stats = new HashMap<>();
     stats.put("rows", 0);
     stats.put("attachments", 0);
     try {

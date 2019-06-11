@@ -4,7 +4,7 @@ import java.net.URI;
 
 public interface WsfClientFactory {
 
-  public WsfClient newClient(WsfResponseListener listener);
+  WsfClient newClient(WsfResponseListener listener);
 
-  public WsfClient newClient(WsfResponseListener listener, URI serviceURI);
+  WsfClient newClient(WsfResponseListener listener, URI serviceURI);
 }

@@ -6,10 +6,9 @@ import org.json.JSONObject;
 
 /**
  * @author jerric
- * 
  */
 public class ServiceRequest extends PluginRequest {
-  
+
   private static final String PLUGIN_KEY = "plugin";
 
   private String pluginClass;
@@ -35,9 +34,9 @@ public class ServiceRequest extends PluginRequest {
   }
 
   /**
-   * the full class name of the WSF plugin. The service will instantiate a plugin instance from this class
-   * name, and invoke it.
-   * 
+   * the full class name of the WSF plugin. The service will instantiate a
+   * plugin instance from this class name, and invoke it.
+   *
    * @return the pluginClass
    */
   public String getPluginClass() {
@@ -46,7 +45,7 @@ public class ServiceRequest extends PluginRequest {
 
   /**
    * @param pluginClass
-   *          the pluginClass to set
+   *   the pluginClass to set
    */
   public void setPluginClass(String pluginClass) {
     this.pluginClass = pluginClass;

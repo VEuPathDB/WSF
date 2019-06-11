@@ -6,11 +6,10 @@ import org.json.JSONObject;
 
 /**
  * @author jerric
- * 
  */
 @SuppressWarnings("hiding")
 public class ClientRequest extends PluginRequest {
-  
+
   public static final String PLUGIN_KEY = "plugin";
   public static final String PROJECT_KEY = PluginRequest.PROJECT_KEY;
   public static final String COLUMNS_ARRAY_KEY = PluginRequest.COLUMNS_ARRAY_KEY;
@@ -42,7 +41,7 @@ public class ClientRequest extends PluginRequest {
   /**
    * the full class name of the WSF plugin. The service will instantiate a plugin instance from this class
    * name, and invoke it.
-   * 
+   *
    * @return the pluginClass
    */
   public String getPluginClass() {
