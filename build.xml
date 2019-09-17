@@ -1,43 +1,10 @@
 <project name="WSF" default="Installation" basedir=".">
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-  <!-- oooooooooooooooooooooooooo   Properties   oooooooooooooooooooooooooo -->
-  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-
-
-  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooo  Dependencies  oooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
 
   <import file="${projectsDir}/FgpUtil/build.xml" />
-
-  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-  <!-- oooooooooooooooooooooooooo    Checkout    oooooooooooooooooooooooooo -->
-  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-
-  <target name="WSF-ChildCheckout">
-    <available file="${projectsDir}/FgpUtil" type="dir"  property="FgpUtil.present" />
-    <antcall target="FgpUtil-Checkout"/>
-  </target>
-
-  <target name="FgpUtil-Checkout" unless="FgpUtil.present">
-    <ant target="defaultProjectCheckout" inheritAll="false">
-      <property name="svnurl" value="https://cbilsvn.pmacs.upenn.edu/svn/gus/FgpUtil"/>
-      <property name="project" value="FgpUtil"/>
-      <property name="version" value="WDK_version_1-28"/>
-    </ant>
-  </target>
-
-  
-  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-  <!-- oooooooooooooooooooooooooo    Update    oooooooooooooooooooooooooo -->
-  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-
-  <target name="WSF-ChildUpdate">
-    <ant target="defaultProjectUpdate">
-      <property name="project" value="FgpUtil"/>
-    </ant>
-  </target>
 
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
@@ -52,55 +19,55 @@
                                            WSF/Service-Installation,
                                            WSF/Client-Installation">
     <ant target="defaultProjectInstall">
-      <property name="project" value="WSF"/>
+      <property name="project" value="WSF" />
     </ant>
   </target>
 
   <target name="WSF-MavenInstallation">
     <ant target="mavenBuildProject">
-      <property name="project" value="WSF"/>
+      <property name="project" value="WSF" />
     </ant>
-    <property name="alreadyBuilt" value="true"/>
+    <property name="alreadyBuilt" value="true" />
   </target>
 
   <!-- ooooooooooooooooooooooo  Install Components  ooooooooooooooooooooooo -->
 
   <target name="WSF/Common-Installation">
     <ant target="defaultComponentInstall">
-      <property name="project" value="WSF"/>
-      <property name="component" value="Common"/>
+      <property name="project" value="WSF" />
+      <property name="component" value="Common" />
     </ant>
   </target>
 
   <target name="WSF/Plugin-Installation" depends="WSF/Common-Installation">
     <ant target="defaultComponentInstall">
-      <property name="project" value="WSF"/>
-      <property name="component" value="Plugin"/>
+      <property name="project" value="WSF" />
+      <property name="component" value="Plugin" />
     </ant>
   </target>
 
   <target name="WSF/MockPlugin-Installation" depends="WSF/Plugin-Installation">
     <ant target="defaultComponentInstall">
-      <property name="project" value="WSF"/>
-      <property name="component" value="MockPlugin"/>
+      <property name="project" value="WSF" />
+      <property name="component" value="MockPlugin" />
     </ant>
   </target>
 
   <target name="WSF/Service-Installation" depends="WSF/MockPlugin-Installation">
     <ant target="defaultComponentInstall">
-      <property name="project" value="WSF"/>
-      <property name="component" value="Service"/>
+      <property name="project" value="WSF" />
+      <property name="component" value="Service" />
     </ant>
   </target>
 
   <target name="WSF/Client-Installation" depends="WSF/Service-Installation">
     <ant target="defaultComponentInstall">
-      <property name="project" value="WSF"/>
-      <property name="component" value="Client"/>
+      <property name="project" value="WSF" />
+      <property name="component" value="Client" />
     </ant>
   </target>
 
- 
+
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
@@ -110,27 +77,32 @@
                                               WSF-Installation,
                                               WSF/Service-WebInstallation">
 
-    <available file="${webappTargetDir}/WEB-INF/wsf-config" type="dir" property="wsf-config.exist" />
-    <available file="${webappTargetDir}/WEB-INF/lib" type="dir" property="lib.exist" />
-    <available file="${webappTargetDir}/WEB-INF/web.xml" property="web.xml.exist" />
-        
+    <available file="${webappTargetDir}/WEB-INF/wsf-config" type="dir"
+               property="wsf-config.exist" />
+    <available file="${webappTargetDir}/WEB-INF/lib" type="dir"
+               property="lib.exist" />
+    <available file="${webappTargetDir}/WEB-INF/web.xml"
+               property="web.xml.exist" />
+
     <!-- create necessary directory structure -->
-    <mkdir dir="${webappTargetDir}/WEB-INF/"/>
-    
+    <mkdir dir="${webappTargetDir}/WEB-INF/" />
+
     <antcall target="createLibLink" />
     <antcall target="createConfigLink" />
-<!--
-    <antcall target="copyWebXml" />
--->
+    <!--
+        <antcall target="copyWebXml" />
+    -->
 
     <!-- copy the log4j.properties to webapp's classes, if necessary -->
-    <available file="${webappTargetDir}/WEB-INF/classes/log4j.xml" property="log4j.webconfig.exist" />
-<!--
-    <antcall target="copyLog4jWebconfig" />
--->
+    <available file="${webappTargetDir}/WEB-INF/classes/log4j.xml"
+               property="log4j.webconfig.exist" />
+    <!--
+        <antcall target="copyLog4jWebconfig" />
+    -->
 
     <!-- use default context.xml, if it does not exist -->
-    <available file="${targetDir}/config/context.xml" property="context.xml.exist" />
+    <available file="${targetDir}/config/context.xml"
+               property="context.xml.exist" />
     <antcall target="copyContextXml" />
 
   </target>
@@ -139,62 +111,66 @@
   <target name="WSF/Service-WebInstallation" depends="WSF/Service-Installation">
 
     <ant target="defaultWebComponentInstall">
-      <property name="project" value="WSF"/>
-      <property name="component" value="Service"/>
+      <property name="project" value="WSF" />
+      <property name="component" value="Service" />
     </ant>
 
   </target>
 
 
-    <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
 
 
-    <target name="verifyWebPropFile">
-    
-        <fail unless="webappTargetDir">The 'webappTargetDir' is missing from the web property file. Example: /usr/local/tomcat/webapps/axis</fail>
-    
-    </target>
+  <target name="verifyWebPropFile">
 
-   
+    <fail unless="webappTargetDir">The 'webappTargetDir' is missing from the web
+      property file. Example: /usr/local/tomcat/webapps/axis
+    </fail>
+
+  </target>
+
+
   <target name="createLibLink" unless="lib.exist">
-    <symlink link="${webappTargetDir}/WEB-INF/lib" resource="${targetDir}/lib/java"/>
+    <symlink link="${webappTargetDir}/WEB-INF/lib"
+             resource="${targetDir}/lib/java" />
   </target>
 
- 
+
   <target name="createConfigLink" unless="wsf-config.exist">
-    <symlink link="${webappTargetDir}/WEB-INF/wsf-config" resource="${targetDir}/config"/>
+    <symlink link="${webappTargetDir}/WEB-INF/wsf-config"
+             resource="${targetDir}/config" />
   </target>
 
- 
+
   <target name="copyWebXml" unless="web.xml.exist">
-    <copy file="${webappTargetDir}/WEB-INF/wsf-web.xml" toFile="${webappTargetDir}/WEB-INF/web.xml"/>
-  </target>
- 
- 
-  <target name="copyLog4jWebconfig" unless="log4j.webconfig.exist">
-    <copy file="${targetDir}/config/log4j.xml" toDir="${webappTargetDir}/WEB-INF/classes"/>
-  </target>
- 
-  <target name="copyContextXml" unless="context.xml.exist">
-    <filter token="targetDir" value="${targetDir}"/>
-    <filter token="webappTargetDir" value="${webappTargetDir}"/>
-    <copy file="${targetDir}/config/wsf-context.xml.sample" 
-          toFile="${targetDir}/config/wsf-context.xml"
-          filtering="true"/>
+    <copy file="${webappTargetDir}/WEB-INF/wsf-web.xml"
+          toFile="${webappTargetDir}/WEB-INF/web.xml" />
   </target>
 
-  
-  
+
+  <target name="copyLog4jWebconfig" unless="log4j.webconfig.exist">
+    <copy file="${targetDir}/config/log4j.xml"
+          toDir="${webappTargetDir}/WEB-INF/classes" />
+  </target>
+
+  <target name="copyContextXml" unless="context.xml.exist">
+    <filter token="targetDir" value="${targetDir}" />
+    <filter token="webappTargetDir" value="${webappTargetDir}" />
+    <copy file="${targetDir}/config/wsf-context.xml.sample"
+          toFile="${targetDir}/config/wsf-context.xml"
+          filtering="true" />
+  </target>
+
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooo  Release  ooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
 
   <target name="WSF-Release">
-    
+
     <echo>"WSF-Release" is not supported at this moment.</echo>
 
-  </target>  
+  </target>
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooo  Distributable  ooooooooooooooooooooooooo -->
@@ -204,6 +180,6 @@
 
     <echo>"WSF-Distributable" is not supported at this moment.</echo>
 
-  </target>  
+  </target>
 
 </project>
