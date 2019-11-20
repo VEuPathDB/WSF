@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.gusdb.wsf.service;
 
 import java.io.IOException;
@@ -24,9 +21,9 @@ import org.gusdb.wsf.plugin.PluginExecutor;
 
 /**
  * The WSF Web service entry point.
- * 
+ *
  * @author Jerric
- * @created Nov 2, 2005
+ * @since Nov 2, 2005
  */
 @Path("/")
 public class WsfService {

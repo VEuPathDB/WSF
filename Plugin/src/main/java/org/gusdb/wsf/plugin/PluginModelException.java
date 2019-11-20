@@ -1,10 +1,7 @@
 package org.gusdb.wsf.plugin;
 
-
-
 /**
  * @author Jerric
- * @created Nov 2, 2005
  */
 public class PluginModelException extends Exception {
 
@@ -27,7 +24,7 @@ public class PluginModelException extends Exception {
   }
 
   public PluginModelException(String message, Throwable cause,
-      boolean enableSuppression, boolean writableStackTrace) {
+    boolean enableSuppression, boolean writableStackTrace) {
     super(message, cause, enableSuppression, writableStackTrace);
   }
 

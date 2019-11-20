@@ -4,7 +4,7 @@ package org.gusdb.wsf.plugin;
 
 /**
  * @author Cristina
- * @created Feb 21, 2017
+ * @since Feb 21, 2017
  */
 public class PluginTimeoutException extends PluginModelException {
 

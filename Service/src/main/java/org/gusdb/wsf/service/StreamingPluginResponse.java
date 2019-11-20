@@ -13,8 +13,8 @@ public class StreamingPluginResponse implements PluginResponse {
 
   private final ObjectOutputStream outStream;
 
-  private int rowCount = 0;
-  private int attachmentCount = 0;
+  private int rowCount;
+  private int attachmentCount;
 
   public StreamingPluginResponse(ObjectOutputStream outStream) {
     this.outStream = outStream;
@@ -41,7 +41,8 @@ public class StreamingPluginResponse implements PluginResponse {
   }
 
   @Override
-  public void addAttachment(String key, String content) throws PluginModelException {
+  public void addAttachment(String key, String content)
+  throws PluginModelException {
     ResponseAttachment attachment = new ResponseAttachment(key, content);
     try {
       outStream.writeObject(attachment);

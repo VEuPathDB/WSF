@@ -2,7 +2,7 @@ package org.gusdb.wsf.client;
 
 import java.net.URI;
 
-public final class WsfClientFactoryImpl implements WsfClientFactory{
+public final class WsfClientFactoryImpl implements WsfClientFactory {
 
   @Override
   public WsfClient newClient(WsfResponseListener listener) {

@@ -4,9 +4,6 @@ import java.io.Serializable;
 
 public class ResponseStatus implements Serializable {
 
-  /**
-   * 
-   */
   private static final long serialVersionUID = 1L;
 
   private int signal;
@@ -33,7 +30,7 @@ public class ResponseStatus implements Serializable {
 
   /**
    * @param exception
-   *          the exception to set
+   *   the exception to set
    */
   public void setException(Exception exception) {
     this.exception = exception;

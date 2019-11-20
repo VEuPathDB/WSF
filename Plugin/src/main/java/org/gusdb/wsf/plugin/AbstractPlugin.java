@@ -22,12 +22,11 @@ import org.gusdb.fgputil.db.slowquery.QueryLogger;
 import org.gusdb.fgputil.runtime.GusHome;
 
 /**
- * 
- * An abstract super class for all WSF plugins. This class is a SINGLETON. Instance variables apply to all
- * calls of the plugin.
- * 
+ * An abstract super class for all WSF plugins. This class is a SINGLETON.
+ * Instance variables apply to all calls of the plugin.
+ *
  * @author Jerric
- * @created Feb 9, 2006
+ * @since Feb 9, 2006
  */
 public abstract class AbstractPlugin implements Plugin {
 
@@ -35,13 +34,14 @@ public abstract class AbstractPlugin implements Plugin {
       PluginUserException;
 
   /**
-   * The logger for this plugin. It is a recommended way to record standard output and error messages.
+   * The logger for this plugin. It is a recommended way to record standard
+   * output and error messages.
    */
   private static final Logger LOG = Logger.getLogger(AbstractPlugin.class);
 
   /**
-   * It stores the properties defined in the configuration file. If the plugin doesn't use a configuration
-   * file, this map is empty.
+   * It stores the properties defined in the configuration file. If the plugin
+   * doesn't use a configuration file, this map is empty.
    */
   protected Properties properties;
 
@@ -56,21 +56,16 @@ public abstract class AbstractPlugin implements Plugin {
 
   /**
    * Initialize a plugin and assign a property file to it
-   * 
+   *
    * @param propertyFile
-   *          the name of the property file. The base class will resolve the path to this file, which should
-   *          be under the WEB-INF of axis' webapps.
+   *   the name of the property file. The base class will resolve the path to
+   *   this file, which should be under the WEB-INF of axis' webapps.
    */
   public AbstractPlugin(String propertyFile) {
     this();
     this.propertyFile = propertyFile;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.gusdb.wsf.plugin.Plugin#initialize(java.util.Map)
-   */
   @Override
   public void initialize() throws PluginModelException {
     // load the properties
@@ -98,7 +93,7 @@ public abstract class AbstractPlugin implements Plugin {
 
   private void loadConfiguration() throws InvalidPropertiesFormatException, IOException, PluginModelException {
     String configDir = null;
-    String filePath = null;
+    String filePath;
 
     String gusHome = GusHome.getGusHome();
     if (gusHome != null)
@@ -146,17 +141,22 @@ public abstract class AbstractPlugin implements Plugin {
 
   /**
    * @param command
-   *          the command array. If you have param values with spaces in it, put the value into one cell to
-   *          avoid the value to be splitted.
+   *   the command array. If you have param values with spaces in it, put the
+   *   value into one cell to avoid the value to be splitted.
    * @param timeout
-   *          the maximum allowed time for the command to run, in seconds
+   *   the maximum allowed time for the command to run, in seconds
    * @param result
-   *          Contains raw output of the command.
+   *   Contains raw output of the command.
    * @param env
-   *          a string including env variables, as expected by exec. Useful to pass in a PATH
+   *   a string including env variables, as expected by exec. Useful to pass in
+   *   a PATH
+   *
    * @return the exit code of the invoked command
-   * @throws PluginUserException if user input is invalid
-   * @throws PluginModelException if something goes wrong during execution
+   *
+   * @throws PluginUserException
+   *   if user input is invalid
+   * @throws PluginModelException
+   *   if something goes wrong during execution
    */
   protected int invokeCommand(String[] command, StringBuffer result, long timeout, String[] env)
       throws PluginUserException, PluginModelException {
@@ -245,7 +245,7 @@ public abstract class AbstractPlugin implements Plugin {
     public void run() {
       try {
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        String line = null;
+        String line;
         while ((line = br.readLine()) != null) {
           // sb.append(type + ">" + line);
           sb.append(line + FormatUtil.NL);
@@ -273,12 +273,12 @@ public abstract class AbstractPlugin implements Plugin {
       }
     }
   }
-  
+
   /**
-   * Run an sql select statement to acquire a list value to use as a parameter.  
-   * @param sqlParamValue
-   * @return a list comprised of the values found in the first column of the sql result
-   * @throws PluginModelException 
+   * Run an sql select statement to acquire a list value to use as a parameter.
+   *
+   * @return a list comprised of the values found in the first column of the sql
+   *   result
    */
   protected List<String> getParamValueFromSql(String sql, String queryDescrip, DataSource dataSource) throws PluginModelException {
 
