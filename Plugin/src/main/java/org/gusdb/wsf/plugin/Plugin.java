@@ -27,10 +27,12 @@ public interface Plugin {
    * The Plugin needs to provides a list of the columns expected in the result;
    * the base class will use this template method in the input validation
    * process.
+   * @param request 
    *
    * @return returns an array the columns expected in the result
+   * @throws PluginModelException 
    */
-  String[] getColumns();
+  String[] getColumns(PluginRequest request) throws PluginModelException;
 
   /**
    * Initialize the plugin singleton.

@@ -47,7 +47,7 @@ public class PluginExecutor {
 
     // validate columns
     LOG.debug("validating columns...");
-    validateColumns(plugin, request.getOrderedColumns());
+    validateColumns(plugin, request);
 
     // validate parameters
     LOG.debug("validating params...");
@@ -70,14 +70,15 @@ public class PluginExecutor {
     }
   }
 
-  private void validateColumns(Plugin plugin, String[] orderedColumns) throws PluginUserException {
-    String[] reqColumns = plugin.getColumns();
+  private void validateColumns(Plugin plugin, PluginRequest request) throws PluginUserException, PluginModelException {
+    String[] expectedColumns = request.getOrderedColumns();
+    String[] requiredColumns = plugin.getColumns(request);
 
     Set<String> colSet = new HashSet<String>();
-    for (String col : orderedColumns) {
+    for (String col : expectedColumns) {
       colSet.add(col);
     }
-    for (String col : reqColumns) {
+    for (String col : requiredColumns) {
       if (!colSet.contains(col)) {
         throw new PluginUserException("The required column is missing: " + col);
       }

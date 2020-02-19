@@ -36,7 +36,7 @@ public class MockPlugin extends AbstractPlugin {
   }
 
   @Override
-  public String[] getColumns() {
+  public String[] getColumns(PluginRequest request) {
     return COLUMNS;
   }
 
