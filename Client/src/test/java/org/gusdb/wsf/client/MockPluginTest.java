@@ -12,8 +12,8 @@ import org.glassfish.jersey.jetty.JettyHttpContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.gusdb.wsf.plugin.mock.MockPlugin;
 import org.gusdb.wsf.service.WsfService;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class MockPluginTest {
 
@@ -31,7 +31,7 @@ public class MockPluginTest {
     request.setPluginClass(MockPlugin.class.getName());
     request.setParams(params);
     request.setOrderedColumns(MockPlugin.COLUMNS);
-    request.setContext(new HashMap<String, String>());
+    request.setContext(new HashMap<>());
 
     return request;
   }
@@ -48,9 +48,9 @@ public class MockPluginTest {
     WsfClient client = new WsfClientFactoryImpl().newClient(listener);
     int signal = client.invoke(request);
 
-    Assert.assertEquals(MockPlugin.SIGNAL, signal);
-    Assert.assertEquals(rowCount, listener.getRowCount());
-    Assert.assertEquals(attachmentCount, listener.getAttachmentCount());
+    Assertions.assertEquals(MockPlugin.SIGNAL, signal);
+    Assertions.assertEquals(rowCount, listener.getRowCount());
+    Assertions.assertEquals(attachmentCount, listener.getAttachmentCount());
   }
 
   @Test
@@ -68,9 +68,9 @@ public class MockPluginTest {
     WsfClient client = new WsfClientFactoryImpl().newClient(listener, url);
     int signal = client.invoke(request);
 
-    Assert.assertEquals(MockPlugin.SIGNAL, signal);
-    Assert.assertEquals(rowCount, listener.getRowCount());
-    Assert.assertEquals(attachmentCount, listener.getAttachmentCount());
+    Assertions.assertEquals(MockPlugin.SIGNAL, signal);
+    Assertions.assertEquals(rowCount, listener.getRowCount());
+    Assertions.assertEquals(attachmentCount, listener.getAttachmentCount());
 
     server.stop();
   }
