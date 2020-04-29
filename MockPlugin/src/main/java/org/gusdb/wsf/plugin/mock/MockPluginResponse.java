@@ -1,10 +1,8 @@
 package org.gusdb.wsf.plugin.mock;
 
-import org.gusdb.wsf.plugin.PluginModelException;
 import org.gusdb.wsf.plugin.PluginResponse;
-import org.gusdb.wsf.plugin.PluginUserException;
-import org.junit.Assert;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MockPluginResponse implements PluginResponse {
 
@@ -26,37 +24,37 @@ public class MockPluginResponse implements PluginResponse {
   }
 
   @Override
-  public void addRow(String[] row) throws PluginModelException, PluginUserException {
+  public void addRow(String[] row) {
     validateRow(row);
   }
 
   @Override
-  public void addAttachment(String key, String content) throws PluginModelException, PluginUserException {
+  public void addAttachment(String key, String content) {
     validateAttachment(key, content);
   }
 
   @Override
-  public void setMessage(String message) throws PluginModelException, PluginUserException {
+  public void setMessage(String message) {
     validateMessage(message);
   }
 
 
   protected void validateRow(String[] row) {
     for (int i = 0; i < row.length; i++) {
-      String column = MockPlugin.COLUMNS[i];
-      Assert.assertTrue(row[i].startsWith(column + "-"));
+      var column = MockPlugin.COLUMNS[i];
+      assertTrue(row[i].startsWith(column + "-"));
     }
     rowCount++;
   }
 
   protected void validateAttachment(String key, String content) {
-    Assert.assertTrue(key.startsWith(MockPlugin.ATTACHMENT_KEY_PREFIX));
-    Assert.assertTrue(content.startsWith(MockPlugin.ATTACHMENT_VALUE_PREFIX));
+    assertTrue(key.startsWith(MockPlugin.ATTACHMENT_KEY_PREFIX));
+    assertTrue(content.startsWith(MockPlugin.ATTACHMENT_VALUE_PREFIX));
     attachmentCount++;
   }
 
   protected void validateMessage(String message) {
-    Assert.assertTrue(message.startsWith(MockPlugin.MESSAGE_PREFIX));
+    assertTrue(message.startsWith(MockPlugin.MESSAGE_PREFIX));
   }
 
 }

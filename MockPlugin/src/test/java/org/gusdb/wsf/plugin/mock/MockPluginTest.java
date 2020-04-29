@@ -8,8 +8,9 @@ import org.gusdb.wsf.plugin.Plugin;
 import org.gusdb.wsf.plugin.PluginModelException;
 import org.gusdb.wsf.plugin.PluginRequest;
 import org.gusdb.wsf.plugin.PluginUserException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MockPluginTest {
 
@@ -24,7 +25,7 @@ public class MockPluginTest {
     request.setProjectId(MOCK_PROJECT);
     request.setParams(params);
     request.setOrderedColumns(MockPlugin.COLUMNS);
-    request.setContext(new HashMap<String, String>());
+    request.setContext(new HashMap<>());
 
     return request;
   }
@@ -39,8 +40,8 @@ public class MockPluginTest {
     MockPluginResponse response = new MockPluginResponse();
     Plugin plugin = new MockPlugin();
     int signal = plugin.invoke(request, response);
-    Assert.assertEquals(MockPlugin.SIGNAL, signal);
-    Assert.assertEquals(rowCount, response.getRowCount());
-    Assert.assertEquals(attachmentCount, response.getAttachmentCount());
+    assertEquals(MockPlugin.SIGNAL, signal);
+    assertEquals(rowCount, response.getRowCount());
+    assertEquals(attachmentCount, response.getAttachmentCount());
   }
 }
