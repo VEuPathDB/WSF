@@ -176,7 +176,7 @@ public class PluginRequest implements WsfRequest {
    */
   @Override
   public Map<String, Integer> getColumnMap() {
-    Map<String, Integer> map = new HashMap<>();
+    Map<String, Integer> map = new LinkedHashMap<>();
     for (int i = 0; i < _orderedColumns.size(); i++) {
       map.put(_orderedColumns.get(i), i);
     }
