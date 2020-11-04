@@ -7,18 +7,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.InvalidPropertiesFormatException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 import org.gusdb.fgputil.FormatUtil;
-import org.gusdb.fgputil.db.SqlUtils;
-import org.gusdb.fgputil.db.slowquery.QueryLogger;
+import org.gusdb.fgputil.db.stream.ResultSets;
 import org.gusdb.fgputil.runtime.GusHome;
 
 /**
@@ -281,27 +281,12 @@ public abstract class AbstractPlugin implements Plugin {
    *   result
    */
   protected List<String> getParamValueFromSql(String sql, String queryDescrip, DataSource dataSource) throws PluginModelException {
-
-    ResultSet rs = null;
-
-    List<String> answer = new ArrayList<String>();
-    try {
-      long startTime = System.currentTimeMillis();
-      rs = SqlUtils.executeQuery(dataSource, sql, queryDescrip);
-
-      while (rs.next()) {
-        answer.add(rs.getString(1));
-      }
-      QueryLogger.logEndStatementExecution(sql, queryDescrip, startTime);
-
+    try(Stream<String> values = ResultSets.openStream(dataSource, sql, queryDescrip,
+        rs -> Optional.of(rs.getString(1)))) {
+      return values.collect(Collectors.toList());
     }
     catch (Exception ex) {
       throw new PluginModelException(ex);
     }
-    finally {
-      SqlUtils.closeResultSetAndStatement(rs, null);
-    }
-    return answer;
   }
-
 }
