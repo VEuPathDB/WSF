@@ -10,6 +10,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.eclipse.jetty.server.Server;
 import org.glassfish.jersey.jetty.JettyHttpContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.gusdb.wsf.plugin.DelayedResultException;
 import org.gusdb.wsf.plugin.mock.MockPlugin;
 import org.gusdb.wsf.service.WsfService;
 import org.junit.Assert;
@@ -39,7 +40,7 @@ public class MockPluginTest {
   private final Random random = new Random();
 
   @Test
-  public void testClientLocal() throws ClientModelException, ClientUserException {
+  public void testClientLocal() throws ClientModelException, ClientUserException, DelayedResultException {
     int rowCount = random.nextInt(1000) + 10;
     int attachmentCount = random.nextInt(1000);
     ClientRequest request = createRequest(rowCount, attachmentCount);

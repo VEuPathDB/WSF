@@ -13,7 +13,7 @@ public interface Plugin {
    * @return the signal set by the plugin
    */
   int invoke(PluginRequest request, PluginResponse response)
-  throws PluginModelException, PluginUserException;
+  throws PluginModelException, PluginUserException, DelayedResultException;
 
   /**
    * The Plugin needs to provide a list of required parameter names; the base

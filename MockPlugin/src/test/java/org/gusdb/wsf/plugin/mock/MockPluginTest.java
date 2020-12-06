@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.gusdb.wsf.plugin.DelayedResultException;
 import org.gusdb.wsf.plugin.Plugin;
 import org.gusdb.wsf.plugin.PluginModelException;
 import org.gusdb.wsf.plugin.PluginRequest;
@@ -32,7 +33,7 @@ public class MockPluginTest {
   private final Random random = new Random();
 
   @Test
-  public void testPlugin() throws PluginModelException, PluginUserException {
+  public void testPlugin() throws PluginModelException, PluginUserException, DelayedResultException {
     int rowCount = random.nextInt(1000) + 10;
     int attachmentCount = random.nextInt(1000);
     PluginRequest request = createRequest(rowCount, attachmentCount);
