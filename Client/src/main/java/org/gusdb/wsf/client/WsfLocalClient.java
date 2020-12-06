@@ -1,5 +1,6 @@
 package org.gusdb.wsf.client;
 
+import org.gusdb.wsf.plugin.DelayedResultException;
 import org.gusdb.wsf.plugin.PluginExecutor;
 import org.gusdb.wsf.plugin.PluginModelException;
 import org.gusdb.wsf.plugin.PluginResponse;
@@ -59,7 +60,7 @@ public class WsfLocalClient implements WsfClient, PluginResponse {
   }
 
   @Override
-  public int invoke(ClientRequest request) throws ClientModelException, ClientUserException {
+  public int invoke(ClientRequest request) throws ClientModelException, ClientUserException, DelayedResultException {
     PluginExecutor executor = new PluginExecutor();
     String pluginClassName = request.getPluginClass();
     try {

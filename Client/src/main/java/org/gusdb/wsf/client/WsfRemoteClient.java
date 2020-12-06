@@ -21,6 +21,7 @@ import org.gusdb.wsf.common.ResponseMessage;
 import org.gusdb.wsf.common.ResponseRow;
 import org.gusdb.wsf.common.ResponseStatus;
 import org.gusdb.wsf.common.WsfRequest;
+import org.gusdb.wsf.plugin.DelayedResultException;
 import org.gusdb.wsf.plugin.PluginUserException;
 
 public class WsfRemoteClient implements WsfClient {
@@ -41,7 +42,7 @@ public class WsfRemoteClient implements WsfClient {
   }
 
   @Override
-  public int invoke(ClientRequest request) throws ClientModelException, ClientUserException {
+  public int invoke(ClientRequest request) throws ClientModelException, ClientUserException, DelayedResultException {
     Client client = ClientBuilder.newClient();
     int checksum = request.getChecksum();
     LOG.debug("WSF Remote: checksum=" + checksum + ", url=" + serviceURI + "\n" + request);
@@ -89,7 +90,7 @@ public class WsfRemoteClient implements WsfClient {
   }
 
   private int readStream(InputStream inStream, Map<String, Integer> stats) throws ClientUserException,
-      ClientModelException, IOException, ClassNotFoundException {
+      ClientModelException, IOException, ClassNotFoundException, DelayedResultException {
     ObjectInputStream objectStream = new ObjectInputStream(inStream);
     while (true) {
       Object object = objectStream.readUnshared();
@@ -102,6 +103,9 @@ public class WsfRemoteClient implements WsfClient {
         if (exception != null) {
           if (exception instanceof PluginUserException) {
             throw new ClientUserException(exception);
+          }
+          else if (exception instanceof DelayedResultException){
+            throw (DelayedResultException) exception;
           }
           else {
             throw new ClientModelException(exception);

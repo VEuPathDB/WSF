@@ -7,6 +7,7 @@ import java.util.Random;
 import javax.ws.rs.core.Response;
 
 import org.gusdb.wsf.common.WsfRequest;
+import org.gusdb.wsf.plugin.DelayedResultException;
 import org.gusdb.wsf.plugin.Plugin;
 import org.gusdb.wsf.plugin.PluginModelException;
 import org.gusdb.wsf.plugin.PluginUserException;
@@ -37,7 +38,7 @@ public class MockServiceTest {
   private final Random random = new Random();
 
   @Test
-  public void testPlugin() throws PluginModelException, PluginUserException {
+  public void testPlugin() throws PluginModelException, PluginUserException, DelayedResultException {
     int rowCount = random.nextInt(1000) + 10;
     int attachmentCount = random.nextInt(1000);
     ServiceRequest request = createRequest(rowCount, attachmentCount);

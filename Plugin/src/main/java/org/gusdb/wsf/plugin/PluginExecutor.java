@@ -12,7 +12,7 @@ public class PluginExecutor {
   private static final Logger LOG = Logger.getLogger(PluginExecutor.class);
 
   public int execute(String pluginClassName, PluginRequest request, PluginResponse response)
-      throws PluginModelException, PluginUserException {
+      throws PluginModelException, PluginUserException, DelayedResultException {
     LOG.info("Invoking: " + pluginClassName + ", projectId: " + request.getProjectId());
     LOG.debug("request: " + request.toString());
 
@@ -40,7 +40,7 @@ public class PluginExecutor {
   }
 
   private int invokePlugin(Plugin plugin, PluginRequest request, PluginResponse response)
-      throws PluginModelException, PluginUserException {
+      throws PluginModelException, PluginUserException, DelayedResultException {
     // validate required parameters
     LOG.debug("validing required params...");
     validateRequiredParameters(plugin, request);
