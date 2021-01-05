@@ -104,8 +104,11 @@ public class WsfRemoteClient implements WsfClient {
           if (exception instanceof PluginUserException) {
             throw new ClientUserException(exception);
           }
-          else if (exception instanceof DelayedResultException){
+          else if (exception instanceof DelayedResultException) {
             throw (DelayedResultException) exception;
+          }
+          else if (exception instanceof RuntimeException) {
+            throw (RuntimeException) exception;
           }
           else {
             throw new ClientModelException(exception);
