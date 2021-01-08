@@ -31,7 +31,7 @@ import org.gusdb.fgputil.runtime.GusHome;
 public abstract class AbstractPlugin implements Plugin {
 
   protected abstract int execute(PluginRequest request, PluginResponse response) throws PluginModelException,
-      PluginUserException;
+      PluginUserException, DelayedResultException;
 
   /**
    * The logger for this plugin. It is a recommended way to record standard
@@ -82,7 +82,7 @@ public abstract class AbstractPlugin implements Plugin {
 
   @Override
   public int invoke(PluginRequest request, PluginResponse response) throws PluginModelException,
-      PluginUserException {
+      PluginUserException, DelayedResultException {
     try {
       return execute(request, response);
     }
