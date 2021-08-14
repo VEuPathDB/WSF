@@ -35,9 +35,11 @@ public interface Plugin {
   String[] getColumns(PluginRequest request) throws PluginModelException;
 
   /**
-   * Initialize the plugin singleton.
+   * Initialize the plugin instance.
+   *
+   * @param request that spurred creation of this plugin
    */
-  void initialize() throws PluginModelException;
+  void initialize(PluginRequest request) throws PluginModelException;
 
   /**
    * Validate the parameters passed by the service. This validation confirms

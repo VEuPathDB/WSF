@@ -26,7 +26,7 @@ public class PluginExecutor {
       Plugin plugin = pluginClass.getDeclaredConstructor().newInstance();
 
       // initialize plugin
-      plugin.initialize();
+      plugin.initialize(request);
 
       // invoke the plugin
       LOG.debug("Invoking Plugin " + pluginClassName);

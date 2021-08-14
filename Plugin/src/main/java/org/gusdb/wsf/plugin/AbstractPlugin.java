@@ -67,7 +67,7 @@ public abstract class AbstractPlugin implements Plugin {
   }
 
   @Override
-  public void initialize() throws PluginModelException {
+  public void initialize(PluginRequest request) throws PluginModelException {
     // load the properties
     if (propertyFile != null) {
       try {
