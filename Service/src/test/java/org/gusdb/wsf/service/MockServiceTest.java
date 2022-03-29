@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import org.gusdb.wsf.common.WsfRequest;
 import org.gusdb.wsf.plugin.DelayedResultException;
