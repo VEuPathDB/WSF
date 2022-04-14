@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -94,6 +95,9 @@ public class WsfRemoteClient implements WsfClient {
       signal = readStream(inStream, stats);
     }
     catch (ClassNotFoundException | IOException ex) {
+      try {
+        LOG.debug(new String(inStream.readAllBytes(), StandardCharsets.UTF_8));
+      } catch (IOException e) {}
       throw new ClientModelException(ex);
     }
     finally {
