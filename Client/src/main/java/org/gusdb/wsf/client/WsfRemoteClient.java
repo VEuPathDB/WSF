@@ -94,9 +94,6 @@ public class WsfRemoteClient implements WsfClient {
       signal = readStream(inStream, stats);
     }
     catch (ClassNotFoundException | IOException ex) {
-      try {
-        LOG.debug(new String(inStream.readAllBytes(), StandardCharsets.UTF_8));
-      } catch (IOException e) {}
       throw new ClientModelException(ex);
     }
     finally {
