@@ -220,7 +220,8 @@ public class PluginRequest implements WsfRequest {
 
   public Optional<Duration> getRemoteExecuteTimeout() {
     return Optional.ofNullable(this._context.get(REMOTE_EXECUTE_TIMEOUT_ISO_8601_CONTEXT_KEY))
-        .map(Duration::parse);
+        .map(Duration::parse)
+        .filter(duration -> !duration.isZero());
   }
 
 }

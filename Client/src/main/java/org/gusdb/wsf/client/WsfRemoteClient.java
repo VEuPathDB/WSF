@@ -58,11 +58,10 @@ public class WsfRemoteClient implements WsfClient {
     Form form = new Form();
     form.param(WsfRequest.PARAM_REQUEST, request.toString());
 
-    LOG.debug("Context: " + request.getContext());
     // invoke service
-    final Optional<Duration> timeout = request.getRemoteExecuteTimeout();
     Response response;
     try {
+      final Optional<Duration> timeout = request.getRemoteExecuteTimeout();
       final Future<Response> responseFuture = client.target(serviceURI)
           .property(ClientProperties.FOLLOW_REDIRECTS, Boolean.TRUE)
           .request(MediaType.APPLICATION_OCTET_STREAM_TYPE)
