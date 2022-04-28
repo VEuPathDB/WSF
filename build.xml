@@ -1,19 +1,10 @@
-<project name="WSF" default="Installation" basedir=".">
-
-  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-  <!-- oooooooooooooooooooooooooo  Dependencies  oooooooooooooooooooooooooo -->
-  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-
-  <import file="${projectsDir}/FgpUtil/build.xml" />
-
+<project name="WSF" default="WSF-Installation" basedir=".">
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooo  Installation  oooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
 
-  <target name="WSF-Installation" depends="FgpUtil-Installation,
-                                           WSF-MavenInstallation,
-                                           WSF/Common-Installation,
+  <target name="WSF-Installation" depends="WSF/Common-Installation,
                                            WSF/Plugin-Installation,
                                            WSF/MockPlugin-Installation,
                                            WSF/Service-Installation,
@@ -21,13 +12,6 @@
     <ant target="defaultProjectInstall">
       <property name="project" value="WSF" />
     </ant>
-  </target>
-
-  <target name="WSF-MavenInstallation">
-    <ant target="mavenBuildProject">
-      <property name="project" value="WSF" />
-    </ant>
-    <property name="alreadyBuilt" value="true" />
   </target>
 
   <!-- ooooooooooooooooooooooo  Install Components  ooooooooooooooooooooooo -->
@@ -159,27 +143,6 @@
     <copy file="${targetDir}/config/wsf-context.xml.sample"
           toFile="${targetDir}/config/wsf-context.xml"
           filtering="true" />
-  </target>
-
-
-  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-  <!-- oooooooooooooooooooooooooooo  Release  ooooooooooooooooooooooooooooo -->
-  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-
-  <target name="WSF-Release">
-
-    <echo>"WSF-Release" is not supported at this moment.</echo>
-
-  </target>
-
-  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-  <!-- oooooooooooooooooooooooooo  Distributable  ooooooooooooooooooooooooo -->
-  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-
-  <target name="WSF-Distributable">
-
-    <echo>"WSF-Distributable" is not supported at this moment.</echo>
-
   </target>
 
 </project>
