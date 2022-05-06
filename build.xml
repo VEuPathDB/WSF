@@ -115,14 +115,18 @@
 
 
   <target name="createLibLink" unless="lib.exist">
-    <symlink link="${webappTargetDir}/WEB-INF/lib"
-             resource="${targetDir}/lib/java" />
+    <ant target="symlink">
+      <property name="link" value="${webappTargetDir}/WEB-INF/lib"/>
+      <property name="resource" value="${targetDir}/lib/java"/>
+    </ant>
   </target>
 
 
   <target name="createConfigLink" unless="wsf-config.exist">
-    <symlink link="${webappTargetDir}/WEB-INF/wsf-config"
-             resource="${targetDir}/config" />
+    <ant target="symlink">
+      <property name="link" value="${webappTargetDir}/WEB-INF/wsf-config"/>
+      <property name="resource" value="${targetDir}/config"/>
+    </ant>
   </target>
 
 
