@@ -142,11 +142,13 @@
   </target>
 
   <target name="copyContextXml" unless="context.xml.exist">
+    <!-- No longer needed
     <filter token="targetDir" value="${targetDir}" />
     <filter token="webappTargetDir" value="${webappTargetDir}" />
     <copy file="${targetDir}/config/wsf-context.xml.sample"
           toFile="${targetDir}/config/wsf-context.xml"
           filtering="true" />
+    -->
   </target>
 
 </project>
