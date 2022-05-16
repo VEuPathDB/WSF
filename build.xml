@@ -57,27 +57,17 @@
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
 
 
-  <target name="WSF-WebInstallation" depends="verifyWebPropFile,
-                                              WSF-Installation,
+  <target name="WSF-WebInstallation" depends="WSF-Installation,
                                               WSF/Service-WebInstallation">
 
-    <available file="${webappTargetDir}/WEB-INF/wsf-config" type="dir"
-               property="wsf-config.exist" />
     <available file="${webappTargetDir}/WEB-INF/lib" type="dir"
                property="lib.exist" />
-    <available file="${webappTargetDir}/WEB-INF/web.xml"
-               property="web.xml.exist" />
 
     <!-- create necessary directory structure -->
     <mkdir dir="${webappTargetDir}/WEB-INF/" />
 
     <antcall target="createLibLink" />
     <antcall target="createConfigLink" />
-
-    <!-- use default context.xml, if it does not exist -->
-    <available file="${targetDir}/config/context.xml"
-               property="context.xml.exist" />
-    <antcall target="copyContextXml" />
 
   </target>
 
@@ -90,12 +80,6 @@
 
   <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
 
-  <target name="verifyWebPropFile">
-    <fail unless="webappTargetDir">
-    	The 'webappTargetDir' is missing from the web property file.
-    </fail>
-  </target>
-
   <target name="createLibLink" unless="lib.exist">
     <ant target="symlink">
       <property name="link" value="${webappTargetDir}/WEB-INF/lib"/>
@@ -103,17 +87,11 @@
     </ant>
   </target>
 
-
   <target name="createConfigLink" unless="wsf-config.exist">
     <ant target="symlink">
       <property name="link" value="${webappTargetDir}/WEB-INF/wsf-config"/>
       <property name="resource" value="${targetDir}/config"/>
     </ant>
-  </target>
-
-  <target name="copyWebXml" unless="web.xml.exist">
-    <copy file="${webappTargetDir}/WEB-INF/wsf-web.xml"
-          toFile="${webappTargetDir}/WEB-INF/web.xml" />
   </target>
 
 </project>
