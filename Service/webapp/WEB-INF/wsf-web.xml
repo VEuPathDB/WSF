@@ -11,7 +11,7 @@ Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
 	<servlet-name>WSF</servlet-name>
 	<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 	<init-param>
-		<param-name>javax.ws.rs.Application</param-name>
+		<param-name>jakarta.ws.rs.Application</param-name>
 		<param-value>org.gusdb.wsf.service.WsfServiceApplication</param-value>
 	</init-param>
   </servlet>
