@@ -32,7 +32,7 @@ public class StreamingPluginResponse implements PluginResponse {
   public void addRow(String[] row) throws PluginModelException {
     ResponseRow responseRow = new ResponseRow(row);
     try {
-      outStream.writeObject(responseRow);
+      outStream.writeUnshared(responseRow);
       rowCount++;
     }
     catch (IOException ex) {

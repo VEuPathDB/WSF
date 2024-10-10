@@ -76,7 +76,7 @@ public class WsfService {
         }
         finally {
           // send signal back
-          objectStream.writeObject(status);
+          objectStream.writeUnshared(status);
           objectStream.flush();
           objectStream.close();
 
