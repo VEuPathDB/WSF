@@ -68,7 +68,7 @@ public class MockServiceTest {
     // try {
     // objectStream = new ObjectInputStream(inStream);
     // while (true) {
-    // Object object = objectStream.readObject();
+    // Object object = objectStream.readUnshared();
     // if (object instanceof ResponseStatus) {
     // ResponseStatus status = (ResponseStatus) object;
     // Assert.assertEquals(MockPlugin.SIGNAL, status.getSignal());
