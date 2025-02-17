@@ -1,5 +1,9 @@
 package org.gusdb.wsf.plugin;
 
+import javax.ws.rs.core.HttpHeaders;
+
+import org.gusdb.fgputil.Tuples.TwoTuple;
+
 /**
  * @author Jerric
  * @since Feb 10, 2006
@@ -49,4 +53,13 @@ public interface Plugin {
   void validateParameters(PluginRequest request)
   throws PluginModelException, PluginUserException;
 
+  /**
+   * Returns a bearer token authorization header given a bearer token value
+   *
+   * @param bearerTokenValue value of the bearer token
+   * @return header pair for use with authenticated HTTP services
+   */
+  static TwoTuple<String, String> getServiceAuthorizationHeader(String bearerTokenValue) {
+    return new TwoTuple<>(HttpHeaders.AUTHORIZATION, "Bearer " + bearerTokenValue);
+  }
 }
