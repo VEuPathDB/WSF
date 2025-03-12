@@ -16,7 +16,6 @@ import java.util.concurrent.TimeoutException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -26,7 +25,6 @@ import org.gusdb.wsf.common.ResponseAttachment;
 import org.gusdb.wsf.common.ResponseMessage;
 import org.gusdb.wsf.common.ResponseRow;
 import org.gusdb.wsf.common.ResponseStatus;
-import org.gusdb.wsf.common.WsfRequest;
 import org.gusdb.wsf.plugin.DelayedResultException;
 import org.gusdb.wsf.plugin.PluginUserException;
 
@@ -53,10 +51,6 @@ public class WsfRemoteClient implements WsfClient {
     int checksum = request.getChecksum();
     LOG.debug("WSF Remote: checksum=" + checksum + ", url=" + serviceURI + "\n" + request);
 
-    // prepare the form
-    Form form = new Form();
-    form.param(WsfRequest.PARAM_REQUEST, request.toString());
-
     // invoke service
     Response response;
     try {
@@ -65,7 +59,7 @@ public class WsfRemoteClient implements WsfClient {
           .property(ClientProperties.FOLLOW_REDIRECTS, Boolean.TRUE)
           .request(MediaType.APPLICATION_OCTET_STREAM_TYPE)
           .async()
-          .post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+          .post(Entity.entity(request.toString(), MediaType.APPLICATION_JSON));
       if (timeout.isPresent()) {
         response = responseFuture.get(timeout.get().toMillis(), TimeUnit.MILLISECONDS);
       } else {

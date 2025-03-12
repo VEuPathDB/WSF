@@ -5,7 +5,6 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -16,7 +15,6 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.log4j.Logger;
 import org.gusdb.wsf.common.ResponseStatus;
-import org.gusdb.wsf.common.WsfRequest;
 import org.gusdb.wsf.plugin.PluginExecutor;
 
 /**
@@ -43,9 +41,10 @@ public class WsfService {
   }
 
   @POST
-  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
-  public Response invoke(@FormParam(WsfRequest.PARAM_REQUEST) final String jsonRequest) {
+  public Response invoke(String jsonRequest) {
+
     long start = System.currentTimeMillis();
 
     // open a StreamingOutput
