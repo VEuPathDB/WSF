@@ -19,7 +19,6 @@ import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.client.ClientProperties;
@@ -27,7 +26,7 @@ import org.gusdb.fgputil.functional.Either;
 import org.gusdb.wsf.common.ResponseAttachment;
 import org.gusdb.wsf.common.ResponseStatus;
 import org.gusdb.wsf.plugin.DelayedResultException;
-import org.gusdb.wsf.plugin.PluginSupport;
+import org.gusdb.wsf.plugin.StreamingPluginSupport;
 import org.gusdb.wsf.plugin.PluginUserException;
 
 import static org.gusdb.fgputil.json.JsonUtil.Jackson;
@@ -139,13 +138,12 @@ public class WsfRemoteClient implements WsfClient {
           case START_OBJECT:
             var multiResponse = readStreamObject(parser);
 
-            if (multiResponse.isLeft()) {
-              var attachment = multiResponse.getLeft();
-              listener.onAttachmentReceived(attachment.getKey(), attachment.getContent());
-              stats.attachments++;
-            } else {
+            if (multiResponse.isRight())
               return processResponseStatus(multiResponse.getRight());
-            }
+
+            var attachment = multiResponse.getLeft();
+            listener.onAttachmentReceived(attachment.getKey(), attachment.getContent());
+            stats.attachments++;
             break;
 
           default:
@@ -181,10 +179,13 @@ public class WsfRemoteClient implements WsfClient {
 
       out.setSignal(node.get(ResponseStatus.JSON_KEY_SIGNAL).intValue());
 
+      // get a possible exception value as a raw json node (or null if absent)
       var exception = node.get(ResponseStatus.JSON_KEY_EXCEPTION);
 
-      if (exception != null && !(exception instanceof NullNode)) {
-        out.setException(PluginSupport.EXCEPTION_READER.readValue(node.get(ResponseStatus.JSON_KEY_EXCEPTION)));
+      // if there was an exception value in the status json, then add it to the
+      // output response status object.
+      if (!StreamingPluginSupport.isNull(exception)) {
+        out.setException(StreamingPluginSupport.EXCEPTION_READER.readValue(exception));
       }
 
       return Either.right(out);

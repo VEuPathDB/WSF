@@ -9,7 +9,7 @@ import org.gusdb.wsf.common.ResponseAttachment;
 import org.gusdb.wsf.common.ResponseStatus;
 import org.gusdb.wsf.plugin.PluginModelException;
 import org.gusdb.wsf.plugin.PluginResponse;
-import org.gusdb.wsf.plugin.PluginSupport;
+import org.gusdb.wsf.plugin.StreamingPluginSupport;
 
 public class StreamingPluginResponse implements PluginResponse, AutoCloseable {
 
@@ -76,7 +76,7 @@ public class StreamingPluginResponse implements PluginResponse, AutoCloseable {
       jsonStream.writeNumberField(ResponseStatus.JSON_KEY_SIGNAL, status.getSignal());
       if (status.getException() != null) {
         jsonStream.writeFieldName(ResponseStatus.JSON_KEY_EXCEPTION);
-        PluginSupport.EXCEPTION_WRITER.writeValue(jsonStream, status.getException());
+        StreamingPluginSupport.EXCEPTION_WRITER.writeValue(jsonStream, status.getException());
       }
       jsonStream.writeEndObject();
     } catch (IOException e) {
