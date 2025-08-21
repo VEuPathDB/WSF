@@ -17,10 +17,8 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.log4j.Logger;
@@ -42,6 +40,10 @@ public class WsfRemoteClient implements WsfClient {
 
   private WsfResponseListener listener;
 
+  /**
+   * Buffer list to be reused for constructing individual row string arrays to
+   * reduce the overhead of instantiation and backing array resizing.
+   */
   private ArrayList<String> arrayBuffer;
 
   protected WsfRemoteClient(URI serviceURI) {
@@ -124,7 +126,7 @@ public class WsfRemoteClient implements WsfClient {
         switch (jsonToken) {
           // row == array of strings
           case START_ARRAY:
-            listener.onRowReceived(readArrayStream(parser));
+            listener.onRowReceived(readStreamArray(parser));
             stats.rows++;
             break;
 
@@ -135,14 +137,14 @@ public class WsfRemoteClient implements WsfClient {
 
           // (status || attachment) == object
           case START_OBJECT:
-            var multiResponse = readObjectStream(parser);
+            var multiResponse = readStreamObject(parser);
 
             if (multiResponse.isLeft()) {
               var attachment = multiResponse.getLeft();
               listener.onAttachmentReceived(attachment.getKey(), attachment.getContent());
               stats.attachments++;
             } else {
-              return processResultStatus(multiResponse);
+              return processResponseStatus(multiResponse.getRight());
             }
             break;
 
@@ -156,9 +158,69 @@ public class WsfRemoteClient implements WsfClient {
     throw new ClientModelException("result stream ended with no status object");
   }
 
-  private static int processResultStatus(Either<ResponseAttachment, ResponseStatus> multiResponse)
+  /**
+   * Parses an object from the json stream into one of the 2 possible valid
+   * types: A {@link ResponseAttachment} record, or the stream end indicator
+   * {@link ResponseStatus}.
+   *
+   * @param parser JSON stream parser.
+   *
+   * @return An {@link Either} instance containing one of the two valid stream
+   * object types.
+   *
+   * @throws ClientModelException If the stream object does not conform to the
+   * shape of one of the expected object types.
+   */
+  private Either<ResponseAttachment, ResponseStatus> readStreamObject(JsonParser parser)
+  throws ClientModelException, IOException {
+    var node = parser.<ObjectNode>readValueAsTree();
+
+    // If the signal key exists, it is a ResponseStatus instance.
+    if (node.has(ResponseStatus.JSON_KEY_SIGNAL)) {
+      var out = new ResponseStatus();
+
+      out.setSignal(node.get(ResponseStatus.JSON_KEY_SIGNAL).intValue());
+
+      var exception = node.get(ResponseStatus.JSON_KEY_EXCEPTION);
+
+      if (exception != null && !(exception instanceof NullNode)) {
+        out.setException(PluginSupport.parseException(node.get(ResponseStatus.JSON_KEY_EXCEPTION)));
+      }
+
+      return Either.right(out);
+    }
+
+    // If the content key exists, it is a ResponseAttachment instance.
+    if (node.has(ResponseAttachment.JSON_KEY_CONTENT)) {
+      return Either.left(new ResponseAttachment(
+        node.get(ResponseAttachment.JSON_KEY_KEY).textValue(),
+        node.get(ResponseAttachment.JSON_KEY_CONTENT).textValue()
+      ));
+    }
+
+    throw new ClientModelException("unrecognized object in result stream: " + node.toPrettyString());
+  }
+
+  /**
+   * Checks the response status for any exceptions and returns the signal code
+   * if there are none.
+   *
+   * @param status Plugin response status info.
+   *
+   * @return The status signal code if no exceptions were included in the status
+   * object.
+   *
+   * @throws ClientUserException If the response status contains a
+   * {@link PluginUserException} instance.
+   *
+   * @throws DelayedResultException If the response status contains a
+   * {@link DelayedResultException} instance.
+   *
+   * @throws ClientModelException If the response status contains any other
+   * non-{@link RuntimeException} exception instance.
+   */
+  private static int processResponseStatus(ResponseStatus status)
   throws ClientUserException, DelayedResultException, ClientModelException {
-    var status = multiResponse.getRight();
     var exception = status.getException();
 
     if (exception == null)
@@ -179,41 +241,17 @@ public class WsfRemoteClient implements WsfClient {
     throw new ClientModelException(exception);
   }
 
-  private Either<ResponseAttachment, ResponseStatus> readObjectStream(JsonParser parser)
-  throws ClientModelException, IOException {
-    var node = parser.<ObjectNode>readValueAsTree();
-
-    try {
-      // If the signal key exists, it is a ResponseStatus instance.
-      if (node.has(ResponseStatus.JSON_KEY_SIGNAL)) {
-        var out = new ResponseStatus();
-
-        out.setSignal(node.get(ResponseStatus.JSON_KEY_SIGNAL).intValue());
-
-        var exception = node.get(ResponseStatus.JSON_KEY_EXCEPTION);
-
-        if (exception != null && !(exception instanceof NullNode)) {
-          out.setException(PluginSupport.parseException(node.get(ResponseStatus.JSON_KEY_EXCEPTION)));
-        }
-
-        return Either.right(out);
-      }
-
-      // If the content key exists, it is a ResponseAttachment instance.
-      if (node.has(ResponseAttachment.JSON_KEY_CONTENT)) {
-        return Either.left(new ResponseAttachment(
-          node.get(ResponseAttachment.JSON_KEY_KEY).textValue(),
-          node.get(ResponseAttachment.JSON_KEY_CONTENT).textValue()
-        ));
-      }
-    } catch (JacksonException ex) {
-      throw new ClientModelException("could not read json object from result stream", ex);
-    }
-
-    throw new ClientModelException("unrecognized object in result stream: " + node.toPrettyString());
-  }
-
-  private String[] readArrayStream(JsonParser parser) throws ClientModelException, IOException {
+  /**
+   * Parses a string array from the json stream.
+   *
+   * @param parser JSON stream parser.
+   *
+   * @return A new string array containing the values read from the stream.
+   *
+   * @throws ClientModelException If an unexpected value is found in the stream
+   * array.
+   */
+  private String[] readStreamArray(JsonParser parser) throws ClientModelException, IOException {
     while (true) {
       var jsonToken = parser.nextToken();
 
@@ -226,8 +264,10 @@ public class WsfRemoteClient implements WsfClient {
       arrayBuffer.add(parser.getText());
     }
 
+    // creates a new array using System.arrayCopy under the hood.
     var out = arrayBuffer.toArray(String[]::new);
 
+    // clear out the buffer for the next row.
     arrayBuffer.clear();
 
     return out;
