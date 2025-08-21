@@ -76,7 +76,7 @@ public class StreamingPluginResponse implements PluginResponse, AutoCloseable {
       jsonStream.writeNumberField(ResponseStatus.JSON_KEY_SIGNAL, status.getSignal());
       if (status.getException() != null) {
         jsonStream.writeFieldName(ResponseStatus.JSON_KEY_EXCEPTION);
-        PluginSupport.writeException(jsonStream, status.getException());
+        PluginSupport.EXCEPTION_WRITER.writeValue(jsonStream, status.getException());
       }
       jsonStream.writeEndObject();
     } catch (IOException e) {

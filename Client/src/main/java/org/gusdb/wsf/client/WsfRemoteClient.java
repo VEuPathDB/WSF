@@ -184,7 +184,7 @@ public class WsfRemoteClient implements WsfClient {
       var exception = node.get(ResponseStatus.JSON_KEY_EXCEPTION);
 
       if (exception != null && !(exception instanceof NullNode)) {
-        out.setException(PluginSupport.parseException(node.get(ResponseStatus.JSON_KEY_EXCEPTION)));
+        out.setException(PluginSupport.EXCEPTION_READER.readValue(node.get(ResponseStatus.JSON_KEY_EXCEPTION)));
       }
 
       return Either.right(out);
