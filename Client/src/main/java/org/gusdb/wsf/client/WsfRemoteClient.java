@@ -103,6 +103,7 @@ public class WsfRemoteClient implements WsfClient {
           inStream.close();
         }
         catch (IOException ex) {
+          //noinspection ThrowFromFinallyBlock
           throw new ClientModelException(ex);
         }
         finally {
@@ -253,16 +254,20 @@ public class WsfRemoteClient implements WsfClient {
    * array.
    */
   private String[] readStreamArray(JsonParser parser) throws ClientModelException, IOException {
+    LOOP:
     while (true) {
-      var jsonToken = parser.nextToken();
-
-      if (jsonToken == JsonToken.END_ARRAY)
-        break;
-
-      if (jsonToken != JsonToken.VALUE_STRING)
-        throw new ClientModelException("malformed result stream, expected VALUE_STRING, got: " + jsonToken);
-
-      arrayBuffer.add(parser.getText());
+      switch (parser.nextToken()) {
+        case VALUE_STRING:
+          arrayBuffer.add(parser.getText());
+          break;
+        case VALUE_NULL:
+          arrayBuffer.add(null);
+          break;
+        case END_ARRAY:
+          break LOOP;
+        default:
+          throw new ClientModelException("malformed result stream, expected VALUE_STRING, got: " + parser.currentToken());
+      }
     }
 
     // creates a new array using System.arrayCopy under the hood.
