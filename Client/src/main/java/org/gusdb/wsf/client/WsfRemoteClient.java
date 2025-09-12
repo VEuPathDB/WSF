@@ -139,8 +139,14 @@ public class WsfRemoteClient implements WsfClient {
           case START_OBJECT:
             var multiResponse = readStreamObject(parser);
 
-            if (multiResponse.isRight())
+            if (multiResponse.isRight()) {
+              // ensure the stream has ended, log if not.
+              if ((jsonToken = parser.nextToken()) != null)
+                LOG.error("malformed result stream, one or more additional values sent after the result "
+                  + "status object starting with: " + JsonToken.valueDescFor(jsonToken));
+
               return processResponseStatus(multiResponse.getRight());
+            }
 
             var attachment = multiResponse.getLeft();
             listener.onAttachmentReceived(attachment.getKey(), attachment.getContent());
@@ -149,7 +155,7 @@ public class WsfRemoteClient implements WsfClient {
 
           default:
             throw new ClientModelException("malformed result stream, expected START_ARRAY, VALUE_STRING, "
-              + "or START_OBJECT.  Instead got: " + jsonToken);
+              + "or START_OBJECT.  Instead got: " + JsonToken.valueDescFor(jsonToken));
         }
       }
     }
@@ -254,20 +260,18 @@ public class WsfRemoteClient implements WsfClient {
    * array.
    */
   private String[] readStreamArray(JsonParser parser) throws ClientModelException, IOException {
-    LOOP:
     while (true) {
-      switch (parser.nextToken()) {
-        case VALUE_STRING:
-          arrayBuffer.add(parser.getText());
-          break;
-        case VALUE_NULL:
-          arrayBuffer.add(null);
-          break;
-        case END_ARRAY:
-          break LOOP;
-        default:
-          throw new ClientModelException("malformed result stream, expected VALUE_STRING, got: " + parser.currentToken());
-      }
+      var token = parser.nextToken();
+
+      if (token == JsonToken.VALUE_STRING)
+        arrayBuffer.add(parser.getText());
+      else if (token == JsonToken.VALUE_NULL)
+        arrayBuffer.add(null);
+      else if (token == JsonToken.END_ARRAY)
+        break;
+      else
+        throw new ClientModelException("malformed result stream, expected VALUE_STRING, got: "
+          + JsonToken.valueDescFor(token));
     }
 
     // creates a new array using System.arrayCopy under the hood.
