@@ -6,6 +6,9 @@ public class ResponseAttachment implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  public static final String JSON_KEY_KEY = "key";
+  public static final String JSON_KEY_CONTENT = "content";
+
   private final String key;
   private final String content;
 

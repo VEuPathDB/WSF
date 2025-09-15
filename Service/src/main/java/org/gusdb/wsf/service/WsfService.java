@@ -1,9 +1,5 @@
 package org.gusdb.wsf.service;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -16,6 +12,8 @@ import javax.ws.rs.core.StreamingOutput;
 import org.apache.log4j.Logger;
 import org.gusdb.wsf.common.ResponseStatus;
 import org.gusdb.wsf.plugin.PluginExecutor;
+
+import static org.gusdb.fgputil.functional.Functions.wrapException;
 
 /**
  * The WSF Web service entry point.
@@ -48,39 +46,43 @@ public class WsfService {
     long start = System.currentTimeMillis();
 
     // open a StreamingOutput
-    StreamingOutput output = new StreamingOutput() {
+    StreamingOutput output = outStream -> {
+      // prepare to run the plugin
+      PluginExecutor executor = new PluginExecutor();
+      ResponseStatus status = new ResponseStatus();
 
-      @Override
-      public void write(OutputStream outStream) throws IOException {
-        // prepare to run the plugin
-        PluginExecutor executor = new PluginExecutor();
-        ResponseStatus status = new ResponseStatus();
+      // prepare response
+      StreamingPluginResponse pluginResponse = null;
+      int checksum = 0;
 
-        // prepare response
-        ObjectOutputStream objectStream = new ObjectOutputStream(outStream);
-        StreamingPluginResponse pluginResponse = new StreamingPluginResponse(objectStream);
-        int checksum = 0;
-        try {
-          ServiceRequest request = new ServiceRequest(jsonRequest);
-          checksum = request.getChecksum();
-          LOG.debug("Invoking WSF: checksum=" + checksum + "\n" + jsonRequest);
+      try {
+        pluginResponse = new StreamingPluginResponse(outStream);
+        ServiceRequest request = new ServiceRequest(jsonRequest);
+        checksum = request.getChecksum();
+        LOG.debug("Invoking WSF: checksum=" + checksum + "\n" + jsonRequest);
 
-          // invoke plugin
-          int signal = executor.execute(request.getPluginClass(), request, pluginResponse);
-          status.setSignal(signal);
-        }
-        catch (Exception ex) {
-          status.setSignal(-1);
-          status.setException(ex);
-        }
-        finally {
-          // send signal back
-          objectStream.writeUnshared(status);
-          objectStream.flush();
-          objectStream.close();
+        // invoke plugin
+        int signal = executor.execute(request.getPluginClass(), request, pluginResponse);
+        status.setSignal(signal);
+      }
+      catch (Exception ex) {
+        status.setSignal(-1);
+        status.setException(ex);
+      }
+      finally {
+        // send signal back
+        if (pluginResponse != null) {
+          final var finalResponseCopy = pluginResponse;
+          wrapException(() -> {
+            finalResponseCopy.writeStatus(status);
+            outStream.flush();
+            finalResponseCopy.close();
+            outStream.close();
+            return null;
+          });
 
           LOG.debug("WSF Service finished: checksum=" + checksum + ", status=" + status + ", #rows=" +
-              pluginResponse.getRowCount() + ", #attch=" + pluginResponse.getAttachmentCount());
+            pluginResponse.getRowCount() + ", #attch=" + pluginResponse.getAttachmentCount());
         }
       }
     };
