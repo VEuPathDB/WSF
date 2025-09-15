@@ -6,6 +6,9 @@ public class ResponseStatus implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  public static final String JSON_KEY_SIGNAL = "signal";
+  public static final String JSON_KEY_EXCEPTION = "exception";
+
   private int signal;
 
   private Exception exception;
