@@ -1,23 +1,30 @@
 package org.gusdb.wsf.service;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.wsf.common.ResponseAttachment;
-import org.gusdb.wsf.common.ResponseMessage;
-import org.gusdb.wsf.common.ResponseRow;
+import org.gusdb.wsf.common.ResponseStatus;
 import org.gusdb.wsf.plugin.PluginModelException;
 import org.gusdb.wsf.plugin.PluginResponse;
+import org.gusdb.wsf.plugin.StreamingPluginSupport;
 
-public class StreamingPluginResponse implements PluginResponse {
+public class StreamingPluginResponse implements PluginResponse, AutoCloseable {
 
-  private final ObjectOutputStream outStream;
+  private final JsonGenerator jsonStream;
 
   private int rowCount;
   private int attachmentCount;
 
-  public StreamingPluginResponse(ObjectOutputStream outStream) {
-    this.outStream = outStream;
+  public StreamingPluginResponse(OutputStream outStream) throws PluginModelException {
+    try {
+      this.jsonStream = JsonUtil.Jackson.createGenerator(outStream);
+    }
+    catch (IOException e) {
+      throw new PluginModelException(e);
+    }
   }
 
   public int getRowCount() {
@@ -30,9 +37,8 @@ public class StreamingPluginResponse implements PluginResponse {
 
   @Override
   public void addRow(String[] row) throws PluginModelException {
-    ResponseRow responseRow = new ResponseRow(row);
     try {
-      outStream.writeUnshared(responseRow);
+      jsonStream.writeArray(row, 0, row.length);
       rowCount++;
     }
     catch (IOException ex) {
@@ -41,11 +47,12 @@ public class StreamingPluginResponse implements PluginResponse {
   }
 
   @Override
-  public void addAttachment(String key, String content)
-  throws PluginModelException {
-    ResponseAttachment attachment = new ResponseAttachment(key, content);
+  public void addAttachment(String key, String content) throws PluginModelException {
     try {
-      outStream.writeUnshared(attachment);
+      jsonStream.writeStartObject();
+      jsonStream.writeStringField(ResponseAttachment.JSON_KEY_KEY, key);
+      jsonStream.writeStringField(ResponseAttachment.JSON_KEY_CONTENT, content);
+      jsonStream.writeEndObject();
       attachmentCount++;
     }
     catch (IOException ex) {
@@ -55,13 +62,30 @@ public class StreamingPluginResponse implements PluginResponse {
 
   @Override
   public void setMessage(String message) throws PluginModelException {
-    ResponseMessage responseMessage = new ResponseMessage(message);
     try {
-      outStream.writeUnshared(responseMessage);
+      jsonStream.writeString(message);
     }
     catch (IOException ex) {
       throw new PluginModelException(ex);
     }
   }
 
+  public void writeStatus(ResponseStatus status) throws PluginModelException {
+    try {
+      jsonStream.writeStartObject();
+      jsonStream.writeNumberField(ResponseStatus.JSON_KEY_SIGNAL, status.getSignal());
+      if (status.getException() != null) {
+        jsonStream.writeFieldName(ResponseStatus.JSON_KEY_EXCEPTION);
+        StreamingPluginSupport.EXCEPTION_WRITER.writeValue(jsonStream, status.getException());
+      }
+      jsonStream.writeEndObject();
+    } catch (IOException e) {
+      throw new PluginModelException(e);
+    }
+  }
+
+  @Override
+  public void close() throws Exception {
+    jsonStream.close();
+  }
 }
