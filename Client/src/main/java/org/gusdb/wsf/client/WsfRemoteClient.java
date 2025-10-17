@@ -94,7 +94,7 @@ public class WsfRemoteClient implements WsfClient {
       inStream = response.readEntity(InputStream.class);
       signal = readStream(inStream, stats);
     }
-    catch (ClassNotFoundException | IOException ex) {
+    catch (IOException ex) {
       throw new ClientModelException(ex);
     }
     finally {
@@ -117,7 +117,7 @@ public class WsfRemoteClient implements WsfClient {
   }
 
   private int readStream(InputStream inStream, Stats stats) throws ClientUserException,
-      ClientModelException, IOException, ClassNotFoundException, DelayedResultException {
+      ClientModelException, IOException, DelayedResultException {
 
     try (var parser = Jackson.getFactory().createParser(inStream)) {
       JsonToken jsonToken;
