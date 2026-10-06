@@ -185,9 +185,7 @@ public class PluginRequest implements WsfRequest {
    */
   public void setOrderedColumns(String[] orderedColumns) {
     this._orderedColumns = new ArrayList<>(orderedColumns.length);
-    for (String column : orderedColumns) {
-      this._orderedColumns.add(column);
-    }
+    Collections.addAll(this._orderedColumns, orderedColumns);
   }
 
   /**

@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.InvalidPropertiesFormatException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -16,7 +15,8 @@ import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.FormatUtil;
 import org.gusdb.fgputil.db.stream.ResultSets;
 import org.gusdb.fgputil.runtime.GusHome;
@@ -37,7 +37,7 @@ public abstract class AbstractPlugin implements Plugin {
    * The logger for this plugin. It is a recommended way to record standard
    * output and error messages.
    */
-  private static final Logger LOG = Logger.getLogger(AbstractPlugin.class);
+  private static final Logger LOG = LogManager.getLogger(AbstractPlugin.class);
 
   /**
    * It stores the properties defined in the configuration file. If the plugin
@@ -83,15 +83,10 @@ public abstract class AbstractPlugin implements Plugin {
   @Override
   public int invoke(PluginRequest request, PluginResponse response) throws PluginModelException,
       PluginUserException, DelayedResultException {
-    try {
-      return execute(request, response);
-    }
-    catch (PluginModelException ex) {
-      throw ex;
-    }
+    return execute(request, response);
   }
 
-  private void loadConfiguration() throws InvalidPropertiesFormatException, IOException, PluginModelException {
+  private void loadConfiguration() throws IOException, PluginModelException {
     String configDir = null;
     String filePath;
 
@@ -119,7 +114,7 @@ public abstract class AbstractPlugin implements Plugin {
 
       filePath = path;
     }
-    LOG.debug("WSF Plugin prop file: " + filePath);
+    LOG.debug("WSF Plugin prop file: {}", filePath);
 
     InputStream in = new FileInputStream(filePath);
     properties.loadFromXML(in);
@@ -135,7 +130,7 @@ public abstract class AbstractPlugin implements Plugin {
   }
 
   protected int invokeCommand(String[] command, StringBuffer result, long timeout)
-      throws PluginUserException, PluginModelException {
+      throws PluginModelException {
     return invokeCommand(command, result, timeout, null);
   }
 
@@ -153,14 +148,12 @@ public abstract class AbstractPlugin implements Plugin {
    *
    * @return the exit code of the invoked command
    *
-   * @throws PluginUserException
-   *   if user input is invalid
    * @throws PluginModelException
    *   if something goes wrong during execution
    */
   protected int invokeCommand(String[] command, StringBuffer result, long timeout, String[] env)
-      throws PluginUserException, PluginModelException {
-    LOG.info("WsfPlugin.invokeCommand: " + FormatUtil.printArray(command));
+      throws PluginModelException {
+    LOG.info("WsfPlugin.invokeCommand: {}", FormatUtil.printArray(command));
     // invoke the command
     Process process;
     try {
@@ -185,7 +178,7 @@ public abstract class AbstractPlugin implements Plugin {
     long limit = timeout * 1000;
     // check the exit value of the process; if the process is not
     // finished yet, an IllegalThreadStateException is thrown out
-    int signal = -1;
+    int signal;
     while (true) {
       //LOG.debug("waiting for 1 second ...");
       try {
@@ -214,11 +207,12 @@ public abstract class AbstractPlugin implements Plugin {
           // convert string array to string
           StringBuilder buffer = new StringBuilder();
           for (String piece : command) {
-            if (buffer.length() > 0)
+            if (!buffer.isEmpty())
               buffer.append(" ");
             buffer.append(piece);
           }
-          LOG.warn("Time out, the command is cancelled: " + buffer);
+
+          LOG.warn("Time out, the command is cancelled: {}", buffer);
           outputGobbler.close();
           errorGobbler.close();
           process.destroy();
@@ -229,8 +223,7 @@ public abstract class AbstractPlugin implements Plugin {
     return signal;
   }
 
-  class StreamGobbler extends Thread {
-
+  static class StreamGobbler extends Thread {
     InputStream is;
     String type;
     StringBuffer sb;
@@ -247,8 +240,7 @@ public abstract class AbstractPlugin implements Plugin {
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         String line;
         while ((line = br.readLine()) != null) {
-          // sb.append(type + ">" + line);
-          sb.append(line + FormatUtil.NL);
+          sb.append(line).append(FormatUtil.NL);
         }
       }
       catch (IOException ex) {
